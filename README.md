@@ -1,0 +1,2 @@
+sitecore-codeeditor
+===================
