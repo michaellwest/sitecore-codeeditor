@@ -56,7 +56,9 @@
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App_Config\Include\Sitecore.SharedSource.ControlSources.config" />
+    <None Include="App_Config\Include\Sitecore.SharedSource.ControlSources.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="App_Config\Include\Sitecore.SharedSource.Commands.config" />
   </ItemGroup>
   <ItemGroup />
