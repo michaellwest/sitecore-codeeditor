@@ -4,7 +4,7 @@ using Sitecore.Text;
 using Sitecore.Web;
 using Sitecore.Web.UI.Sheer;
 
-namespace Sitecore.SharedSource.FieldTypeExtensions
+namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 {
     public class RichTextEx : RichText
     {
