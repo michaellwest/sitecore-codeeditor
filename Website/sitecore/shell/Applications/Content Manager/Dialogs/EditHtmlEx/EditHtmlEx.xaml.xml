@@ -37,11 +37,11 @@
 
       <input type="hidden" id="scActiveRibbonStrip" name="scActiveRibbonStrip" />
 
-      <Border class="scStretch scFlexColumnContainer" runat="server">
+      <GridPanel Width="100%" Height="100%" Style="table-layout:fixed" runat="server">
 
         <Border ID="RibbonPanel" runat="server" />
 
-        <Border class="scFlexContent" runat="server">
+        <Border GridPanel.Height="100%" Height="100%" runat="server">
           <asp:TextBox ID="Html" runat="server" TextMode="MultiLine" Style="width:100%;height:100%;border:none"/>
         </Border>
 
@@ -54,7 +54,7 @@
             <Literal runat="server" Text="Reject"/>
           </Button>
         </Border>
-      </Border>
+      </GridPanel>
 
     </Sitecore.Controls.HtmlPage>
   </Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditHtmlEx>

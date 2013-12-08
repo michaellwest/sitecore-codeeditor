@@ -1,5 +1,5 @@
 (function($){
-    $('head').append("<style>div[id$=RibbonPanel],textarea[id$=Html] { display: none; } #CodeEditor { width: 100%; height: 100%; position: initial; } </style>");
+    $('head').append("<style>div[id$=RibbonPanel],textarea[id$=Html] { display: none; } #CodeEditor { width: 100%; height: 100%; } </style>");
  
     $(function() {
         var html = $('textarea[id$=Html]');
