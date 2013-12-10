@@ -8,7 +8,16 @@
       <License />
       <Comment />
       <Attributes />
-      <Readme />
+      <Readme>This module provides a replacement html editor for the rich text editor (visible using the Edit Html button).
+
+Initial release.
+
+Please report any problems in our issue tracker:
+http://goo.gl/MiDWdD
+
+Copyright (c) 2013 Michael West
+
+http://michaellwest.blogspot.com/</Readme>
       <Publisher>Michael West</Publisher>
       <PostStep />
       <PackageID />
