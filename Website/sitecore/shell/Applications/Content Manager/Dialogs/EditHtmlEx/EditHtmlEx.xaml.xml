@@ -11,7 +11,7 @@
   xmlns:html="http://www.sitecore.net/microsoft/htmlcontrols"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   
-  <Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditHtmlEx x:inherits="Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditHtmlEx.EditHtmlExPage,Sitecore.SharedSource">
+  <Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditHtmlEx x:inherits="Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditHtmlEx.EditHtmlExPage,Sitecore.SharedSource.CodeEditor">
     <Sitecore.Controls.HtmlPage Overflow="hidden" runat="server">
 
       <AjaxScriptManager runat="server"/>

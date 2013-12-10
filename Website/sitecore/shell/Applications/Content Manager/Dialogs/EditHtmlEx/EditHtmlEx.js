@@ -16,7 +16,7 @@
                 html.val(codeeditor.session.getValue());
         });
 
-        /*ace.config.loadModule("ace/ext/emmet", function () {
+        ace.config.loadModule("ace/ext/emmet", function () {
             ace.require("ace/lib/net").loadScript("/sitecore/shell/Controls/Lib/ace/emmet-core/emmet.js", function () {
                 codeeditor.setOption("enableEmmet", true);
             });
@@ -32,6 +32,6 @@
                 enableSnippets: true,
                 enableBasicAutocompletion: true
             });
-        });*/
+        });
     });
 }(jQuery));

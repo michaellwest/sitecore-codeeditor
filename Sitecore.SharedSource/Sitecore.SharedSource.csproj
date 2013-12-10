@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sitecore.SharedSource</RootNamespace>
-    <AssemblyName>Sitecore.SharedSource</AssemblyName>
+    <AssemblyName>Sitecore.SharedSource.CodeEditor</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -46,10 +46,9 @@
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App_Config\Include\Sitecore.SharedSource.ControlSources.config">
+    <None Include="App_Config\Include\Sitecore.SharedSource.CodeEditor.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="App_Config\Include\Sitecore.SharedSource.Commands.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -58,9 +57,8 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)$(ProjectName).dll" "$(SolutionDir)\..\Website\bin\$(ProjectName).dll"
-copy /Y "$(ProjectDir)\App_Config\Include\$(ProjectName).Commands.config" "$(SolutionDir)\..\Website\App_Config\Include\$(ProjectName).Commands.config"
-copy /Y "$(ProjectDir)\App_Config\Include\$(ProjectName).ControlSources.config" "$(SolutionDir)\..\Website\App_Config\Include\$(ProjectName).ControlSources.config"</PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)\..\Website\bin\$(TargetName).dll"
+copy /Y "$(ProjectDir)\App_Config\Include\$(TargetName).config" "$(SolutionDir)\..\Website\App_Config\Include\$(TargetName).config"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
