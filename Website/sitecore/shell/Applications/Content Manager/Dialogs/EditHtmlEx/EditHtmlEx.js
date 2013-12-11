@@ -45,7 +45,7 @@
 
         var codeeeditorcommands = [ {
             name: "format",
-            bindKey: { win: "ctrl-shift-f", mac: "ctrl-command-enter", sender: 'codeeditor|cli' },
+            bindKey: { win: "ctrl-shift-f", mac: "ctrl-command-enter", sender: 'codeeditor' },
             exec: function (env, args, request) {
                 var source = codeeditor.session.getValue();
                 if (source) {
