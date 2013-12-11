@@ -33,6 +33,8 @@
       </Stylesheet>
       <Script src="/sitecore/shell/Controls/Lib/jQuery/jQuery.noconflict.js" runat="server" />
       <Script src="/sitecore/shell/Controls/Lib/ace/ace.js" runat="server" />
+      <Script src="/sitecore/shell/Controls/Lib/js-beautify/beautify.js" runat="server" />
+      <Script src="/sitecore/shell/Controls/Lib/js-beautify/beautify-html.js" runat="server" />
       <Script src="/sitecore/shell//Applications/Content Manager/Dialogs/EditHtmlEx/EditHtmlEx.js" runat="server" />
 
       <input type="hidden" id="scActiveRibbonStrip" name="scActiveRibbonStrip" />
