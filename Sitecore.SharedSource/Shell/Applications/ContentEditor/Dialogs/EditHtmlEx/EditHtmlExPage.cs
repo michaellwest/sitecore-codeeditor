@@ -13,7 +13,6 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditHtm
     {
         // Fields
         protected TextBox Html;
-        protected Border RibbonPanel;
 
         // Methods
         protected virtual void Cancel_Click()
