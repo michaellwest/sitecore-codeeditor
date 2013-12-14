@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xamlControls xmlns:html="http://www.sitecore.net/htmlcontrols" xmlns:x="http://www.sitecore.net/xaml">
+  <Sitecore.SharedSource.Controls.HtmlPageEx>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"&gt;
+    <x:param name="Title" value="Sitecore" />
+    <x:param name="Background" />
+    <x:param name="Overflow" />
+    <x:param name="Icon" value="Applications/32x32/about.png" />
+    <x:param name="Header" value="Dialog" />
+    <x:param name="Text" value="Dialog" />
+    <x:param name="OKButton" value="OK" />
+    <x:param name="CancelButton" value="Cancel" />
+
+<html>
+  <html:Head runat="server">
+    <html:Title runat="server" Text="{Title}" />
+    <meta name="GENERATOR" content="Sitecore" />
+    <meta http-equiv="imagetoolbar" content="no" />
+    <meta http-equiv="imagetoolbar" content="false" />
+    <Placeholder runat="server" key="Stylesheets"/>
+    <Placeholder runat="server" key="Scripts"/>
+  </html:Head>
+  <body runat="server" style="margin:0px;width:100%;height:100%">
+    <x:styleattribute runat="server" name="overflow" value="{Overflow}" />
+
+    <html:Form runat="server">
+      <x:styleattribute runat="server" name="background" value="{Background}" />
+      <Border Class="scFlexColumnContainer" runat="server" Width="100%" Height="100%">
+        <Border class="scDialogHeader" runat="server">
+          <ThemedImage Src="{Icon}" style="float:left; width:32px; height:32px;margin:4px 8px 4px 8px;" runat="server" />
+          <Border style="padding:4px 16px 0px 0px; overflow:hidden;" runat="server" >
+            <div style="color:black;padding:0px 0px 4px 0px;font:bold 9pt tahoma">
+              <Literal ID="HeaderLiteral" runat="server" Text="{Header}"/>
+            </div>
+            <div style="color:#333333">
+              <Literal ID="TextLiteral" runat="server" Text="{Text}"/>
+            </div>
+          </Border>
+        </Border>
+        
+        <Placeholder runat="server" Key="Toolbar" />
+        
+        <Border height="4px" runat="server" />
+
+        <div class="scDialogContentContainer scFlexContent">
+          <div class="scStretchAbsolute">
+            <Placeholder runat="server" />
+          </div>
+        </div>
+
+        <Border Class="scFormDialogFooter" runat="server">
+          <div class="footerOkCancel">
+            <Button runat="server" ID="OK" Width="76px" Height="23px" KeyCode="13" Margin="0px 0px 0px 4px" Click="OK_Click">
+            <Literal runat="server" Text="{OKButton}"/>
+          </Button>
+
+          <Button runat="server" ID="Cancel" Width="76px" Height="23px" KeyCode="27" Margin="0px 0px 0px 4px" Click="Cancel_Click">
+            <Literal runat="server" Text="{CancelButton}"/>
+          </Button>
+          </div>
+          <Placeholder runat="server" Key="Buttons"/>
+        </Border>
+
+      </Border>
+    </html:Form>
+  </body>
+</html>
+  </Sitecore.SharedSource.Controls.HtmlPageEx>
+</xamlControls>

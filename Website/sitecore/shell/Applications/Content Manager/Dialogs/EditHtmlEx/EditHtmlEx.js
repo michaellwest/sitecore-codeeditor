@@ -1,7 +1,7 @@
 (function($){
     $('head').append("<style>div[id$=RibbonPanel],textarea[id$=Html] { display: none; } #CodeEditor { width: 100%; height: 100%; } </style>");
 
-    function looks_like_html(source) {
+    function isHtml(source) {
             // <foo> - looks like html
             // <!--\nalert('foo!');\n--> - doesn't look like html
 
@@ -44,7 +44,7 @@
             exec: function (env, args, request) {
                 var source = codeeditor.session.getValue();
                 if (source) {
-                    if(looks_like_html(source)) {
+                    if(isHtml(source)) {
                         var opts = {};
                         opts.indent_size = '4';
                         opts.indent_char = opts.indent_size == 1 ? '\t' : ' ';
