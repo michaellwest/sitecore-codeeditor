@@ -3,14 +3,22 @@
     <metadata>
       <PackageName>CodeEditor</PackageName>
       <Author>Michael West</Author>
-      <Version>1.0.0.0</Version>
+      <Version>1.1.0.0</Version>
       <Revision />
       <License />
       <Comment />
       <Attributes />
-      <Readme>This module provides a replacement html editor for the rich text editor (visible using the Edit Html button).
+      <Readme>This module provides a replacement html editor for the 
+rich text editor (visible using the Edit Html button).
 
-Initial release.
+Installation Steps
+1. Overwrite any existing files 
+2. Merge/Merge any existing Sitecore items
+
+Shortcuts
+Ctrl-Space : Snippet/code completion window
+Ctrl-Shift-F : Format html code
+
 
 Please report any problems in our issue tracker:
 http://goo.gl/MiDWdD
@@ -72,7 +80,7 @@ http://michaellwest.blogspot.com/</Readme>
       <Name>configs</Name>
     </xfiles>
     <files>
-      <Root>/sitecore/shell/Controls/Lib/ace</Root>
+      <Root>/sitecore/shell/Controls/Lib/js-beautify</Root>
       <Converter>
         <FileToEntryConverter>
           <Root>/</Root>
@@ -107,7 +115,7 @@ http://michaellwest.blogspot.com/</Readme>
         </FileDateFilter>
       </Include>
       <Exclude />
-      <Name>lib</Name>
+      <Name>lib-ace</Name>
     </files>
     <files>
       <Root>/sitecore/shell/Applications/Content Manager/Dialogs/EditHtmlEx</Root>
@@ -169,6 +177,58 @@ http://michaellwest.blogspot.com/</Readme>
       <Include />
       <Exclude />
       <Name>assembly</Name>
+    </xfiles>
+    <files>
+      <Root>/sitecore/shell/Controls/Lib/js-beautify</Root>
+      <Converter>
+        <FileToEntryConverter>
+          <Root>/</Root>
+          <Transforms>
+            <InstallerConfigurationTransform>
+              <Options>
+                <BehaviourOptions>
+                  <ItemMode>Undefined</ItemMode>
+                  <ItemMergeMode>Undefined</ItemMergeMode>
+                </BehaviourOptions>
+              </Options>
+            </InstallerConfigurationTransform>
+          </Transforms>
+        </FileToEntryConverter>
+      </Converter>
+      <Include>
+        <FileNameFilter>
+          <Pattern />
+          <AcceptDirectories>False</AcceptDirectories>
+        </FileNameFilter>
+        <FileDateFilter>
+          <FilterType>CreatedFilter</FilterType>
+          <ActionDateTo />
+          <ActionDateFrom />
+          <NotOlderThan />
+        </FileDateFilter>
+        <FileDateFilter>
+          <FilterType>ModifiedFilter</FilterType>
+          <ActionDateTo />
+          <ActionDateFrom />
+          <NotOlderThan />
+        </FileDateFilter>
+      </Include>
+      <Exclude />
+      <Name>lib-jsbeautify</Name>
+    </files>
+    <xfiles>
+      <Entries>
+        <x-item>/sitecore/shell/Applications/Xaml/Controls/HtmlPageEx.xaml.xml</x-item>
+      </Entries>
+      <Converter>
+        <FileToEntryConverter>
+          <Root>/</Root>
+          <Transforms />
+        </FileToEntryConverter>
+      </Converter>
+      <Include />
+      <Exclude />
+      <Name>controls</Name>
     </xfiles>
   </Sources>
   <Converter>
