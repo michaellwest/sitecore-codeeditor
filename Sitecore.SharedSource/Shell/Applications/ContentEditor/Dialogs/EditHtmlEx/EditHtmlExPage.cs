@@ -2,7 +2,6 @@
 using System.Web.UI.WebControls;
 using Sitecore.Diagnostics;
 using Sitecore.Web;
-using Sitecore.Web.UI.HtmlControls;
 using Sitecore.Web.UI.Sheer;
 using Sitecore.Web.UI.WebControls;
 using Sitecore.Web.UI.XamlSharp.Xaml;
@@ -13,7 +12,6 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditHtm
     {
         // Fields
         protected TextBox Html;
-        protected Border RibbonPanel;
 
         // Methods
         protected virtual void Cancel_Click()
