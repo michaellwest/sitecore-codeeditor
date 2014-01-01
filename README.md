@@ -10,7 +10,7 @@ Code Editor module seeks to improve the experience.
 
 ## Installation
 
-- Install /Packages/CodeEditor-1.0.0.0.zip in Sitecore.
+- Install /Packages/CodeEditor-1.x.x.x.zip in Sitecore.
 	- Merge/Merge the Sitecore items.
 
 ### Installed Assets
@@ -30,7 +30,7 @@ The following items are updated in the core database:
  
 ### What versions of Sitecore will this work on?
 
-I have tested this on Sitecore 6.6 and 7.1.
+I have tested this on Sitecore 6.6, 7.0, and 7.1.
 
 ### What version of .NET is required?
 
