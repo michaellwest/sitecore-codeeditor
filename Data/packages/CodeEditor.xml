@@ -3,7 +3,7 @@
     <metadata>
       <PackageName>CodeEditor</PackageName>
       <Author>Michael West</Author>
-      <Version>1.1.0.0</Version>
+      <Version>1.2.0.0</Version>
       <Revision />
       <License />
       <Comment />
@@ -23,7 +23,7 @@ Ctrl-Shift-F : Format html code
 Please report any problems in our issue tracker:
 http://goo.gl/MiDWdD
 
-Copyright (c) 2013 Michael West
+Copyright (c) 2014 Michael West
 
 http://michaellwest.blogspot.com/</Readme>
       <Publisher>Michael West</Publisher>
@@ -36,6 +36,10 @@ http://michaellwest.blogspot.com/</Readme>
     <xitems>
       <Entries>
         <x-item>/core/sitecore/system/Field types/Simple Types/Rich Text/{52E0A4C2-A339-40E7-B7DC-5E69FCFE937C}/invariant/0</x-item>
+        <x-item>/core/sitecore/system/Field types/Custom Types/{360617ED-2F15-49F6-AA48-6D6C341760E0}/invariant/0</x-item>
+        <x-item>/core/sitecore/system/Field types/Custom Types/Code Text/{185AF9DE-8B03-4D37-BD8F-BC8329AA8B26}/invariant/0</x-item>
+        <x-item>/core/sitecore/system/Field types/Custom Types/Code Text/Menu/{0CD68B98-BF5C-461E-8825-A559748EAC13}/invariant/0</x-item>
+        <x-item>/core/sitecore/system/Field types/Custom Types/Code Text/Menu/Edit Code/{72C1FE61-FA41-497E-8ADA-35C556B94A85}/invariant/0</x-item>
       </Entries>
       <SkipVersions>False</SkipVersions>
       <Converter>
@@ -80,7 +84,7 @@ http://michaellwest.blogspot.com/</Readme>
       <Name>configs</Name>
     </xfiles>
     <files>
-      <Root>/sitecore/shell/Controls/Lib/js-beautify</Root>
+      <Root>/sitecore/shell/Controls/Lib/ace</Root>
       <Converter>
         <FileToEntryConverter>
           <Root>/</Root>
@@ -153,7 +157,7 @@ http://michaellwest.blogspot.com/</Readme>
         </FileDateFilter>
       </Include>
       <Exclude />
-      <Name>dialog</Name>
+      <Name>dialog-html</Name>
     </files>
     <xfiles>
       <Entries>
@@ -219,17 +223,65 @@ http://michaellwest.blogspot.com/</Readme>
     <xfiles>
       <Entries>
         <x-item>/sitecore/shell/Applications/Xaml/Controls/HtmlPageEx.xaml.xml</x-item>
+        <x-item>/sitecore/shell/Applications/Xaml/Controls/CodePage.xaml.xml</x-item>
       </Entries>
       <Converter>
         <FileToEntryConverter>
           <Root>/</Root>
-          <Transforms />
+          <Transforms>
+            <InstallerConfigurationTransform>
+              <Options>
+                <BehaviourOptions>
+                  <ItemMode>Undefined</ItemMode>
+                  <ItemMergeMode>Undefined</ItemMergeMode>
+                </BehaviourOptions>
+              </Options>
+            </InstallerConfigurationTransform>
+          </Transforms>
         </FileToEntryConverter>
       </Converter>
       <Include />
       <Exclude />
       <Name>controls</Name>
     </xfiles>
+    <files>
+      <Root>/sitecore/shell/Applications/Content Manager/Dialogs/EditCode</Root>
+      <Converter>
+        <FileToEntryConverter>
+          <Root>/</Root>
+          <Transforms>
+            <InstallerConfigurationTransform>
+              <Options>
+                <BehaviourOptions>
+                  <ItemMode>Undefined</ItemMode>
+                  <ItemMergeMode>Undefined</ItemMergeMode>
+                </BehaviourOptions>
+              </Options>
+            </InstallerConfigurationTransform>
+          </Transforms>
+        </FileToEntryConverter>
+      </Converter>
+      <Include>
+        <FileNameFilter>
+          <Pattern />
+          <AcceptDirectories>False</AcceptDirectories>
+        </FileNameFilter>
+        <FileDateFilter>
+          <FilterType>CreatedFilter</FilterType>
+          <ActionDateTo />
+          <ActionDateFrom />
+          <NotOlderThan />
+        </FileDateFilter>
+        <FileDateFilter>
+          <FilterType>ModifiedFilter</FilterType>
+          <ActionDateTo />
+          <ActionDateFrom />
+          <NotOlderThan />
+        </FileDateFilter>
+      </Include>
+      <Exclude />
+      <Name>dialog-code</Name>
+    </files>
   </Sources>
   <Converter>
     <TrivialConverter>
