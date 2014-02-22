@@ -11,6 +11,8 @@
       <Readme>This module provides a replacement html editor for the 
 rich text editor (visible using the Edit Html button).
 
+There is also a code text field type with an Edit Code button.
+
 Installation Steps
 1. Overwrite any existing files 
 2. Merge/Merge any existing Sitecore items
@@ -18,6 +20,10 @@ Installation Steps
 Shortcuts
 Ctrl-Space : Snippet/code completion window
 Ctrl-Shift-F : Format html code
+
+Field Type Source Examples:
+mode=javascript
+mode=css&amp;theme=textmate
 
 
 Please report any problems in our issue tracker:
