@@ -1,4 +1,5 @@
-﻿using Sitecore.Diagnostics;
+﻿using System.Linq;
+using Sitecore.Diagnostics;
 using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
@@ -48,7 +49,15 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 var urlString =
                     new UrlString(
                         "/sitecore/shell/~/xaml/Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditCode.aspx");
-                urlString.Append("mode", "css");
+                var parameters = WebUtil.ParseUrlParameters(Source);
+                if (parameters["mode"] != null)
+                {
+                    urlString.Append("mode", parameters["mode"]);
+                }
+                if (parameters["theme"] != null)
+                {
+                    urlString.Append("theme", parameters["theme"]);
+                }
                 var handle = new UrlHandle();
                 var str2 = Value;
                 if (str2 == "__#!$No value$!#__")
