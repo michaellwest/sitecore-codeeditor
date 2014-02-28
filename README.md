@@ -21,12 +21,19 @@ The installation package installs/updates the following:
 
 The following items are updated in the core database:
  
+* /sitecore/system/Field types/Custom Types/Code Text
 * /sitecore/system/Field types/Simple Types/Rich Text
 
 #### Files
 
 * ~/bin/Sitecore.SharedSource.CodeEditor.dll
 * ~/App_Config/Include/Sitecore.SharedSource.CodeEditor.config
+* ~/sitecore/shell/Applications/Content Manager/Dialogs/EditCode/*
+* ~/sitecore/shell/Applications/Content Manager/Dialogs/EditHtmlEx/*
+* ~/sitecore/shell/Applications/Xaml/Controls/CodePage.xaml.xml
+* ~/sitecore/shell/Applications/Xaml/Controls/HtmlPageEx.xaml.xml
+* ~/sitecore/shell/Applications/Xaml/Controls/Lib/ace/*
+* ~/sitecore/shell/Applications/Xaml/Controls/Lib/js-beautify/*
  
 ### What versions of Sitecore will this work on?
 
