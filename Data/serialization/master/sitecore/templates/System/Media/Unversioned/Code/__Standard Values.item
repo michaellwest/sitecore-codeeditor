@@ -1,0 +1,79 @@
+----item----
+version: 1
+id: {34C46B88-3432-403E-8F82-E8E3F4CA3C9B}
+database: master
+path: /sitecore/templates/System/Media/Unversioned/Code/__Standard Values
+parent: {6228C4E1-782E-4CC9-A20B-FE047170DA00}
+name: __Standard Values
+master: {00000000-0000-0000-0000-000000000000}
+template: {6228C4E1-782E-4CC9-A20B-FE047170DA00}
+templatekey: Code
+
+----field----
+field: {C7C26117-DBB1-42B2-AB5E-F7223845CCA3}
+name: __Thumbnail
+key: __thumbnail
+content-length: 155
+
+<image mediaid="{3463CD0F-C755-4F99-9377-5BA5BCAF9FEF}" mediapath="/System/Template Thumbnails/file" src="~/media/3463CD0FC7554F9993775BA5BCAF9FEF.ashx" />
+----field----
+field: {C0E276BB-8807-40AA-8138-E5C38B0C5DAB}
+name: __Quick Actions
+key: __quick actions
+content-length: 116
+
+{3799B830-7D8B-4FED-99D8-5D5EF6607D0E}|{983E7347-8010-4374-9771-6193ABE44F6C}|{8CAFF9B4-A2CF-4BAD-9C90-605A38226623}
+----field----
+field: {B7E5B151-B145-4CED-85C5-FBDB566DFA4D}
+name: __Validator Bar Validation Rules
+key: __validator bar validation rules
+content-length: 38
+
+{9088ACFD-9F36-4E89-9663-12D4286FFBAF}
+----version----
+language: en
+version: 1
+revision: 0e419b4b-1757-4a39-b688-f36a02b567a8
+
+----field----
+field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
+name: __Owner
+key: __owner
+content-length: 14
+
+sitecore\admin
+----field----
+field: {25BED78C-4957-4165-998A-CA1B52F67497}
+name: __Created
+key: __created
+content-length: 15
+
+20071107T112200
+----field----
+field: {5DD74568-4D4B-44C1-B513-0AF5F4CDA34F}
+name: __Created by
+key: __created by
+content-length: 14
+
+sitecore\admin
+----field----
+field: {8CDC337E-A112-42FB-BBB4-4143751E123F}
+name: __Revision
+key: __revision
+content-length: 36
+
+0e419b4b-1757-4a39-b688-f36a02b567a8
+----field----
+field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
+name: __Updated
+key: __updated
+content-length: 34
+
+20140315T140224:635304889443163472
+----field----
+field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
+name: __Updated by
+key: __updated by
+content-length: 14
+
+sitecore\admin

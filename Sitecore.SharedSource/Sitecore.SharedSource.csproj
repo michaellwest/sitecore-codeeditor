@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Shell\Applications\ContentEditor\CodeAttachment.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeText.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditCode\EditCodePage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditHtmlEx\EditHtmlExPage.cs" />
