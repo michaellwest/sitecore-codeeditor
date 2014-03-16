@@ -10,40 +10,50 @@ namespace Sitecore.SharedSource.Pipelines.Save
         {
             foreach (var saveItem in args.Items)
             {
-                var obj = Context.ContentDatabase.Items[saveItem.ID, saveItem.Language, saveItem.Version];
-                if (obj == null) continue;
-                if (obj.Locking.IsLocked() && !obj.Locking.HasLock() &&
+                var item = Context.ContentDatabase.Items[saveItem.ID, saveItem.Language, saveItem.Version];
+                if (item == null)
+                {
+                    continue;
+                }
+                if (item.Locking.IsLocked() && !item.Locking.HasLock() &&
                     (!Context.User.IsAdministrator && !args.PolicyBasedLocking))
                 {
-                    args.Error = "Could not modify locked item \"" + obj.Name + "\"";
+                    args.Error = "Could not modify locked item \"" + item.Name + "\"";
                     args.AbortPipeline();
                     return;
                 }
-                obj.Editing.BeginEdit();
-                foreach (var field1 in saveItem.Fields)
+                item.Editing.BeginEdit();
+                foreach (var saveField in saveItem.Fields)
                 {
-                    var field2 = obj.Fields[field1.ID];
-                    if (field2 == null ||
-                        (field2.IsBlobField &&
-                         ((field2.TypeKey == "attachment" || field2.TypeKey == "code attachment") ||
-                          field1.Value == Translate.Text("[Blob Value]")))) continue;
-
-                    field1.OriginalValue = field2.Value;
-                    if (field1.OriginalValue == field1.Value) continue;
-
-                    if (!string.IsNullOrEmpty(field1.Value) && NeedsHtmlTagEncode(field1))
+                    var field = item.Fields[saveField.ID];
+                    if (field == null)
                     {
-                        field1.Value = field1.Value.Replace("<", "&lt;").Replace(">", "&gt;");
+                        continue;;
                     }
 
-                    field2.Value = field1.Value;
+                    if (field.IsBlobField &&
+                         ((field.TypeKey == "attachment" || field.TypeKey == "code attachment") ||
+                          saveField.Value == Translate.Text("[Blob Value]")))
+                    {
+                        continue;
+                    }
+
+                    saveField.OriginalValue = field.Value;
+                    if (saveField.OriginalValue == saveField.Value)
+                    {
+                        continue;
+                    }
+
+                    if (!string.IsNullOrEmpty(saveField.Value) && NeedsHtmlTagEncode(saveField))
+                    {
+                        saveField.Value = saveField.Value.Replace("<", "&lt;").Replace(">", "&gt;");
+                    }
+
+                    field.Value = saveField.Value;
                 }
-                obj.Editing.EndEdit();
-                Log.Audit(this, "Save item: {0}", new string[1]
-                {
-                    AuditFormatter.FormatItem(obj)
-                });
-                args.SavedItems.Add(obj);
+                item.Editing.EndEdit();
+                Log.Audit(this, "Save item: {0}", new[] {AuditFormatter.FormatItem(item)});
+                args.SavedItems.Add(item);
             }
             if (!Context.IsUnitTesting)
             {

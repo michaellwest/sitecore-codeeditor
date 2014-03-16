@@ -60,10 +60,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 
                 var mediaUri = MediaUri.Parse(mediaItem);
                 var media = MediaManager.GetMedia(mediaUri);
-                Assert.IsNotNull(media, typeof (Media), "MediaUri: {0}", new object[1]
-                {
-                    mediaUri
-                });
+                Assert.IsNotNull(media, typeof (Media), "MediaUri: {0}", new object[] {mediaUri});
 
                 if (args.IsPostBack)
                 {
@@ -76,7 +73,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                     }
 
                     if (text == Value) return;
-                    
+
                     var bytes = Encoding.UTF8.GetBytes(text);
                     using (var ms = new MemoryStream(bytes))
                     {
@@ -163,7 +160,8 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 }
             }
 
-            output.Write("<div class=\"scContentControl\" style=\"background-color: #fff;font: 12pt tahoma;padding: 4px;height: 150px;overflow: hidden;\">");
+            output.Write(
+                "<div class=\"scContentControl\" style=\"background-color: #fff;font: 12pt tahoma;padding: 4px;height: 150px;overflow: hidden;\">");
             output.Write(content);
             output.Write("</div>");
         }

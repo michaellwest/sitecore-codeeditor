@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Sitecore.Diagnostics;
+﻿using Sitecore.Diagnostics;
 using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
@@ -72,8 +71,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         }
 
         /// <summary>
-        /// Updates the Text.
-        /// 
+        /// Updates the Text. 
         /// </summary>
         /// <param name="args">The arguments.</param>
         protected virtual void UpdateText(ClientPipelineArgs args)
