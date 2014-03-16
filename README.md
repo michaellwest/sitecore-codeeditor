@@ -1,12 +1,16 @@
 # Code Editor
 
-Code Editor replaces the html editor found with the Rich Text Editor.
+Code Editor provides a new experience for editing code from within Sitecore.
 
 ## Description
 
-The EditHtml dialog associated with the RichText field type lacks many 
-features such as syntax highlighting, code completion, and snippets. The 
-Code Editor module seeks to improve the experience.
+The Code Editor module provides an advanced code editor including syntax 
+highlighting, code completion, and snippets when using the Code Text field 
+type and Rich Text field type. In addition, a new system type called 
+Code Attachment has been added to enable code editing of media library items.
+
+Code type file extensions such as .html, .css, and .js will now be uploaded using
+the Code template, rather than the previous File template.
 
 ## Installation
 
@@ -19,10 +23,16 @@ The installation package installs/updates the following:
 
 #### Items
 
-The following items are updated in the core database:
+The following items are created/updated in the core database:
  
 * /sitecore/system/Field types/Custom Types/Code Text
 * /sitecore/system/Field types/Simple Types/Rich Text
+* /sitecore/system/Field types/System Types/Code Attachment
+
+The following items are created/updated in the master database:
+
+* /sitecore/templates/System/Media/Unversioned/Code
+* /sitecore/templates/System/Media/Versioned/Code
 
 #### Files
 
