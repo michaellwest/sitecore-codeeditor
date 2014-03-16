@@ -163,7 +163,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 }
             }
 
-            output.Write("<div class=\"scContentControl\" style=\"background-color: #fff;font: 13pt tahoma;padding: 4px;height: 150px;overflow: hidden;\">");
+            output.Write("<div class=\"scContentControl\" style=\"background-color: #fff;font: 12pt tahoma;padding: 4px;height: 150px;overflow: hidden;\">");
             output.Write(content);
             output.Write("</div>");
         }
