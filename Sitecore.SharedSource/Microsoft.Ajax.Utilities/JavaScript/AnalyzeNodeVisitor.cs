@@ -17,25 +17,26 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     internal class AnalyzeNodeVisitor : TreeVisitor
     {
-        private JSParser m_parser;
-        private bool m_encounteredCCOn;// = false;
-        private MatchPropertiesVisitor m_matchVisitor;// == null;
-        private Stack<ActivationObject> m_scopeStack;
+        private readonly JSParser m_parser;
+        private bool m_encounteredCCOn; // = false;
+        private MatchPropertiesVisitor m_matchVisitor; // == null;
+        private readonly Stack<ActivationObject> m_scopeStack;
         private JSError m_strictNameError = JSError.StrictModeVariableName;
-        private HashSet<string> m_noRename;
-        private bool m_stripDebug;
-        private bool m_lookForDebugNamespaces;
+        private readonly HashSet<string> m_noRename;
+        private readonly bool m_stripDebug;
+        private readonly bool m_lookForDebugNamespaces;
         private bool m_possibleDebugNamespace;
         private int m_possibleDebugNamespaceIndex;
-        private List<string[]> m_possibleDebugMatches;
-        private string[][] m_debugNamespaceParts;
+        private readonly List<string[]> m_possibleDebugMatches;
+        private readonly string[][] m_debugNamespaceParts;
 
         public AnalyzeNodeVisitor(JSParser parser)
         {
@@ -45,7 +46,7 @@ namespace Microsoft.Ajax.Utilities
 
             // see if we want to strip debug namespaces, and create the matching list if we do.
             m_stripDebug = m_parser.Settings.StripDebugStatements
-                && m_parser.Settings.IsModificationAllowed(TreeModifications.StripDebugStatements);
+                           && m_parser.Settings.IsModificationAllowed(TreeModifications.StripDebugStatements);
             m_lookForDebugNamespaces = m_stripDebug && m_parser.DebugLookups.Count > 0;
             if (m_lookForDebugNamespaces)
             {
@@ -66,7 +67,7 @@ namespace Microsoft.Ajax.Utilities
 
         #region IVisitor
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(BinaryOperator node)
         {
             if (node != null)
@@ -81,7 +82,7 @@ namespace Microsoft.Ajax.Utilities
                     node.Operand2.Accept(this);
                 }
 
-                if ((node.Operand1 == null || node.Operand1.IsDebugOnly) 
+                if ((node.Operand1 == null || node.Operand1.IsDebugOnly)
                     && (node.Operand2 == null || node.Operand2.IsDebugOnly))
                 {
                     // if both operands are debug-only, then this whole expression is debug only.
@@ -105,10 +106,10 @@ namespace Microsoft.Ajax.Utilities
                     if (node.OperatorToken == JSToken.Minus
                         && m_parser.Settings.IsModificationAllowed(TreeModifications.SimplifyStringToNumericConversion))
                     {
-                        Lookup lookup = node.Operand1 as Lookup;
+                        var lookup = node.Operand1 as Lookup;
                         if (lookup != null)
                         {
-                            ConstantWrapper right = node.Operand2 as ConstantWrapper;
+                            var right = node.Operand2 as ConstantWrapper;
                             if (right != null && right.IsIntegerLiteral && right.ToNumber() == 0)
                             {
                                 // okay, so we have "lookup - 0"
@@ -116,10 +117,10 @@ namespace Microsoft.Ajax.Utilities
                                 // There is an easier way: apply the unary + operator to it. 
                                 // transform: lookup - 0   => +lookup
                                 var unary = new UnaryOperator(node.Context)
-                                    {
-                                        Operand = lookup,
-                                        OperatorToken = JSToken.Plus
-                                    };
+                                {
+                                    Operand = lookup,
+                                    OperatorToken = JSToken.Plus
+                                };
                                 node.Parent.ReplaceChild(node, unary);
 
                                 // because we recursed at the top of this function, we don't need to Analyze
@@ -130,16 +131,20 @@ namespace Microsoft.Ajax.Utilities
                         }
                     }
                     else if ((node.OperatorToken == JSToken.StrictEqual || node.OperatorToken == JSToken.StrictNotEqual)
-                        && m_parser.Settings.IsModificationAllowed(TreeModifications.ReduceStrictOperatorIfTypesAreSame))
+                             &&
+                             m_parser.Settings.IsModificationAllowed(
+                                 TreeModifications.ReduceStrictOperatorIfTypesAreSame))
                     {
-                        PrimitiveType leftType = node.Operand1.FindPrimitiveType();
+                        var leftType = node.Operand1.FindPrimitiveType();
                         if (leftType != PrimitiveType.Other)
                         {
-                            PrimitiveType rightType = node.Operand2.FindPrimitiveType();
+                            var rightType = node.Operand2.FindPrimitiveType();
                             if (leftType == rightType)
                             {
                                 // the are the same known types. We can reduce the operators
-                                node.OperatorToken = node.OperatorToken == JSToken.StrictEqual ? JSToken.Equal : JSToken.NotEqual;
+                                node.OperatorToken = node.OperatorToken == JSToken.StrictEqual
+                                    ? JSToken.Equal
+                                    : JSToken.NotEqual;
                             }
                             else if (rightType != PrimitiveType.Other)
                             {
@@ -150,7 +155,8 @@ namespace Microsoft.Ajax.Utilities
                                 node.Context.HandleError(JSError.StrictComparisonIsAlwaysTrueOrFalse, false);
                                 node.Parent.ReplaceChild(
                                     node,
-                                    new ConstantWrapper(node.OperatorToken == JSToken.StrictNotEqual, PrimitiveType.Boolean, node.Context));
+                                    new ConstantWrapper(node.OperatorToken == JSToken.StrictNotEqual,
+                                        PrimitiveType.Boolean, node.Context));
 
                                 // because we are essentially removing the node from the AST, be sure to detach any references
                                 DetachReferences.Apply(node);
@@ -169,14 +175,15 @@ namespace Microsoft.Ajax.Utilities
                             }
                             else if (m_scopeStack.Peek().UseStrict)
                             {
-                                if (lookup.VariableField == null || lookup.VariableField.FieldType == FieldType.UndefinedGlobal)
+                                if (lookup.VariableField == null ||
+                                    lookup.VariableField.FieldType == FieldType.UndefinedGlobal)
                                 {
                                     // strict mode cannot assign to undefined fields
                                     node.Operand1.Context.HandleError(JSError.StrictModeUndefinedVariable, true);
                                 }
                                 else if (lookup.VariableField.FieldType == FieldType.Arguments
-                                    || (lookup.VariableField.FieldType == FieldType.Predefined 
-                                    && string.CompareOrdinal(lookup.Name, "eval") == 0))
+                                         || (lookup.VariableField.FieldType == FieldType.Predefined
+                                             && string.CompareOrdinal(lookup.Name, "eval") == 0))
                                 {
                                     // strict mode cannot assign to lookup "eval" or "arguments"
                                     node.Operand1.Context.HandleError(JSError.StrictModeInvalidAssign, true);
@@ -185,7 +192,7 @@ namespace Microsoft.Ajax.Utilities
                         }
                     }
                     else if ((node.Parent is Block || (node.Parent is CommaOperator && node.Parent.Parent is Block))
-                        && (node.OperatorToken == JSToken.LogicalOr || node.OperatorToken == JSToken.LogicalAnd))
+                             && (node.OperatorToken == JSToken.LogicalOr || node.OperatorToken == JSToken.LogicalAnd))
                     {
                         // this is an expression statement where the operator is || or && -- basically
                         // it's a shortcut for an if-statement:
@@ -200,7 +207,9 @@ namespace Microsoft.Ajax.Utilities
                             // transform: expr1&&expr2 => !expr1||expr2
                             // transform: expr1||expr2 => !expr1&&expr2
                             logicalNot.Apply();
-                            node.OperatorToken = node.OperatorToken == JSToken.LogicalAnd ? JSToken.LogicalOr : JSToken.LogicalAnd;
+                            node.OperatorToken = node.OperatorToken == JSToken.LogicalAnd
+                                ? JSToken.LogicalOr
+                                : JSToken.LogicalAnd;
                         }
                     }
                 }
@@ -278,11 +287,12 @@ namespace Microsoft.Ajax.Utilities
                 // transform: expr;if(cond)... => if(expr,cond)...
                 // combine the previous expression with the if-condition via comma, then delete
                 // the previous statement.
-                ifNode.Condition = CommaOperator.CombineWithComma(node[ndx - 1].Context.FlattenToStart(), node[ndx - 1], ifNode.Condition);
+                ifNode.Condition = CommaOperator.CombineWithComma(node[ndx - 1].Context.FlattenToStart(), node[ndx - 1],
+                    ifNode.Condition);
                 node.RemoveAt(ndx - 1);
             }
             else if ((whileNode = node[ndx] as WhileNode) != null
-                && m_parser.Settings.IsModificationAllowed(TreeModifications.ChangeWhileToFor))
+                     && m_parser.Settings.IsModificationAllowed(TreeModifications.ChangeWhileToFor))
             {
                 // transform: expr;while(cond)... => for(expr;cond;)...
                 // zero-sum, and maybe a little worse for performance because of the nop iterator,
@@ -314,13 +324,14 @@ namespace Microsoft.Ajax.Utilities
                 if (prevBinary.OperatorToken == JSToken.Assign)
                 {
                     // transform: lookup=expr1;lookup[OP]=expr2;  ==>  lookup=expr1[OP]expr2
-                    var binOp = new BinaryOperator(prevBinary.Operand2.Context.Clone().CombineWith(curBinary.Operand2.Context))
-                    {
-                        Operand1 = prevBinary.Operand2,
-                        Operand2 = curBinary.Operand2,
-                        OperatorToken = JSScanner.StripAssignment(curBinary.OperatorToken),
-                        OperatorContext = curBinary.OperatorContext
-                    };
+                    var binOp =
+                        new BinaryOperator(prevBinary.Operand2.Context.Clone().CombineWith(curBinary.Operand2.Context))
+                        {
+                            Operand1 = prevBinary.Operand2,
+                            Operand2 = curBinary.Operand2,
+                            OperatorToken = JSScanner.StripAssignment(curBinary.OperatorToken),
+                            OperatorContext = curBinary.OperatorContext
+                        };
                     prevBinary.Operand2 = binOp;
 
                     // we are removing the second lookup, so clean up the reference on the field
@@ -337,7 +348,8 @@ namespace Microsoft.Ajax.Utilities
                     // there's lots of ins-and-outs in terms of strings versus numerics versus precedence and all 
                     // sorts of stuff. I need to iron this out a little better, but until then, just combine with a comma.
                     // transform: expr1;expr2  ==>  expr1,expr2
-                    var binOp = CommaOperator.CombineWithComma(prevBinary.Context.Clone().CombineWith(curBinary.Context), prevBinary, curBinary);
+                    var binOp = CommaOperator.CombineWithComma(
+                        prevBinary.Context.Clone().CombineWith(curBinary.Context), prevBinary, curBinary);
 
                     // replace the previous node and delete the current
                     node[ndx - 1] = binOp;
@@ -349,7 +361,8 @@ namespace Microsoft.Ajax.Utilities
                 // transform: expr1;expr2 to expr1,expr2
                 // use the special comma operator object so we can handle it special
                 // and don't create stack-breakingly deep trees
-                var binOp = CommaOperator.CombineWithComma(node[ndx - 1].Context.Clone().CombineWith(node[ndx].Context), node[ndx - 1], node[ndx]);
+                var binOp = CommaOperator.CombineWithComma(
+                    node[ndx - 1].Context.Clone().CombineWith(node[ndx].Context), node[ndx - 1], node[ndx]);
 
                 // replace the current node and delete the previous
                 node[ndx] = binOp;
@@ -478,7 +491,8 @@ namespace Microsoft.Ajax.Utilities
                     else
                     {
                         // transform: expr1;return expr2 to return expr1,expr2
-                        var binOp = CommaOperator.CombineWithComma(node[ndx - 1].Context.FlattenToStart(), node[ndx - 1], returnNode.Operand);
+                        var binOp = CommaOperator.CombineWithComma(node[ndx - 1].Context.FlattenToStart(), node[ndx - 1],
+                            returnNode.Operand);
 
                         // replace the operand on the return node with the new expression and
                         // delete the previous node
@@ -489,7 +503,8 @@ namespace Microsoft.Ajax.Utilities
                 else
                 {
                     // transform: expr1;return expr2 to return expr1,expr2
-                    var binOp = CommaOperator.CombineWithComma(node[ndx - 1].Context.FlattenToStart(), node[ndx - 1], returnNode.Operand);
+                    var binOp = CommaOperator.CombineWithComma(node[ndx - 1].Context.FlattenToStart(), node[ndx - 1],
+                        returnNode.Operand);
 
                     // replace the operand on the return node with the new expression and
                     // delete the previous node
@@ -517,7 +532,8 @@ namespace Microsoft.Ajax.Utilities
                 else if (forNode.Initializer.IsExpression)
                 {
                     // transform: expr1;for(expr2;...) to for(expr1,expr2;...)
-                    var binOp = CommaOperator.CombineWithComma(node[ndx-1].Context.FlattenToStart(), node[ndx - 1], forNode.Initializer);
+                    var binOp = CommaOperator.CombineWithComma(node[ndx - 1].Context.FlattenToStart(), node[ndx - 1],
+                        forNode.Initializer);
 
                     // replace the initializer with the new binary operator and remove the previous node
                     forNode.Initializer = binOp;
@@ -593,11 +609,6 @@ namespace Microsoft.Ajax.Utilities
                     varDecl.Initializer = binaryOp.Operand2;
                     node[ndx] = null;
                 }
-                else
-                {
-                    // we have var name;name[OP]=expr.
-                    // leave it alone???? we could make var name=undefined[OP]expr1, if we have a good undefined value.
-                }
             }
         }
 
@@ -612,11 +623,8 @@ namespace Microsoft.Ajax.Utilities
                     // see if the fields are the same
                     return lookup.VariableField == targetField;
                 }
-                else
-                {
-                    // no variable field -- match the name, just in case
-                    return string.CompareOrdinal(lookup.Name, targetField.Name) == 0;
-                }
+                // no variable field -- match the name, just in case
+                return string.CompareOrdinal(lookup.Name, targetField.Name) == 0;
             }
 
             // recurse through each child (if any). If any one returns true,
@@ -638,8 +646,8 @@ namespace Microsoft.Ajax.Utilities
             // start with the last statement in the block and back up over any function declarations
             // or important comments until we get the last statement
             var lastStatementIndex = node.Count - 1;
-            while (lastStatementIndex >= 0 
-                && (node[lastStatementIndex] is FunctionObject || node[lastStatementIndex] is ImportantComment))
+            while (lastStatementIndex >= 0
+                   && (node[lastStatementIndex] is FunctionObject || node[lastStatementIndex] is ImportantComment))
             {
                 --lastStatementIndex;
             }
@@ -647,10 +655,10 @@ namespace Microsoft.Ajax.Utilities
             return lastStatementIndex >= 0 ? node[lastStatementIndex] : null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1809:AvoidExcessiveLocals"),
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"),
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"),
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode")]
+        [SuppressMessage("Microsoft.Performance", "CA1809:AvoidExcessiveLocals"),
+         SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"),
+         SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"),
+         SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode")]
         public override void Visit(Block node)
         {
             if (node != null)
@@ -680,7 +688,8 @@ namespace Microsoft.Ajax.Utilities
                             // if the lexical declaration is a let or const declaration (as opposed to a function declaration),
                             // then force the warning to an error. This is so the function declaration will remain a warning if
                             // it collides with a var. 
-                            varDecl.Context.HandleError(JSError.DuplicateLexicalDeclaration, lexDecl is LexicalDeclaration);
+                            varDecl.Context.HandleError(JSError.DuplicateLexicalDeclaration,
+                                lexDecl is LexicalDeclaration);
 
                             // mark them both a no-rename to preserve the collision in the output
                             lexDecl.VariableField.IfNotNull(v => v.CanCrunch = false);
@@ -691,7 +700,7 @@ namespace Microsoft.Ajax.Utilities
 
                 // we might things differently if these statements are the body collection for a function
                 // because we can assume the implicit return statement at the end of it
-                bool isFunctionLevel = (node.Parent is FunctionObject);
+                var isFunctionLevel = (node.Parent is FunctionObject);
 
                 // analyze all the statements in our block and recurse them
                 if (node.HasOwnScope)
@@ -755,9 +764,9 @@ namespace Microsoft.Ajax.Utilities
                             }
                         }
                         else if (node[ndx] is ReturnNode
-                            || node[ndx] is Break
-                            || node[ndx] is ContinueNode
-                            || node[ndx] is ThrowNode)
+                                 || node[ndx] is Break
+                                 || node[ndx] is ContinueNode
+                                 || node[ndx] is ThrowNode)
                         {
                             // we have an exit node -- no statments afterwards will be executed, so clear them out.
                             // transform: {...;return;...} to {...;return}
@@ -837,17 +846,17 @@ namespace Microsoft.Ajax.Utilities
                             // if applied on top of it.
                             // transform: if(cond)return expr;} to return cond?expr:void 0}
                             var conditional = new Conditional(ifNode.Condition.Context.FlattenToStart())
-                                {
-                                    Condition = ifNode.Condition,
-                                    TrueExpression = returnNode.Operand,
-                                    FalseExpression = CreateVoidNode(returnNode.Context.FlattenToStart())
-                                };
+                            {
+                                Condition = ifNode.Condition,
+                                TrueExpression = returnNode.Operand,
+                                FalseExpression = CreateVoidNode(returnNode.Context.FlattenToStart())
+                            };
 
                             // replace the if-statement with the new return node
                             node.ReplaceChild(ifNode, new ReturnNode(ifNode.Context)
-                                {
-                                    Operand = conditional
-                                });
+                            {
+                                Operand = conditional
+                            });
                             Optimize(conditional);
                         }
                     }
@@ -867,7 +876,7 @@ namespace Microsoft.Ajax.Utilities
                     // walk BACKWARDS down the list because we'll be removing items when we encounter
                     // var statements that can be moved inside a for statement's initializer
                     // we also don't need to check the first one, since there is nothing before it.
-                    for (int ndx = node.Count - 1; ndx > 0; --ndx)
+                    for (var ndx = node.Count - 1; ndx > 0; --ndx)
                     {
                         // see if the previous statement is a var statement
                         // (we've already combined adjacent var-statements)
@@ -880,14 +889,15 @@ namespace Microsoft.Ajax.Utilities
                             // BUT if the var statement has any initializers containing an in-operator, first check
                             // to see if we haven't killed that move before we try moving it. Opera 11 seems to have
                             // an issue with that syntax, even if properly parenthesized.
-                            if (m_parser.Settings.IsModificationAllowed(TreeModifications.MoveInExpressionsIntoForStatement)
+                            if (m_parser.Settings.IsModificationAllowed(
+                                TreeModifications.MoveInExpressionsIntoForStatement)
                                 || !previousVar.ContainsInOperator)
                             {
                                 // and see if the forNode's initializer is empty
                                 if (forNode.Initializer != null)
                                 {
                                     // not empty -- see if it is a Var node
-                                    Var varInitializer = forNode.Initializer as Var;
+                                    var varInitializer = forNode.Initializer as Var;
                                     if (varInitializer != null)
                                     {
                                         // transform: var decls1;for(var decls2;...) to for(var decls1,decls2;...)
@@ -945,21 +955,21 @@ namespace Microsoft.Ajax.Utilities
                                 }
                             }
                         }
-                        else if (previousVar != null 
-                            && (whileNode = node[ndx] as WhileNode) != null
-                            && m_parser.Settings.IsModificationAllowed(TreeModifications.ChangeWhileToFor))
+                        else if (previousVar != null
+                                 && (whileNode = node[ndx] as WhileNode) != null
+                                 && m_parser.Settings.IsModificationAllowed(TreeModifications.ChangeWhileToFor))
                         {
                             // transform: var ...;while(cond)... => for(var ...;cond;)...
                             node[ndx] = new ForNode(whileNode.Context.FlattenToStart())
-                                {
-                                    Initializer = previousVar,
-                                    Condition = whileNode.Condition,
-                                    Body = whileNode.Body
-                                };
+                            {
+                                Initializer = previousVar,
+                                Condition = whileNode.Condition,
+                                Body = whileNode.Body
+                            };
                             node.RemoveAt(ndx - 1);
                         }
                         else if (previousVar != null
-                            && (forInNode = node[ndx] as ForIn) != null)
+                                 && (forInNode = node[ndx] as ForIn) != null)
                         {
                             // if the for-in's variable field is not a declaration, we should check to see
                             // if there is a single named reference, and whether the previous var's last declaration
@@ -981,9 +991,9 @@ namespace Microsoft.Ajax.Utilities
                                     if (newBinding != null)
                                     {
                                         var newVarDecl = new VariableDeclaration(forInNode.Variable.Context.Clone())
-                                            {
-                                                Binding = newBinding,
-                                            };
+                                        {
+                                            Binding = newBinding,
+                                        };
                                         var newVar = new Var(forInNode.Variable.Context.Clone());
                                         newVar.Append(newVarDecl);
                                         forInNode.Variable = newVar;
@@ -1017,7 +1027,7 @@ namespace Microsoft.Ajax.Utilities
                     // set this flag to true if we end up adding an expression to the block.
                     // before exiting, we'll go through and combine adjacent expressions again if this
                     // flag has been set to true.
-                    bool changedStatementToExpression = false;
+                    var changedStatementToExpression = false;
 
                     // get the index of the statement before the last return
                     // (skip over function decls and importand comments)
@@ -1075,14 +1085,14 @@ namespace Microsoft.Ajax.Utilities
                     // and only one statement in the true block.
                     Conditional conditional;
                     IfNode previousIf;
-                    while (indexPrevious >= 0 
-                        && lastReturn != null
-                        && (previousIf = node[indexPrevious] as IfNode) != null
-                        && previousIf.TrueBlock != null && previousIf.TrueBlock.Count == 1
-                        && previousIf.FalseBlock == null)
+                    while (indexPrevious >= 0
+                           && lastReturn != null
+                           && (previousIf = node[indexPrevious] as IfNode) != null
+                           && previousIf.TrueBlock != null && previousIf.TrueBlock.Count == 1
+                           && previousIf.FalseBlock == null)
                     {
                         // assume no change is made for this loop
-                        bool somethingChanged = false;
+                        var somethingChanged = false;
 
                         // and that one true-block statement needs to be a return statement
                         var previousReturn = previousIf.TrueBlock[0] as ReturnNode;
@@ -1132,14 +1142,15 @@ namespace Microsoft.Ajax.Utilities
                                 {
                                     // transform: if(cond)return expr;return} to return cond?expr:void 0
                                     conditional = new Conditional(previousIf.Condition.Context.FlattenToStart())
-                                        {
-                                            Condition = previousIf.Condition,
-                                            TrueExpression = previousReturn.Operand,
-                                            FalseExpression = CreateVoidNode(previousReturn.Context.FlattenToStart())
-                                        };
+                                    {
+                                        Condition = previousIf.Condition,
+                                        TrueExpression = previousReturn.Operand,
+                                        FalseExpression = CreateVoidNode(previousReturn.Context.FlattenToStart())
+                                    };
 
                                     // replace the final return with the new return, then delete the previous if-statement
-                                    if (node.ReplaceChild(lastReturn, new ReturnNode(previousReturn.Context.FlattenToStart())
+                                    if (node.ReplaceChild(lastReturn,
+                                        new ReturnNode(previousReturn.Context.FlattenToStart())
                                         {
                                             Operand = conditional
                                         }))
@@ -1156,14 +1167,15 @@ namespace Microsoft.Ajax.Utilities
                                 {
                                     // transform: if(cond)return;return expr} to return cond?void 0:expr
                                     conditional = new Conditional(previousIf.Condition.Context.FlattenToStart())
-                                        {
-                                            Condition = previousIf.Condition,
-                                            TrueExpression = CreateVoidNode(lastReturn.Context.FlattenToStart()),
-                                            FalseExpression = lastReturn.Operand
-                                        };
+                                    {
+                                        Condition = previousIf.Condition,
+                                        TrueExpression = CreateVoidNode(lastReturn.Context.FlattenToStart()),
+                                        FalseExpression = lastReturn.Operand
+                                    };
 
                                     // replace the final return with the new return, then delete the previous if-statement
-                                    if (node.ReplaceChild(lastReturn, new ReturnNode(lastReturn.Context.FlattenToStart())
+                                    if (node.ReplaceChild(lastReturn,
+                                        new ReturnNode(lastReturn.Context.FlattenToStart())
                                         {
                                             Operand = conditional
                                         }))
@@ -1191,7 +1203,10 @@ namespace Microsoft.Ajax.Utilities
                                         // replace the operand on the final-return with the new binary operator,
                                         // and then delete the previous if-statement
                                         DetachReferences.Apply(previousReturn.Operand);
-                                        lastReturn.Operand = CommaOperator.CombineWithComma(previousIf.Condition.Context.FlattenToStart(), previousIf.Condition, lastReturn.Operand);
+                                        lastReturn.Operand =
+                                            CommaOperator.CombineWithComma(
+                                                previousIf.Condition.Context.FlattenToStart(), previousIf.Condition,
+                                                lastReturn.Operand);
                                         node.RemoveAt(indexPrevious);
                                         somethingChanged = true;
                                     }
@@ -1204,11 +1219,11 @@ namespace Microsoft.Ajax.Utilities
                                     // and then delete the previous if-statement
                                     // transform: if(cond)return expr1;return expr2} to return cond?expr1:expr2}
                                     conditional = new Conditional(previousIf.Condition.Context.FlattenToStart())
-                                        {
-                                            Condition = previousIf.Condition,
-                                            TrueExpression = previousReturn.Operand,
-                                            FalseExpression = lastReturn.Operand
-                                        };
+                                    {
+                                        Condition = previousIf.Condition,
+                                        TrueExpression = previousReturn.Operand,
+                                        FalseExpression = lastReturn.Operand
+                                    };
 
                                     // replace the operand on the final-return with the new conditional operator,
                                     // and then delete the previous if-statement
@@ -1225,22 +1240,20 @@ namespace Microsoft.Ajax.Utilities
                             // nothing changed -- break out of the loop
                             break;
                         }
-                        else
-                        {
-                            // set the flag that indicates something changed in at least one of these loops
-                            changedStatementToExpression = true;
-                            
-                            // and since we changed something, we need to bump the index down one
-                            // AFTER we grab the last return node (which has slipped into the same position
-                            // as the previous node)
-                            lastReturn = node[indexPrevious--] as ReturnNode;
-                        }
+                        // set the flag that indicates something changed in at least one of these loops
+                        changedStatementToExpression = true;
+
+                        // and since we changed something, we need to bump the index down one
+                        // AFTER we grab the last return node (which has slipped into the same position
+                        // as the previous node)
+                        lastReturn = node[indexPrevious--] as ReturnNode;
                     }
 
                     // if we added any more expressions since we ran our expression-combination logic, 
                     // run it again.
                     if (changedStatementToExpression
-                        && m_parser.Settings.IsModificationAllowed(TreeModifications.CombineAdjacentExpressionStatements))
+                        &&
+                        m_parser.Settings.IsModificationAllowed(TreeModifications.CombineAdjacentExpressionStatements))
                     {
                         CombineExpressions(node);
                     }
@@ -1253,7 +1266,7 @@ namespace Microsoft.Ajax.Utilities
                         && (conditional = lastReturn.Operand as Conditional) != null)
                     {
                         var unaryOperator = conditional.FalseExpression as UnaryOperator;
-                        if (unaryOperator != null 
+                        if (unaryOperator != null
                             && unaryOperator.OperatorToken == JSToken.Void
                             && unaryOperator.Operand is ConstantWrapper)
                         {
@@ -1280,20 +1293,20 @@ namespace Microsoft.Ajax.Utilities
                                 // transform: ...;return cond?expr:void 0} to ...;if(cond)return expr}
                                 // (only works at the function-level because of the implicit return statement)
                                 var ifNode = new IfNode(lastReturn.Context)
+                                {
+                                    Condition = conditional.Condition,
+                                    TrueBlock = AstNode.ForceToBlock(new ReturnNode(lastReturn.Context.Clone())
                                     {
-                                        Condition = conditional.Condition,
-                                        TrueBlock = AstNode.ForceToBlock(new ReturnNode(lastReturn.Context.Clone())
-                                            {
-                                                Operand = conditional.TrueExpression
-                                            })
-                                    };
+                                        Operand = conditional.TrueExpression
+                                    })
+                                };
                                 node.ReplaceChild(lastReturn, ifNode);
                             }
                         }
                         else if (isFunctionLevel)
                         {
                             unaryOperator = conditional.TrueExpression as UnaryOperator;
-                            if (unaryOperator != null 
+                            if (unaryOperator != null
                                 && unaryOperator.OperatorToken == JSToken.Void
                                 && unaryOperator.Operand is ConstantWrapper)
                             {
@@ -1306,13 +1319,13 @@ namespace Microsoft.Ajax.Utilities
                                 // create a new if-node based on the condition, with the branches swapped 
                                 // (true-expression goes to false-branch, false-expression goes to true-branch
                                 var ifNode = new IfNode(lastReturn.Context)
+                                {
+                                    Condition = conditional.Condition,
+                                    TrueBlock = AstNode.ForceToBlock(new ReturnNode(lastReturn.Context.Clone())
                                     {
-                                        Condition = conditional.Condition,
-                                        TrueBlock = AstNode.ForceToBlock(new ReturnNode(lastReturn.Context.Clone())
-                                            {
-                                                Operand = conditional.FalseExpression
-                                            })
-                                    };
+                                        Operand = conditional.FalseExpression
+                                    })
+                                };
                                 node.ReplaceChild(lastReturn, ifNode);
                             }
                         }
@@ -1345,12 +1358,12 @@ namespace Microsoft.Ajax.Utilities
                                 // previous condition with a logical-or and delete the current statement.
                                 // transform: if(cond1)return expr;if(cond2)return expr; to if(cond1||cond2)return expr;
                                 ifNode.Condition = new BinaryOperator(condition1.Context.FlattenToStart())
-                                    {
-                                        Operand1 = condition1,
-                                        Operand2 = condition2,
-                                        OperatorToken = JSToken.LogicalOr,
-                                        TerminatingContext = ifNode.TerminatingContext ?? node.TerminatingContext
-                                    };
+                                {
+                                    Operand1 = condition1,
+                                    Operand2 = condition2,
+                                    OperatorToken = JSToken.LogicalOr,
+                                    TerminatingContext = ifNode.TerminatingContext ?? node.TerminatingContext
+                                };
                                 DetachReferences.Apply(currentExpr);
                                 node.RemoveAt(ndx);
                             }
@@ -1387,7 +1400,8 @@ namespace Microsoft.Ajax.Utilities
                                     // there's only one statement after our if-node.
                                     // see if it's ALSO an if-node with no else block.
                                     var secondIfNode = node[ndxMove] as IfNode;
-                                    if (secondIfNode != null && (secondIfNode.FalseBlock == null || secondIfNode.FalseBlock.Count == 0))
+                                    if (secondIfNode != null &&
+                                        (secondIfNode.FalseBlock == null || secondIfNode.FalseBlock.Count == 0))
                                     {
                                         // it is!
                                         // transform: if(cond1)return;if(cond2){...} => if(!cond1&&cond2){...}
@@ -1397,16 +1411,18 @@ namespace Microsoft.Ajax.Utilities
                                         // remove the secondIf node.
                                         node.RemoveAt(ndxMove);
                                         ifNode.Condition = new BinaryOperator(ifNode.Condition.Context.FlattenToStart())
-                                            {
-                                                Operand1 = ifNode.Condition,
-                                                Operand2 = secondIfNode.Condition,
-                                                OperatorToken = JSToken.LogicalAnd
-                                            };
+                                        {
+                                            Operand1 = ifNode.Condition,
+                                            Operand2 = secondIfNode.Condition,
+                                            OperatorToken = JSToken.LogicalAnd
+                                        };
 
                                         ifNode.TrueBlock = secondIfNode.TrueBlock;
                                     }
                                     else if (node[ndxMove].IsExpression
-                                        && m_parser.Settings.IsModificationAllowed(TreeModifications.IfConditionCallToConditionAndCall))
+                                             &&
+                                             m_parser.Settings.IsModificationAllowed(
+                                                 TreeModifications.IfConditionCallToConditionAndCall))
                                     {
                                         // now we have if(cond)expr; optimize that!
                                         var expression = node[ndxMove];
@@ -1429,9 +1445,9 @@ namespace Microsoft.Ajax.Utilities
                 else
                 {
                     var isIteratorBlock = node.Parent is ForNode
-                        || node.Parent is ForIn
-                        || node.Parent is WhileNode
-                        || node.Parent is DoWhile;
+                                          || node.Parent is ForIn
+                                          || node.Parent is WhileNode
+                                          || node.Parent is DoWhile;
 
                     if (isIteratorBlock
                         && m_parser.Settings.IsModificationAllowed(TreeModifications.InvertIfContinue))
@@ -1451,8 +1467,10 @@ namespace Microsoft.Ajax.Utilities
 
                                 // if there's no label, then we're good. Otherwise we can only make this optimization
                                 // if the label refers to the parent iterator node.
-                                if (continueNode != null 
-                                    && (string.IsNullOrEmpty(continueNode.Label) || (LabelMatchesParent(continueNode.Label, node.Parent))))
+                                if (continueNode != null
+                                    &&
+                                    (string.IsNullOrEmpty(continueNode.Label) ||
+                                     (LabelMatchesParent(continueNode.Label, node.Parent))))
                                 {
                                     // if this is the last statement, then we don't really need the if at all
                                     // and can just replace it with its condition
@@ -1472,7 +1490,8 @@ namespace Microsoft.Ajax.Utilities
                                             // there's only one statement after our if-node.
                                             // see if it's ALSO an if-node with no else block.
                                             var secondIfNode = node[ndxMove] as IfNode;
-                                            if (secondIfNode != null && (secondIfNode.FalseBlock == null || secondIfNode.FalseBlock.Count == 0))
+                                            if (secondIfNode != null &&
+                                                (secondIfNode.FalseBlock == null || secondIfNode.FalseBlock.Count == 0))
                                             {
                                                 // it is!
                                                 // transform: if(cond1)continue;if(cond2){...} => if(!cond1&&cond2){...}
@@ -1480,7 +1499,8 @@ namespace Microsoft.Ajax.Utilities
                                                 // combine cond2 with cond1 via a logical-and,
                                                 // move all secondIf statements inside the if-node,
                                                 // remove the secondIf node.
-                                                ifNode.Condition = new BinaryOperator(ifNode.Condition.Context.FlattenToStart())
+                                                ifNode.Condition =
+                                                    new BinaryOperator(ifNode.Condition.Context.FlattenToStart())
                                                     {
                                                         Operand1 = ifNode.Condition,
                                                         Operand2 = secondIfNode.Condition,
@@ -1491,7 +1511,9 @@ namespace Microsoft.Ajax.Utilities
                                                 node.RemoveAt(ndxMove);
                                             }
                                             else if (node[ndxMove].IsExpression
-                                                && m_parser.Settings.IsModificationAllowed(TreeModifications.IfConditionCallToConditionAndCall))
+                                                     &&
+                                                     m_parser.Settings.IsModificationAllowed(
+                                                         TreeModifications.IfConditionCallToConditionAndCall))
                                             {
                                                 // now we have if(cond)expr; optimize that!
                                                 var expression = node[ndxMove];
@@ -1591,7 +1613,8 @@ namespace Microsoft.Ajax.Utilities
             // get the index of the statement before the last return
             // (skip over function decls and importand comments)
             var indexPrevious = node.IndexOf(child) - 1;
-            while (indexPrevious >= 0 && (node[indexPrevious] is FunctionObject || node[indexPrevious] is ImportantComment))
+            while (indexPrevious >= 0 &&
+                   (node[indexPrevious] is FunctionObject || node[indexPrevious] is ImportantComment))
             {
                 --indexPrevious;
             }
@@ -1619,13 +1642,13 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(CallNode node)
         {
             if (node != null)
             {
                 // see if this is a member (we'll need it for a couple checks)
-                Member member = node.Function as Member;
+                var member = node.Function as Member;
                 Lookup lookup;
 
                 // if this is a constructor and we want to collapse
@@ -1634,7 +1657,9 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // array function as new operands will probably be wrapped in parens
                     var funcObject = node.Function as FunctionObject;
-                    if (funcObject != null || (funcObject = (node.Function as GroupingOperator).IfNotNull(g => g.Operand as FunctionObject)) != null)
+                    if (funcObject != null ||
+                        (funcObject = (node.Function as GroupingOperator).IfNotNull(g => g.Operand as FunctionObject)) !=
+                        null)
                     {
                         if (funcObject.FunctionType == FunctionType.ArrowFunction)
                         {
@@ -1687,7 +1712,8 @@ namespace Microsoft.Ajax.Utilities
                                 }
                             }
                             else if (lookup.Name == "Array"
-                                && m_parser.Settings.IsModificationAllowed(TreeModifications.NewArrayToArrayLiteral))
+                                     &&
+                                     m_parser.Settings.IsModificationAllowed(TreeModifications.NewArrayToArrayLiteral))
                             {
                                 // Array is trickier. 
                                 // If there are no arguments, then just use [].
@@ -1697,7 +1723,7 @@ namespace Microsoft.Ajax.Utilities
                                 // KNOW whether or not it's numeric.
                                 //
                                 // so first see if it even is a single-argument constant wrapper. 
-                                ConstantWrapper constWrapper = (node.Arguments != null && node.Arguments.Count == 1
+                                var constWrapper = (node.Arguments != null && node.Arguments.Count == 1
                                     ? node.Arguments[0] as ConstantWrapper
                                     : null);
 
@@ -1705,14 +1731,14 @@ namespace Microsoft.Ajax.Utilities
                                 // if the argument count IS one, we only crunch if we have a constant wrapper, 
                                 // AND it's not numeric.
                                 if (node.Arguments == null
-                                  || node.Arguments.Count != 1
-                                  || (constWrapper != null && !constWrapper.IsNumericLiteral))
+                                    || node.Arguments.Count != 1
+                                    || (constWrapper != null && !constWrapper.IsNumericLiteral))
                                 {
                                     // create the new array literal object
                                     var arrayLiteral = new ArrayLiteral(node.Context)
-                                        {
-                                            Elements = node.Arguments
-                                        };
+                                    {
+                                        Elements = node.Arguments
+                                    };
 
                                     // replace ourself within our parent
                                     if (node.Parent.ReplaceChild(node, arrayLiteral))
@@ -1757,13 +1783,13 @@ namespace Microsoft.Ajax.Utilities
                             if (node.Arguments.Count == 1)
                             {
                                 // must be a constant wrapper
-                                ConstantWrapper argConstant = node.Arguments[0] as ConstantWrapper;
+                                var argConstant = node.Arguments[0] as ConstantWrapper;
                                 if (argConstant != null)
                                 {
-                                    string resourceName = argConstant.Value.ToString();
+                                    var resourceName = argConstant.Value.ToString();
 
                                     // get the localized string from the resources object
-                                    ConstantWrapper resourceLiteral = new ConstantWrapper(
+                                    var resourceLiteral = new ConstantWrapper(
                                         resourceStrings[resourceName],
                                         PrimitiveType.String,
                                         node.Context);
@@ -1774,13 +1800,10 @@ namespace Microsoft.Ajax.Utilities
                                     resourceLiteral.Accept(this);
                                     return;
                                 }
-                                else
-                                {
-                                    // error! must be a constant
-                                    node.Context.HandleError(
-                                        JSError.ResourceReferenceMustBeConstant,
-                                        true);
-                                }
+                                // error! must be a constant
+                                node.Context.HandleError(
+                                    JSError.ResourceReferenceMustBeConstant,
+                                    true);
                             }
                             else
                             {
@@ -1804,7 +1827,7 @@ namespace Microsoft.Ajax.Utilities
                 if (node.InBrackets && node.Arguments != null)
                 {
                     // see if there is a single, constant argument
-                    string argText = node.Arguments.SingleConstantArgument;
+                    var argText = node.Arguments.SingleConstantArgument;
                     if (argText != null)
                     {
                         // see if we want to replace the name
@@ -1819,45 +1842,45 @@ namespace Microsoft.Ajax.Utilities
                             // a new constant wrapper. Otherwise we'll just replace the operator with a new constant wrapper.
                             if (m_parser.Settings.IsModificationAllowed(TreeModifications.BracketMemberToDotMember)
                                 && JSScanner.IsSafeIdentifier(newName)
-                                && !JSScanner.IsKeyword(newName, (node.EnclosingScope ?? m_parser.GlobalScope).UseStrict))
+                                &&
+                                !JSScanner.IsKeyword(newName, (node.EnclosingScope ?? m_parser.GlobalScope).UseStrict))
                             {
                                 // the new name is safe to convert to a member-dot operator.
                                 // but we don't want to convert the node to the NEW name, because we still need to Analyze the
                                 // new member node -- and it might convert the new name to something else. So instead we're
                                 // just going to convert this existing string to a member node WITH THE OLD STRING, 
                                 // and THEN analyze it (which will convert the old string to newName)
-                                Member replacementMember = new Member(node.Context)
-                                    {
-                                        Root = node.Function,
-                                        Name = argText,
-                                        NameContext = node.Arguments[0].Context
-                                    };
+                                var replacementMember = new Member(node.Context)
+                                {
+                                    Root = node.Function,
+                                    Name = argText,
+                                    NameContext = node.Arguments[0].Context
+                                };
                                 node.Parent.ReplaceChild(node, replacementMember);
 
                                 // this analyze call will convert the old-name member to the newName value
                                 replacementMember.Accept(this);
                                 return;
                             }
-                            else
-                            {
-                                // nope; can't convert to a dot-operator. 
-                                // we're just going to replace the first argument with a new string literal
-                                // and continue along our merry way.
-                                node.Arguments[0] = new ConstantWrapper(newName, PrimitiveType.String, node.Arguments[0].Context);
-                            }
+                            // nope; can't convert to a dot-operator. 
+                            // we're just going to replace the first argument with a new string literal
+                            // and continue along our merry way.
+                            node.Arguments[0] = new ConstantWrapper(newName, PrimitiveType.String,
+                                node.Arguments[0].Context);
                         }
                         else if (m_parser.Settings.IsModificationAllowed(TreeModifications.BracketMemberToDotMember)
-                            && JSScanner.IsSafeIdentifier(argText)
-                            && !JSScanner.IsKeyword(argText, (node.EnclosingScope ?? m_parser.GlobalScope).UseStrict))
+                                 && JSScanner.IsSafeIdentifier(argText)
+                                 &&
+                                 !JSScanner.IsKeyword(argText, (node.EnclosingScope ?? m_parser.GlobalScope).UseStrict))
                         {
                             // not a replacement, but the string literal is a safe identifier. So we will
                             // replace this call node with a Member-dot operation
-                            Member replacementMember = new Member(node.Context)
-                                {
-                                    Root = node.Function,
-                                    Name = argText,
-                                    NameContext = node.Arguments[0].Context
-                                };
+                            var replacementMember = new Member(node.Context)
+                            {
+                                Root = node.Function,
+                                Name = argText,
+                                NameContext = node.Arguments[0].Context
+                            };
                             node.Parent.ReplaceChild(node, replacementMember);
                             replacementMember.Accept(this);
                             return;
@@ -1880,9 +1903,9 @@ namespace Microsoft.Ajax.Utilities
                         // are stripping debug namespaces. Replace the new-operator with an 
                         // empty object literal.
                         node.Parent.ReplaceChild(node, new ObjectLiteral(node.Context)
-                            {
-                                IsDebugOnly = true
-                            });
+                        {
+                            IsDebugOnly = true
+                        });
                     }
                 }
                 else
@@ -1914,7 +1937,7 @@ namespace Microsoft.Ajax.Utilities
                     }
                     else
                     {
-                        CallNode callNode = node.Function as CallNode;
+                        var callNode = node.Function as CallNode;
                         if (callNode != null
                             && callNode.InBrackets
                             && callNode.Function.IsWindowLookup
@@ -1938,7 +1961,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(ClassNode node)
         {
             if (node != null)
@@ -1973,8 +1996,8 @@ namespace Microsoft.Ajax.Utilities
                     {
                         string functionName;
                         var functionObject = element as FunctionObject;
-                        if (functionObject != null 
-                            && functionObject.Binding != null 
+                        if (functionObject != null
+                            && functionObject.Binding != null
                             && !(functionName = functionObject.Binding.Name).IsNullOrWhiteSpace())
                         {
                             var errorContext = functionObject.Binding.Context ?? functionObject.Context;
@@ -1987,7 +2010,8 @@ namespace Microsoft.Ajax.Utilities
                                 errorContext.HandleError(JSError.DuplicateClassElementName, true);
                             }
 
-                            if (functionObject.FunctionType == FunctionType.Getter || functionObject.FunctionType == FunctionType.Setter)
+                            if (functionObject.FunctionType == FunctionType.Getter ||
+                                functionObject.FunctionType == FunctionType.Setter)
                             {
                                 // make sure there's no method with this name
                                 if (nameHash.Contains(ClassElementKeyName(FunctionType.Method, functionName)))
@@ -2073,9 +2097,9 @@ namespace Microsoft.Ajax.Utilities
                 if (node.FalseExpression == null || node.FalseExpression.IsDebugOnly)
                 {
                     node.Parent.ReplaceChild(node, new ConstantWrapper(null, PrimitiveType.Null, node.Context)
-                        {
-                            IsDebugOnly = true
-                        });
+                    {
+                        IsDebugOnly = true
+                    });
                 }
                 else
                 {
@@ -2115,20 +2139,20 @@ namespace Microsoft.Ajax.Utilities
 
                             // transform: cond?lhs=expr1:lhs=expr2 to lhs=cond?expr1:expr2s
                             var binaryOp = new BinaryOperator(node.Context)
+                            {
+                                Operand1 = trueAssign.Operand1,
+                                Operand2 = new Conditional(node.Context)
                                 {
-                                    Operand1 = trueAssign.Operand1,
-                                    Operand2 = new Conditional(node.Context)
-                                    {
-                                        Condition = node.Condition,
-                                        QuestionContext = node.QuestionContext,
-                                        TrueExpression = trueAssign.Operand2,
-                                        ColonContext = node.ColonContext,
-                                        FalseExpression = falseAssign.Operand2
-                                    },
-                                    OperatorContext = trueAssign.OperatorContext,
-                                    OperatorToken = trueAssign.OperatorToken,
-                                    TerminatingContext = node.TerminatingContext
-                                };
+                                    Condition = node.Condition,
+                                    QuestionContext = node.QuestionContext,
+                                    TrueExpression = trueAssign.Operand2,
+                                    ColonContext = node.ColonContext,
+                                    FalseExpression = falseAssign.Operand2
+                                },
+                                OperatorContext = trueAssign.OperatorContext,
+                                OperatorToken = trueAssign.OperatorToken,
+                                TerminatingContext = node.TerminatingContext
+                            };
 
                             node.Parent.ReplaceChild(node, binaryOp);
                         }
@@ -2164,7 +2188,7 @@ namespace Microsoft.Ajax.Utilities
                 // user has explicitly set the flag to throw an error if the string isn't safe, so
                 // let's err on the side of caution. Also check for the closing of a CDATA element.
                 isNotSafe = source.IndexOf("</", StringComparison.Ordinal) >= 0
-                    || source.IndexOf("]]>", StringComparison.Ordinal) >= 0;
+                            || source.IndexOf("]]>", StringComparison.Ordinal) >= 0;
             }
 
             return isNotSafe;
@@ -2187,15 +2211,15 @@ namespace Microsoft.Ajax.Utilities
                 // check to see if this node is an argument to a RegExp constructor.
                 // if it is, we'll want to not use certain string escapes
                 AstNode previousNode = null;
-                AstNode parentNode = node.Parent;
+                var parentNode = node.Parent;
                 while (parentNode != null)
                 {
                     // is this a call node and the previous node was one of the parameters?
-                    CallNode callNode = parentNode as CallNode;
+                    var callNode = parentNode as CallNode;
                     if (callNode != null && previousNode == callNode.Arguments)
                     {
                         // are we calling a simple lookup for "RegExp"?
-                        Lookup lookup = callNode.Function as Lookup;
+                        var lookup = callNode.Function as Lookup;
                         if (lookup != null && lookup.Name == "RegExp")
                         {
                             // we are -- so all string literals passed within this constructor should not use
@@ -2313,7 +2337,8 @@ namespace Microsoft.Ajax.Utilities
                             }
                         }
                     }
-                    else if (node.Count == 1 && (node[0] is Declaration || node[0] is FunctionObject || node[0] is ClassNode))
+                    else if (node.Count == 1 &&
+                             (node[0] is Declaration || node[0] is FunctionObject || node[0] is ClassNode))
                     {
                         // we are explicitly exporting function or class names or declarations (var/let/const)
                         // make sure we don't rename them
@@ -2331,7 +2356,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(ForNode node)
         {
             if (node != null)
@@ -2475,15 +2500,15 @@ namespace Microsoft.Ajax.Utilities
                     else
                     {
                         node.Collection = new ObjectLiteral(node.Collection.Context)
-                            {
-                                IsDebugOnly = true
-                            };
+                        {
+                            IsDebugOnly = true
+                        };
                     }
                 }
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(FunctionObject node)
         {
             if (node != null)
@@ -2522,19 +2547,20 @@ namespace Microsoft.Ajax.Utilities
                 if (node.FunctionType == FunctionType.Setter
                     && (node.ParameterDeclarations == null || node.ParameterDeclarations.Count != 1))
                 {
-                    (node.ParameterDeclarations.IfNotNull(p => p.Context) ?? node.Context).HandleError(JSError.SetterMustHaveOneParameter, true);
+                    (node.ParameterDeclarations.IfNotNull(p => p.Context) ?? node.Context).HandleError(
+                        JSError.SetterMustHaveOneParameter, true);
                 }
                 else if (node.ParameterDeclarations.IfNotNull(p => p.Count > 1))
                 {
                     // more than one parameter. Make sure there are no rest parameters BEFORE the last parameter
                     var lastParameterIndex = node.ParameterDeclarations.Count - 1;
                     node.ParameterDeclarations.ForEach<ParameterDeclaration>(paramDecl =>
+                    {
+                        if (paramDecl.Position != lastParameterIndex && paramDecl.HasRest)
                         {
-                            if (paramDecl.Position != lastParameterIndex && paramDecl.HasRest)
-                            {
-                                paramDecl.Context.HandleError(JSError.RestParameterNotLast, true);
-                            }
-                        });
+                            paramDecl.Context.HandleError(JSError.RestParameterNotLast, true);
+                        }
+                    });
                 }
 
                 if (node.ParameterDeclarations != null && node.ParameterDeclarations.Count > 0)
@@ -2587,7 +2613,9 @@ namespace Microsoft.Ajax.Utilities
                     // recursed, so walk backwards from the end of the parameters list
                     // and flag/remove any parameters that are not referenced until we hit the first one that is.
                     var removeIfUnreferenced = m_parser.Settings.RemoveUnneededCode
-                        && m_parser.Settings.IsModificationAllowed(TreeModifications.RemoveUnusedParameters);
+                                               &&
+                                               m_parser.Settings.IsModificationAllowed(
+                                                   TreeModifications.RemoveUnusedParameters);
                     var foundLastReference = false;
                     for (var ndx = node.ParameterDeclarations.Count - 1; ndx >= 0; --ndx)
                     {
@@ -2634,7 +2662,8 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        private static bool CheckParametersAreReferenced(AstNode binding, bool removeIfUnreferenced, bool foundLastReference)
+        private static bool CheckParametersAreReferenced(AstNode binding, bool removeIfUnreferenced,
+            bool foundLastReference)
         {
             var isUnreferenced = false;
 
@@ -2721,11 +2750,12 @@ namespace Microsoft.Ajax.Utilities
             }
             else if ((objectLiteral = binding as ObjectLiteral) != null)
             {
-                objectLiteral.Properties.ForEach<ObjectLiteralProperty>(property => TrimTrailingElisionsFromArrayBindings(property.Value));
+                objectLiteral.Properties.ForEach<ObjectLiteralProperty>(
+                    property => TrimTrailingElisionsFromArrayBindings(property.Value));
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(IfNode node)
         {
             if (node != null)
@@ -2768,21 +2798,21 @@ namespace Microsoft.Ajax.Utilities
                             // applying a logical-not makes the condition smaller -- reverse the branches
                             logicalNot.Apply();
                             conditional = new Conditional(node.Context)
-                                {
-                                    Condition = node.Condition,
-                                    TrueExpression = node.FalseBlock[0],
-                                    FalseExpression = node.TrueBlock[0]
-                                };
+                            {
+                                Condition = node.Condition,
+                                TrueExpression = node.FalseBlock[0],
+                                FalseExpression = node.TrueBlock[0]
+                            };
                         }
                         else
                         {
                             // regular order
                             conditional = new Conditional(node.Context)
-                                {
-                                    Condition = node.Condition,
-                                    TrueExpression = node.TrueBlock[0],
-                                    FalseExpression = node.FalseBlock[0]
-                                };
+                            {
+                                Condition = node.Condition,
+                                TrueExpression = node.TrueBlock[0],
+                                FalseExpression = node.FalseBlock[0]
+                            };
                         }
 
                         node.Parent.ReplaceChild(
@@ -2815,18 +2845,18 @@ namespace Microsoft.Ajax.Utilities
                                 {
                                     // transform: if(cond)return expr1;else return expr2 to return cond?expr1:expr2
                                     var conditional = new Conditional(node.Condition.Context.FlattenToStart())
-                                        {
-                                            Condition = node.Condition,
-                                            TrueExpression = trueReturn.Operand,
-                                            FalseExpression = falseReturn.Operand
-                                        };
+                                    {
+                                        Condition = node.Condition,
+                                        TrueExpression = trueReturn.Operand,
+                                        FalseExpression = falseReturn.Operand
+                                    };
 
                                     // create a new return node from the conditional and replace
                                     // our if-node with it
                                     var returnNode = new ReturnNode(node.Context)
-                                        {
-                                            Operand = conditional
-                                        };
+                                    {
+                                        Operand = conditional
+                                    };
 
                                     node.Parent.ReplaceChild(
                                         node,
@@ -2860,11 +2890,11 @@ namespace Microsoft.Ajax.Utilities
                         }
 
                         var binaryOp = new BinaryOperator(node.Context)
-                            {
-                                Operand1 = node.Condition,
-                                Operand2 = node.FalseBlock[0],
-                                OperatorToken = newOperator,
-                            };
+                        {
+                            Operand1 = node.Condition,
+                            Operand2 = node.FalseBlock[0],
+                            OperatorToken = newOperator,
+                        };
 
                         // we don't need to analyse this new node because we've already analyzed
                         // the pieces parts as part of the if. And this visitor's method for the BinaryOperator
@@ -2872,7 +2902,9 @@ namespace Microsoft.Ajax.Utilities
                         // new node
                         node.Parent.ReplaceChild(node, binaryOp);
                     }
-                    else if (m_parser.Settings.IsModificationAllowed(TreeModifications.IfConditionFalseToIfNotConditionTrue))
+                    else if (
+                        m_parser.Settings.IsModificationAllowed(
+                            TreeModifications.IfConditionFalseToIfNotConditionTrue))
                     {
                         // logical-not the condition
                         // if(cond);else stmt ==> if(!cond)stmt
@@ -2933,11 +2965,11 @@ namespace Microsoft.Ajax.Utilities
                         // change the first if-statement's condition to be cond1&&cond2
                         // move the nested if-statement's true block to the outer if-statement
                         node.Condition = new BinaryOperator(node.Condition.Context.FlattenToStart())
-                            {
-                                Operand1 = node.Condition,
-                                Operand2 = nestedIf.Condition,
-                                OperatorToken = JSToken.LogicalAnd
-                            };
+                        {
+                            Operand1 = node.Condition,
+                            Operand2 = nestedIf.Condition,
+                            OperatorToken = JSToken.LogicalAnd
+                        };
                         node.TrueBlock = nestedIf.TrueBlock;
                     }
                 }
@@ -2961,11 +2993,11 @@ namespace Microsoft.Ajax.Utilities
             // because the true block is an expression, we know it must only have
             // ONE statement in it, so we can just dereference it directly.
             var binaryOp = new BinaryOperator(ifNode.Context)
-                {
-                    Operand1 = ifNode.Condition,
-                    Operand2 = expression,
-                    OperatorToken = newOperator,
-                };
+            {
+                Operand1 = ifNode.Condition,
+                Operand2 = expression,
+                OperatorToken = newOperator,
+            };
 
             // we don't need to analyse this new node because we've already analyzed
             // the pieces parts as part of the if. And this visitor's method for the BinaryOperator
@@ -3035,7 +3067,7 @@ namespace Microsoft.Ajax.Utilities
                         }
                     }
                     else if (m_parser.Settings.LocalRenaming != LocalRenaming.KeepAll
-                        && m_parser.Settings.IsModificationAllowed(TreeModifications.LocalRenaming))
+                             && m_parser.Settings.IsModificationAllowed(TreeModifications.LocalRenaming))
                     {
                         // it was either referenced or we don't want to get rid of unused labels,
                         // but we DO want to minify them. set the minified value.
@@ -3055,14 +3087,14 @@ namespace Microsoft.Ajax.Utilities
                 if (node.Parent is CallNode)
                 {
                     node.RefType = (
-                      ((CallNode)(node.Parent)).IsConstructor
-                      ? ReferenceType.Constructor
-                      : ReferenceType.Function
-                      );
+                        ((CallNode) (node.Parent)).IsConstructor
+                            ? ReferenceType.Constructor
+                            : ReferenceType.Function
+                        );
                 }
 
                 // check the name of the variable for reserved words that aren't allowed
-                ActivationObject scope = m_scopeStack.Peek();
+                var scope = m_scopeStack.Peek();
                 if (JSScanner.IsKeyword(node.Name, scope.UseStrict)
                     && node.VariableField.IfNotNull(v => v.FieldType != FieldType.Super))
                 {
@@ -3080,17 +3112,19 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // don't analyze the new ConstantWrapper -- we don't want it to take part in the
                         // duplicate constant combination logic should it be turned on.
-                        node.Parent.ReplaceChild(node, new ConstantWrapper(double.NaN, PrimitiveType.Number, node.Context));
+                        node.Parent.ReplaceChild(node,
+                            new ConstantWrapper(double.NaN, PrimitiveType.Number, node.Context));
                     }
                     else if (string.CompareOrdinal(node.Name, "Infinity") == 0)
                     {
                         // don't analyze the new ConstantWrapper -- we don't want it to take part in the
                         // duplicate constant combination logic should it be turned on.
-                        node.Parent.ReplaceChild(node, new ConstantWrapper(double.PositiveInfinity, PrimitiveType.Number, node.Context));
+                        node.Parent.ReplaceChild(node,
+                            new ConstantWrapper(double.PositiveInfinity, PrimitiveType.Number, node.Context));
                     }
-                    else if (m_lookForDebugNamespaces 
-                        && parentIsMember 
-                        && string.CompareOrdinal(node.Name, "window") == 0)
+                    else if (m_lookForDebugNamespaces
+                             && parentIsMember
+                             && string.CompareOrdinal(node.Name, "window") == 0)
                     {
                         // this is a lookup for the global window object. Might be the start of a debug namespace.
                         // leave the index at zero, because we haven't matched anything yet.
@@ -3116,7 +3150,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(Member node)
         {
             if (node != null)
@@ -3144,7 +3178,7 @@ namespace Microsoft.Ajax.Utilities
                             // if this member name is a string on the object, we'll replacve it with
                             // the literal. Otherwise we'll replace it with an empty string.
                             // see if the string resource contains this value
-                            ConstantWrapper stringLiteral = new ConstantWrapper(
+                            var stringLiteral = new ConstantWrapper(
                                 resourceStrings[node.Name] ?? string.Empty,
                                 PrimitiveType.String,
                                 node.Context);
@@ -3163,7 +3197,7 @@ namespace Microsoft.Ajax.Utilities
                     && m_parser.Settings.IsModificationAllowed(TreeModifications.PropertyRenaming))
                 {
                     // see if this name is a target for replacement
-                    string newName = m_parser.Settings.GetNewName(node.Name);
+                    var newName = m_parser.Settings.GetNewName(node.Name);
                     if (!string.IsNullOrEmpty(newName))
                     {
                         // it is -- set the name to the new name
@@ -3267,7 +3301,7 @@ namespace Microsoft.Ajax.Utilities
                         m_possibleDebugNamespace = false;
                         return true;
                     }
-                    else if (parentIsMember)
+                    if (parentIsMember)
                     {
                         // otherwise add it to the list so we will keep looking when we go up a
                         // level to the next member operator
@@ -3287,7 +3321,7 @@ namespace Microsoft.Ajax.Utilities
             return false;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(ObjectLiteral node)
         {
             if (node != null)
@@ -3299,27 +3333,28 @@ namespace Microsoft.Ajax.Utilities
                 if (m_parser.Settings.LocalRenaming != LocalRenaming.KeepAll)
                 {
                     node.Properties.ForEach<ObjectLiteralProperty>(property =>
+                    {
+                        if (property.Name == null)
                         {
-                            if (property.Name == null)
+                            // implicit object property name! if we change the variable name,
+                            // we will pick up the WRONG property name!
+                            // the value should be a binding identifier or a lookup, should be a valid identifier,
+                            // and not be in the "norename" list
+                            var propertyName = property.Value.ToString();
+                            if (JSScanner.IsValidIdentifier(propertyName) && !m_noRename.Contains(propertyName))
                             {
-                                // implicit object property name! if we change the variable name,
-                                // we will pick up the WRONG property name!
-                                // the value should be a binding identifier or a lookup, should be a valid identifier,
-                                // and not be in the "norename" list
-                                var propertyName = property.Value.ToString();
-                                if (JSScanner.IsValidIdentifier(propertyName) && !m_noRename.Contains(propertyName))
+                                if (FieldCanBeRenamed(property.Value))
                                 {
-                                    if (FieldCanBeRenamed(property.Value))
+                                    // it can be renamed. Let's add a property name now to lock the name down
+                                    property.Name = new ObjectLiteralField(propertyName, PrimitiveType.String,
+                                        property.Value.Context)
                                     {
-                                        // it can be renamed. Let's add a property name now to lock the name down
-                                        property.Name = new ObjectLiteralField(propertyName, PrimitiveType.String, property.Value.Context)
-                                        {
-                                            IsIdentifier = true
-                                        };
-                                    }
+                                        IsIdentifier = true
+                                    };
                                 }
                             }
-                        });
+                        }
+                    });
                 }
 
                 if (m_scopeStack.Peek().UseStrict)
@@ -3329,60 +3364,62 @@ namespace Microsoft.Ajax.Utilities
                     // use a map to remember which ones we already have and of what type.
                     var nameMap = new Dictionary<string, string>();
                     node.Properties.ForEach<ObjectLiteralProperty>(property =>
+                    {
+                        var propertyType = GetPropertyType(property.Value as FunctionObject);
+
+                        // key name is the name plus the type. Can't just use the name because 
+                        // get and set will both have the same name (but different types)
+                        var keyName = (property.Name ?? property.Value) + propertyType;
+
+                        string mappedType;
+                        if (propertyType == "data")
                         {
-                            var propertyType = GetPropertyType(property.Value as FunctionObject);
-
-                            // key name is the name plus the type. Can't just use the name because 
-                            // get and set will both have the same name (but different types)
-                            var keyName = (property.Name ?? property.Value) + propertyType;
-
-                            string mappedType;
-                            if (propertyType == "data")
+                            // can't have another data, get, or set
+                            if (nameMap.TryGetValue(keyName, out mappedType)
+                                || nameMap.TryGetValue((property.Name ?? property.Value) + "get", out mappedType)
+                                || nameMap.TryGetValue((property.Name ?? property.Value) + "set", out mappedType))
                             {
-                                // can't have another data, get, or set
-                                if (nameMap.TryGetValue(keyName, out mappedType)
-                                    || nameMap.TryGetValue((property.Name ?? property.Value) + "get", out mappedType)
-                                    || nameMap.TryGetValue((property.Name ?? property.Value) + "set", out mappedType))
-                                {
-                                    // throw the error
-                                    (property.Name ?? property.Value).Context.HandleError(JSError.StrictModeDuplicateProperty, true);
+                                // throw the error
+                                (property.Name ?? property.Value).Context.HandleError(
+                                    JSError.StrictModeDuplicateProperty, true);
 
-                                    // if the mapped type isn't data, then we can add this data name/type to the map
-                                    // because that means the first tryget failed and we don't have a data already
-                                    if (mappedType != propertyType)
-                                    {
-                                        nameMap.Add(keyName, propertyType);
-                                    }
-                                }
-                                else
+                                // if the mapped type isn't data, then we can add this data name/type to the map
+                                // because that means the first tryget failed and we don't have a data already
+                                if (mappedType != propertyType)
                                 {
-                                    // not in the map at all. Add it now.
                                     nameMap.Add(keyName, propertyType);
                                 }
                             }
                             else
                             {
-                                // get can have a set, but can't have a data or another get
-                                // set can have a get, but can't have a data or another set
-                                if (nameMap.TryGetValue(keyName, out mappedType)
-                                    || nameMap.TryGetValue((property.Name ?? property.Value) + "data", out mappedType))
-                                {
-                                    // throw the error
-                                    (property.Name ?? property.Value).Context.HandleError(JSError.StrictModeDuplicateProperty, true);
+                                // not in the map at all. Add it now.
+                                nameMap.Add(keyName, propertyType);
+                            }
+                        }
+                        else
+                        {
+                            // get can have a set, but can't have a data or another get
+                            // set can have a get, but can't have a data or another set
+                            if (nameMap.TryGetValue(keyName, out mappedType)
+                                || nameMap.TryGetValue((property.Name ?? property.Value) + "data", out mappedType))
+                            {
+                                // throw the error
+                                (property.Name ?? property.Value).Context.HandleError(
+                                    JSError.StrictModeDuplicateProperty, true);
 
-                                    // if the mapped type isn't data, then we can add this data name/type to the map
-                                    if (mappedType != propertyType)
-                                    {
-                                        nameMap.Add(keyName, propertyType);
-                                    }
-                                }
-                                else
+                                // if the mapped type isn't data, then we can add this data name/type to the map
+                                if (mappedType != propertyType)
                                 {
-                                    // not in the map at all - add it now
                                     nameMap.Add(keyName, propertyType);
                                 }
                             }
-                        });
+                            else
+                            {
+                                // not in the map at all - add it now
+                                nameMap.Add(keyName, propertyType);
+                            }
+                        }
+                    });
                 }
             }
         }
@@ -3392,7 +3429,9 @@ namespace Microsoft.Ajax.Utilities
             var canBeRenamed = false;
             if (node != null)
             {
-                canBeRenamed = (node as INameDeclaration).IfNotNull(n => !n.RenameNotAllowed && n.VariableField.IfNotNull(v => v.CanCrunch));
+                canBeRenamed =
+                    (node as INameDeclaration).IfNotNull(
+                        n => !n.RenameNotAllowed && n.VariableField.IfNotNull(v => v.CanCrunch));
                 if (!canBeRenamed)
                 {
                     canBeRenamed = (node as INameReference).IfNotNull(n => n.VariableField.IfNotNull(v => v.CanCrunch));
@@ -3410,7 +3449,7 @@ namespace Microsoft.Ajax.Utilities
                     && m_parser.Settings.HasRenamePairs && m_parser.Settings.ManualRenamesProperties
                     && m_parser.Settings.IsModificationAllowed(TreeModifications.PropertyRenaming))
                 {
-                    string newName = m_parser.Settings.GetNewName(node.Value.ToString());
+                    var newName = m_parser.Settings.GetNewName(node.Value.ToString());
                     if (!string.IsNullOrEmpty(newName))
                     {
                         node.Value = newName;
@@ -3438,7 +3477,7 @@ namespace Microsoft.Ajax.Utilities
         private static string GetPropertyType(FunctionObject funcObj)
         {
             // should never be a function declaration....
-            switch(funcObj.IfNotNull(f => f.FunctionType))
+            switch (funcObj.IfNotNull(f => f.FunctionType))
             {
                 case FunctionType.Getter:
                     return "get";
@@ -3464,7 +3503,7 @@ namespace Microsoft.Ajax.Utilities
                     // just try instantiating a Regex object with this string.
                     // if it's invalid, it will throw an exception.
                     // we don't need to pass the flags -- we're just interested in the pattern
-                    Regex re = new Regex(node.Pattern, RegexOptions.ECMAScript);
+                    var re = new Regex(node.Pattern, RegexOptions.ECMAScript);
 
                     // basically we have this test here so the re variable is referenced
                     // and FxCop won't throw an error. There really aren't any cases where
@@ -3474,7 +3513,7 @@ namespace Microsoft.Ajax.Utilities
                         node.Context.HandleError(JSError.RegExpSyntax, true);
                     }
                 }
-                catch (System.ArgumentException e)
+                catch (ArgumentException e)
                 {
                     Debug.WriteLine(e.ToString());
                     node.Context.HandleError(JSError.RegExpSyntax, true);
@@ -3489,7 +3528,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 // first we want to make sure that we are indeed within a function scope.
                 // it makes no sense to have a return outside of a function
-                ActivationObject scope = m_scopeStack.Peek();
+                var scope = m_scopeStack.Peek();
                 while (scope != null && !(scope is FunctionScope))
                 {
                     scope = scope.Parent;
@@ -3541,7 +3580,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(Switch node)
         {
             if (node != null)
@@ -3563,7 +3602,8 @@ namespace Microsoft.Ajax.Utilities
                         if (varDecl != null)
                         {
                             // report the error (lex/const collides with var) or warning (funcdecl collides with var)
-                            varDecl.Context.HandleError(JSError.DuplicateLexicalDeclaration, lexDecl is LexicalDeclaration);
+                            varDecl.Context.HandleError(JSError.DuplicateLexicalDeclaration,
+                                lexDecl is LexicalDeclaration);
 
                             // mark them both a no-rename to preserve the collision
                             varDecl.VariableField.IfNotNull(v => v.CanCrunch = false);
@@ -3577,8 +3617,8 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // because we are looking at breaks, we need to know if this
                     // switch statement is labeled
-                    string thisLabel = string.Empty;
-                    LabeledStatement label = node.Parent as LabeledStatement;
+                    var thisLabel = string.Empty;
+                    var label = node.Parent as LabeledStatement;
                     if (label != null)
                     {
                         thisLabel = label.Label;
@@ -3587,12 +3627,12 @@ namespace Microsoft.Ajax.Utilities
                     // loop through all the cases, looking for the default.
                     // then, if it's empty (or just doesn't do anything), we can
                     // get rid of it altogether
-                    int defaultCase = -1;
-                    bool eliminateDefault = false;
-                    for (int ndx = 0; ndx < node.Cases.Count; ++ndx)
+                    var defaultCase = -1;
+                    var eliminateDefault = false;
+                    for (var ndx = 0; ndx < node.Cases.Count; ++ndx)
                     {
                         // it should always be a switch case, but just in case...
-                        SwitchCase switchCase = node.Cases[ndx] as SwitchCase;
+                        var switchCase = node.Cases[ndx] as SwitchCase;
                         if (switchCase != null)
                         {
                             if (switchCase.IsDefault)
@@ -3617,12 +3657,12 @@ namespace Microsoft.Ajax.Utilities
                                 if (switchCase.Statements.Count == 1)
                                 {
                                     // see if it's a break
-                                    Break lastBreak = switchCase.Statements[0] as Break;
+                                    var lastBreak = switchCase.Statements[0] as Break;
 
                                     // if the last statement is not a break,
                                     // OR it has a label and it's not this switch statement...
                                     if (lastBreak == null
-                                      || (lastBreak.Label != null && lastBreak.Label != thisLabel))
+                                        || (lastBreak.Label != null && lastBreak.Label != thisLabel))
                                     {
                                         // set the flag back to false to indicate that we need to keep it.
                                         eliminateDefault = false;
@@ -3659,16 +3699,16 @@ namespace Microsoft.Ajax.Utilities
                         // when we delete a case statement, we set this flag to true.
                         // when we hit a non-empty case statement, we set the flag to false.
                         // if we hit an empty case statement when this flag is true, we can delete this case, too.
-                        bool emptyStatements = true;
+                        var emptyStatements = true;
                         Break deletedBreak = null;
 
                         // walk the tree backwards because we don't know how many we will
                         // be deleting, and if we go backwards, we won't have to adjust the 
                         // index as we go.
-                        for (int ndx = node.Cases.Count - 1; ndx >= 0; --ndx)
+                        for (var ndx = node.Cases.Count - 1; ndx >= 0; --ndx)
                         {
                             // should always be a switch case
-                            SwitchCase switchCase = node.Cases[ndx] as SwitchCase;
+                            var switchCase = node.Cases[ndx] as SwitchCase;
                             if (switchCase != null)
                             {
                                 // if the block is empty and the last block was empty, we can delete this case.
@@ -3682,7 +3722,9 @@ namespace Microsoft.Ajax.Utilities
                                 else
                                 {
                                     // onlyBreak will be set to null if this block is not a single-statement break block
-                                    Break onlyBreak = (switchCase.Statements.Count == 1 ? switchCase.Statements[0] as Break : null);
+                                    var onlyBreak = (switchCase.Statements.Count == 1
+                                        ? switchCase.Statements[0] as Break
+                                        : null);
                                     if (onlyBreak != null)
                                     {
                                         // we'll only delete this case if the break either doesn't have a label
@@ -3717,9 +3759,9 @@ namespace Microsoft.Ajax.Utilities
                                         {
                                             // we'll need to append the deleted break statement if it doesn't already have
                                             // a flow-changing statement: break, continue, return, or throw
-                                            AstNode lastStatement = switchCase.Statements[switchCase.Statements.Count - 1];
+                                            var lastStatement = switchCase.Statements[switchCase.Statements.Count - 1];
                                             if (!(lastStatement is Break) && !(lastStatement is ContinueNode)
-                                              && !(lastStatement is ReturnNode) && !(lastStatement is ThrowNode))
+                                                && !(lastStatement is ReturnNode) && !(lastStatement is ThrowNode))
                                             {
                                                 switchCase.Statements.Append(deletedBreak);
                                             }
@@ -3741,16 +3783,16 @@ namespace Microsoft.Ajax.Utilities
                     if (node.Cases.Count > 0
                         && m_parser.Settings.IsModificationAllowed(TreeModifications.RemoveBreakFromLastCaseBlock))
                     {
-                        SwitchCase lastCase = node.Cases[node.Cases.Count - 1] as SwitchCase;
+                        var lastCase = node.Cases[node.Cases.Count - 1] as SwitchCase;
                         if (lastCase != null)
                         {
                             // get the block of statements making up the last case block
-                            Block lastBlock = lastCase.Statements;
+                            var lastBlock = lastCase.Statements;
                             // if the last statement is not a break, then lastBreak will be null
-                            Break lastBreak = (lastBlock.Count > 0 ? lastBlock[lastBlock.Count - 1] as Break : null);
+                            var lastBreak = (lastBlock.Count > 0 ? lastBlock[lastBlock.Count - 1] as Break : null);
                             // if lastBreak is not null and it either has no label, or the label matches this switch statement...
                             if (lastBreak != null
-                              && (lastBreak.Label == null || lastBreak.Label == thisLabel))
+                                && (lastBreak.Label == null || lastBreak.Label == thisLabel))
                             {
                                 // remove the break statement
                                 lastBlock.RemoveLast();
@@ -3805,7 +3847,8 @@ namespace Microsoft.Ajax.Utilities
                             && string.CompareOrdinal(lexDecl.Name, catchDecl.Name) == 0)
                         {
                             // report the error (catchvar collides with lex/const) or warning (catchvar collides with funcdecl)
-                            lexDecl.Context.HandleError(JSError.DuplicateLexicalDeclaration, lexDecl is LexicalDeclaration);
+                            lexDecl.Context.HandleError(JSError.DuplicateLexicalDeclaration,
+                                lexDecl is LexicalDeclaration);
 
                             // link the inner one to the outer one so any renaming stays in sync.
                             if (lexDecl.VariableField != null)
@@ -3836,7 +3879,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(UnaryOperator node)
         {
             if (node != null)
@@ -3855,7 +3898,8 @@ namespace Microsoft.Ajax.Utilities
 
                         case JSToken.TypeOf:
                             // typeof null is "object"
-                            node.Parent.ReplaceChild(node, new ConstantWrapper("object", PrimitiveType.String, node.Context)
+                            node.Parent.ReplaceChild(node,
+                                new ConstantWrapper("object", PrimitiveType.String, node.Context)
                                 {
                                     IsDebugOnly = true
                                 });
@@ -3870,14 +3914,15 @@ namespace Microsoft.Ajax.Utilities
                         case JSToken.Decrement:
                             // ++ and -- result in a number, so just replace with 0
                             node.Parent.ReplaceChild(node, new ConstantWrapper(0, PrimitiveType.Number, node.Context)
-                                {
-                                    IsDebugOnly = true
-                                });
+                            {
+                                IsDebugOnly = true
+                            });
                             break;
 
                         case JSToken.LogicalNot:
                             // !null is true
-                            node.Parent.ReplaceChild(node, new ConstantWrapper(true, PrimitiveType.Boolean, node.Context)
+                            node.Parent.ReplaceChild(node,
+                                new ConstantWrapper(true, PrimitiveType.Boolean, node.Context)
                                 {
                                     IsDebugOnly = true
                                 });
@@ -3886,25 +3931,25 @@ namespace Microsoft.Ajax.Utilities
                         case JSToken.BitwiseNot:
                             // ~null is -1
                             node.Parent.ReplaceChild(node, new ConstantWrapper(-1, PrimitiveType.Number, node.Context)
-                                {
-                                    IsDebugOnly = true
-                                });
+                            {
+                                IsDebugOnly = true
+                            });
                             break;
 
                         case JSToken.Plus:
                             // +null is zero
                             node.Parent.ReplaceChild(node, new ConstantWrapper(0, PrimitiveType.Number, node.Context)
-                                {
-                                    IsDebugOnly = true
-                                });
+                            {
+                                IsDebugOnly = true
+                            });
                             break;
 
                         case JSToken.Minus:
                             // -null is negative zero
                             node.Parent.ReplaceChild(node, new ConstantWrapper(-0, PrimitiveType.Number, node.Context)
-                                {
-                                    IsDebugOnly = true
-                                });
+                            {
+                                IsDebugOnly = true
+                            });
                             break;
 
                         default:
@@ -3947,8 +3992,8 @@ namespace Microsoft.Ajax.Utilities
                                 if (lookup.VariableField == null
                                     || lookup.VariableField.FieldType == FieldType.UndefinedGlobal
                                     || lookup.VariableField.FieldType == FieldType.Arguments
-                                    || (lookup.VariableField.FieldType == FieldType.Predefined 
-                                    && string.CompareOrdinal(lookup.Name, "eval") == 0))
+                                    || (lookup.VariableField.FieldType == FieldType.Predefined
+                                        && string.CompareOrdinal(lookup.Name, "eval") == 0))
                                 {
                                     node.Operand.Context.HandleError(JSError.StrictModeInvalidPreOrPost, true);
                                 }
@@ -4004,16 +4049,18 @@ namespace Microsoft.Ajax.Utilities
                     else
                     {
                         // if the operand is a numeric literal
-                        ConstantWrapper constantWrapper = node.Operand as ConstantWrapper;
+                        var constantWrapper = node.Operand as ConstantWrapper;
                         if (constantWrapper != null && constantWrapper.IsNumericLiteral)
                         {
                             // get the value of the constant. We've already screened it for numeric, so
                             // we don't have to worry about catching any errors
-                            double doubleValue = constantWrapper.ToNumber();
+                            var doubleValue = constantWrapper.ToNumber();
 
                             // if this is a unary minus...
                             if (node.OperatorToken == JSToken.Minus
-                                && m_parser.Settings.IsModificationAllowed(TreeModifications.ApplyUnaryMinusToNumericLiteral))
+                                &&
+                                m_parser.Settings.IsModificationAllowed(
+                                    TreeModifications.ApplyUnaryMinusToNumericLiteral))
                             {
                                 // negate the value
                                 constantWrapper.Value = -doubleValue;
@@ -4028,7 +4075,9 @@ namespace Microsoft.Ajax.Utilities
                                 }
                             }
                             else if (node.OperatorToken == JSToken.Plus
-                                && m_parser.Settings.IsModificationAllowed(TreeModifications.RemoveUnaryPlusOnNumericLiteral))
+                                     &&
+                                     m_parser.Settings.IsModificationAllowed(
+                                         TreeModifications.RemoveUnaryPlusOnNumericLiteral))
                             {
                                 // +NEG is still negative, +POS is still positive, and +0 is still 0.
                                 // so just get rid of the unary operator altogether
@@ -4059,7 +4108,7 @@ namespace Microsoft.Ajax.Utilities
                     // var a=1, a=2 is okay, but var a, a=2 and var a=2, a should both be just var a=2, 
                     // and var a, a should just be var a
                     // only do this for simple binding identifier; leave binding patterns alone
-                    int ndx = 0;
+                    var ndx = 0;
                     while (ndx < node.Count)
                     {
                         var bindingIdentifier = node[ndx].Binding as BindingIdentifier;
@@ -4118,7 +4167,7 @@ namespace Microsoft.Ajax.Utilities
 
                 // if this is a binding pattern and the parent is NOT a for-in loop,
                 // then we MUST have an initializer as per the language syntax!
-                if (node.Initializer == null 
+                if (node.Initializer == null
                     && !(node.Binding is BindingIdentifier)
                     && node.Parent.IfNotNull(p => !(p.Parent is ForIn)))
                 {
@@ -4128,7 +4177,8 @@ namespace Microsoft.Ajax.Utilities
 
                 // if this is a special-case vardecl (var foo/*@cc_on=EXPR@*/), set the flag indicating
                 // we encountered a @cc_on statement if we found one
-                if (node.IsCCSpecialCase && m_parser.Settings.IsModificationAllowed(TreeModifications.RemoveUnnecessaryCCOnStatements))
+                if (node.IsCCSpecialCase &&
+                    m_parser.Settings.IsModificationAllowed(TreeModifications.RemoveUnnecessaryCCOnStatements))
                 {
                     node.UseCCOn = !m_encounteredCCOn;
                     m_encounteredCCOn = true;
@@ -4209,9 +4259,9 @@ namespace Microsoft.Ajax.Utilities
                     else
                     {
                         node.WithObject = new ObjectLiteral(node.WithObject.Context)
-                            {
-                                IsDebugOnly = true
-                            };
+                        {
+                            IsDebugOnly = true
+                        };
                     }
                 }
             }
@@ -4227,14 +4277,14 @@ namespace Microsoft.Ajax.Utilities
             }
 
             return new ObjectLiteral(node.Context)
-                {
-                    IsDebugOnly = true
-                };
+            {
+                IsDebugOnly = true
+            };
         }
 
         private static string GuessAtName(AstNode node)
         {
-            string guess = string.Empty;
+            var guess = string.Empty;
             var parent = node.Parent;
 
             if (parent != null)
@@ -4246,7 +4296,7 @@ namespace Microsoft.Ajax.Utilities
                     parent = parent.Parent;
                 }
 
-                CallNode call = parent as CallNode;
+                var call = parent as CallNode;
                 if (call != null && call.IsConstructor)
                 {
                     // if this function expression is the object of a new, then we want the parent
@@ -4261,7 +4311,7 @@ namespace Microsoft.Ajax.Utilities
 
         private static bool AreAssignmentsInVar(BinaryOperator binaryOp, Var varStatement)
         {
-            bool areAssignmentsInVar = false;
+            var areAssignmentsInVar = false;
 
             if (binaryOp != null)
             {
@@ -4270,7 +4320,7 @@ namespace Microsoft.Ajax.Utilities
                 if (binaryOp.OperatorToken == JSToken.Assign)
                 {
                     // see if the left-hand side is a simple lookup
-                    Lookup lookup = binaryOp.Operand1 as Lookup;
+                    var lookup = binaryOp.Operand1 as Lookup;
                     if (lookup != null)
                     {
                         // it is. see if that variable is in the previous var statement
@@ -4283,14 +4333,15 @@ namespace Microsoft.Ajax.Utilities
                     // left and right operators are assignments to vars defined in the 
                     // var statement
                     areAssignmentsInVar = AreAssignmentsInVar(binaryOp.Operand1 as BinaryOperator, varStatement)
-                        && AreAssignmentsInVar(binaryOp.Operand2 as BinaryOperator, varStatement);
+                                          && AreAssignmentsInVar(binaryOp.Operand2 as BinaryOperator, varStatement);
                 }
             }
 
             return areAssignmentsInVar;
         }
 
-        private static void ConvertAssignmentsToVarDecls(BinaryOperator binaryOp, Declaration declaration, JSParser parser)
+        private static void ConvertAssignmentsToVarDecls(BinaryOperator binaryOp, Declaration declaration,
+            JSParser parser)
         {
             // we've already checked that the tree only contains simple assignments separate by commas,
             // but just in case we'll check for null anyway
@@ -4299,21 +4350,21 @@ namespace Microsoft.Ajax.Utilities
                 if (binaryOp.OperatorToken == JSToken.Assign)
                 {
                     // we've already cleared this as a simple lookup, but run the check just to be sure
-                    Lookup lookup = binaryOp.Operand1 as Lookup;
+                    var lookup = binaryOp.Operand1 as Lookup;
                     if (lookup != null)
                     {
                         var bindingIdentifier = new BindingIdentifier(lookup.Context)
-                                {
-                                    Name = lookup.Name,
-                                    TerminatingContext = lookup.TerminatingContext,
-                                    VariableField = lookup.VariableField
-                                };
+                        {
+                            Name = lookup.Name,
+                            TerminatingContext = lookup.TerminatingContext,
+                            VariableField = lookup.VariableField
+                        };
                         var varDecl = new VariableDeclaration(binaryOp.Context.Clone())
-                            {
-                                Binding = bindingIdentifier,
-                                AssignContext = binaryOp.OperatorContext,
-                                Initializer = binaryOp.Operand2,
-                            };
+                        {
+                            Binding = bindingIdentifier,
+                            AssignContext = binaryOp.OperatorContext,
+                            Initializer = binaryOp.Operand2,
+                        };
                         lookup.VariableField.Declarations.Add(bindingIdentifier);
                         declaration.Append(varDecl);
                     }
@@ -4351,7 +4402,7 @@ namespace Microsoft.Ajax.Utilities
         private static void DeleteNoInits(Var node, int min, string name)
         {
             // walk backwards from the end of the list down to (and including) the minimum index
-            for (int ndx = node.Count - 1; ndx >= min; --ndx)
+            for (var ndx = node.Count - 1; ndx >= min; --ndx)
             {
                 var varDecl = node[ndx];
                 var bindingIdentifier = varDecl.Binding as BindingIdentifier;
@@ -4371,10 +4422,10 @@ namespace Microsoft.Ajax.Utilities
         private static UnaryOperator CreateVoidNode(Context context)
         {
             return new UnaryOperator(context.FlattenToStart())
-                {
-                    Operand = new ConstantWrapper(0.0, PrimitiveType.Number, context),
-                    OperatorToken = JSToken.Void
-                };
+            {
+                Operand = new ConstantWrapper(0.0, PrimitiveType.Number, context),
+                OperatorToken = JSToken.Void
+            };
         }
 
         private static void ValidateIdentifier(bool isStrict, string identifier, Context context, JSError error)
@@ -4385,8 +4436,8 @@ namespace Microsoft.Ajax.Utilities
                 context.HandleError(JSError.KeywordUsedAsIdentifier, true);
             }
             else if (isStrict
-                && (string.CompareOrdinal(identifier, "eval") == 0
-                || string.CompareOrdinal(identifier, "arguments") == 0))
+                     && (string.CompareOrdinal(identifier, "eval") == 0
+                         || string.CompareOrdinal(identifier, "arguments") == 0))
             {
                 // strict mode cannot declare variables named "eval" or "arguments"
                 context.HandleError(error, true);

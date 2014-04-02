@@ -17,7 +17,7 @@
 using System;
 using System.IO;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public interface ISourceMap : IDisposable
     {

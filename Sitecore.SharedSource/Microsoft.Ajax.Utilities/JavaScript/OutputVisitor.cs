@@ -17,17 +17,18 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public class OutputVisitor : IVisitor
     {
-        private TextWriter m_outputStream;
+        private readonly TextWriter m_outputStream;
 
         private char m_lastCharacter;
         private bool m_lastCountOdd;
@@ -43,7 +44,7 @@ namespace Microsoft.Ajax.Utilities
         private int m_lineCount;
 
         // needed when generating map files
-        private Stack<string> m_functionStack = new Stack<string>();
+        private readonly Stack<string> m_functionStack = new Stack<string>();
         private int m_segmentStartLine;
         private int m_segmentStartColumn;
 
@@ -56,11 +57,11 @@ namespace Microsoft.Ajax.Utilities
         private bool m_noIn;
 
         // shortcut so we don't have to keep checking the count
-        private bool m_hasReplacementTokens;
+        private readonly bool m_hasReplacementTokens;
 
-        private CodeSettings m_settings;
+        private readonly CodeSettings m_settings;
 
-        private RequiresSeparatorVisitor m_requiresSeparator;
+        private readonly RequiresSeparatorVisitor m_requiresSeparator;
 
         private OutputVisitor(TextWriter writer, CodeSettings settings)
         {
@@ -86,7 +87,10 @@ namespace Microsoft.Ajax.Utilities
 
                 // if there is a symbol map that we are tracking, tell it that we have ended an output run
                 // and pass it offsets to the last line and column positions.
-                settings.IfNotNull(s => s.SymbolsMap.IfNotNull(m => m.EndOutputRun(outputVisitor.m_lineCount, outputVisitor.m_lineLength)));
+                settings.IfNotNull(
+                    s =>
+                        s.SymbolsMap.IfNotNull(
+                            m => m.EndOutputRun(outputVisitor.m_lineCount, outputVisitor.m_lineLength)));
             }
         }
 
@@ -102,7 +106,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 using (var writer = new StringWriter(CultureInfo.InvariantCulture))
                 {
-                    OutputVisitor.Apply(writer, node, settings);
+                    Apply(writer, node, settings);
                     return writer.ToString();
                 }
             }
@@ -187,8 +191,8 @@ namespace Microsoft.Ajax.Utilities
                 // if that's the case, we're going to put newlines in so it's a little easier
                 // to read in multi-line mode
                 var addNewLines = node.Parent is CommaOperator
-                    && node.Parent.Parent is Block
-                    && m_settings.OutputMode == OutputMode.MultipleLines;
+                                  && node.Parent.Parent is Block
+                                  && m_settings.OutputMode == OutputMode.MultipleLines;
 
                 // output as comma-separated expressions starting with the first one
                 node[0].Accept(this);
@@ -209,7 +213,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // output a comma
                     OutputPossibleLineBreak(',');
-                    MarkSegment(node, null, node[ndx-1].IfNotNull(n => n.TerminatingContext));
+                    MarkSegment(node, null, node[ndx - 1].IfNotNull(n => n.TerminatingContext));
 
                     if (addNewLines)
                     {
@@ -234,7 +238,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public void Visit(BinaryOperator node)
         {
             if (node != null)
@@ -382,10 +386,10 @@ namespace Microsoft.Ajax.Utilities
                                             rightNeedsParens = false;
                                             break;
 
-                                        // TODO: the plus operator: if we can prove that it is a numeric operator
-                                        // or a string operator on BOTH sides, then it can be associative, too. But
-                                        // if one side is a string and the other numeric, or if we can't tell at 
-                                        // compile-time, then we need to preserve the structural precedence.
+                                            // TODO: the plus operator: if we can prove that it is a numeric operator
+                                            // or a string operator on BOTH sides, then it can be associative, too. But
+                                            // if one side is a string and the other numeric, or if we can't tell at 
+                                            // compile-time, then we need to preserve the structural precedence.
                                         default:
                                             // all other operators are structurally a lower precedence when they
                                             // are on the right, so they need to be evaluated first
@@ -439,7 +443,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public void Visit(Block node)
         {
             if (node != null)
@@ -483,7 +487,8 @@ namespace Microsoft.Ajax.Utilities
                     // root block.
                     // we will need a "use strict" directive IF this scope is strict and we
                     // haven't already gone past where we can insert global directive prologues
-                    m_needsStrictDirective = node.EnclosingScope.IfNotNull(s => s.UseStrict) && !m_doneWithGlobalDirectives;
+                    m_needsStrictDirective = node.EnclosingScope.IfNotNull(s => s.UseStrict) &&
+                                             !m_doneWithGlobalDirectives;
                     outputBraces = false;
                 }
 
@@ -621,7 +626,8 @@ namespace Microsoft.Ajax.Utilities
                             // it requires parens so we don't get the precedence all screwed up.
                             // pass in whether or not WE have any arguments -- will make a difference when we have embedded
                             // constructors that don't have arguments
-                            needsParens = NewParensVisitor.NeedsParens(node.Function, node.Arguments == null || node.Arguments.Count == 0);
+                            needsParens = NewParensVisitor.NeedsParens(node.Function,
+                                node.Arguments == null || node.Arguments.Count == 0);
                         }
                         else
                         {
@@ -652,7 +658,8 @@ namespace Microsoft.Ajax.Utilities
                         if (ndx > 0)
                         {
                             OutputPossibleLineBreak(',');
-                            MarkSegment(node.Arguments, null, argument.IfNotNull(a => a.TerminatingContext) ?? node.Arguments.Context);
+                            MarkSegment(node.Arguments, null,
+                                argument.IfNotNull(a => a.TerminatingContext) ?? node.Arguments.Context);
 
                             if (m_settings.OutputMode == OutputMode.MultipleLines)
                             {
@@ -728,7 +735,14 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 // if there are any elements, put the braces on new lines and indent
-                node.Elements.IfNotNull(e => { if (e.Count > 0) { NewLine(); Indent();  } });
+                node.Elements.IfNotNull(e =>
+                {
+                    if (e.Count > 0)
+                    {
+                        NewLine();
+                        Indent();
+                    }
+                });
                 OutputPossibleLineBreak('{');
                 MarkSegment(node, null, node.OpenBrace);
                 SetContextOutputPosition(node.OpenBrace);
@@ -744,7 +758,14 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 // if there are any elements, unindent and put the closing braces on a new line
-                node.Elements.IfNotNull(e => { if (e.Count > 0) { Unindent();  NewLine(); } });
+                node.Elements.IfNotNull(e =>
+                {
+                    if (e.Count > 0)
+                    {
+                        Unindent();
+                        NewLine();
+                    }
+                });
                 OutputPossibleLineBreak('}');
                 MarkSegment(node, null, node.CloseBrace);
                 SetContextOutputPosition(node.CloseBrace);
@@ -860,7 +881,7 @@ namespace Microsoft.Ajax.Utilities
                 if (m_outputCCOn && m_settings.IsModificationAllowed(TreeModifications.RemoveUnnecessaryCCOnStatements))
                 {
                     while (ndx < node.Statements.Count
-                        && node.Statements[ndx] is ConditionalCompilationOn)
+                           && node.Statements[ndx] is ConditionalCompilationOn)
                     {
                         ++ndx;
                     }
@@ -895,7 +916,7 @@ namespace Microsoft.Ajax.Utilities
                     }
 
                     // go through the rest of the statements (if any)
-                    AstNode prevStatement = statement;
+                    var prevStatement = statement;
                     while (++ndx < node.Statements.Count)
                     {
                         statement = node.Statements[ndx];
@@ -928,7 +949,7 @@ namespace Microsoft.Ajax.Utilities
             if (node != null)
             {
                 var symbol = StartSymbol(node);
-                
+
                 Output("@else");
                 MarkSegment(node, null, node.Context);
                 SetContextOutputPosition(node.Context);
@@ -1073,7 +1094,8 @@ namespace Microsoft.Ajax.Utilities
                 if (node.TrueExpression != null)
                 {
                     m_noIn = isNoIn;
-                    AcceptNodeWithParens(node.TrueExpression, node.TrueExpression.Precedence < OperatorPrecedence.Assignment);
+                    AcceptNodeWithParens(node.TrueExpression,
+                        node.TrueExpression.Precedence < OperatorPrecedence.Assignment);
                 }
 
                 if (m_settings.OutputMode == OutputMode.MultipleLines)
@@ -1096,7 +1118,8 @@ namespace Microsoft.Ajax.Utilities
                 if (node.FalseExpression != null)
                 {
                     m_noIn = isNoIn;
-                    AcceptNodeWithParens(node.FalseExpression, node.FalseExpression.Precedence < OperatorPrecedence.Assignment);
+                    AcceptNodeWithParens(node.FalseExpression,
+                        node.FalseExpression.Precedence < OperatorPrecedence.Assignment);
                 }
 
                 m_noIn = isNoIn;
@@ -1126,7 +1149,9 @@ namespace Microsoft.Ajax.Utilities
 
                     case PrimitiveType.Number:
                         if (node.Context == null || !node.Context.HasCode
-                            || (!node.MayHaveIssues && m_settings.IsModificationAllowed(TreeModifications.MinifyNumericLiterals)))
+                            ||
+                            (!node.MayHaveIssues &&
+                             m_settings.IsModificationAllowed(TreeModifications.MinifyNumericLiterals)))
                         {
                             // apply minification to the literal to get it as small as possible
                             Output(NormalizeNumber(node.ToNumber(), node.Context));
@@ -1171,7 +1196,7 @@ namespace Microsoft.Ajax.Utilities
                             Output(ReplaceTokens(node.Context.Code));
                         }
                         else if (node.MayHaveIssues
-                            || (m_settings.AllowEmbeddedAspNetBlocks && node.StringContainsAspNetReplacement))
+                                 || (m_settings.AllowEmbeddedAspNetBlocks && node.StringContainsAspNetReplacement))
                         {
                             // we'd rather show the raw string, but make sure it's safe for inlining
                             Output(InlineSafeString(ReplaceTokens(node.Context.Code)));
@@ -1388,7 +1413,7 @@ namespace Microsoft.Ajax.Utilities
                 node.IsRedundant = node.UseStrict && !m_needsStrictDirective;
                 if (!node.IsRedundant)
                 {
-                    Visit((ConstantWrapper)node);
+                    Visit((ConstantWrapper) node);
                     if (node.UseStrict)
                     {
                         // just output a strict directive -- don't need one anymore
@@ -1452,7 +1477,7 @@ namespace Microsoft.Ajax.Utilities
                     {
                         OutputPossibleLineBreak(' ');
                     }
-                    
+
                     node.Body.Accept(this);
 
                     if (m_settings.OutputMode == OutputMode.MultipleLines)
@@ -1646,7 +1671,7 @@ namespace Microsoft.Ajax.Utilities
 
                 // NEVER do without these semicolons
                 OutputPossibleLineBreak(';');
-                MarkSegment(node, null, node.Separator1Context ?? node.Context); 
+                MarkSegment(node, null, node.Separator1Context ?? node.Context);
                 if (m_settings.OutputMode == OutputMode.MultipleLines)
                 {
                     OutputPossibleLineBreak(' ');
@@ -1743,13 +1768,14 @@ namespace Microsoft.Ajax.Utilities
                     //      2c. we aren't going to remove function expression names
                     // otherwise use the name guess.
                     var hasName = (node.Binding != null && !node.Binding.Name.IsNullOrWhiteSpace())
-                            && (node.FunctionType != FunctionType.Expression
-                                || node.Binding.VariableField.RefCount > 0
-                                || !m_settings.RemoveFunctionExpressionNames
-                                || !m_settings.IsModificationAllowed(TreeModifications.RemoveFunctionExpressionNames));
+                                  && (node.FunctionType != FunctionType.Expression
+                                      || node.Binding.VariableField.RefCount > 0
+                                      || !m_settings.RemoveFunctionExpressionNames
+                                      ||
+                                      !m_settings.IsModificationAllowed(TreeModifications.RemoveFunctionExpressionNames));
                     var fullFunctionName = hasName
-                            ? node.Binding.Name
-                            : node.NameGuess;
+                        ? node.Binding.Name
+                        : node.NameGuess;
 
                     if (node.IsStatic)
                     {
@@ -1758,7 +1784,7 @@ namespace Microsoft.Ajax.Utilities
 
                     OutputFunctionPrefix(node, fullFunctionName);
                     m_startOfStatement = false;
-                    bool isAnonymous = true;
+                    var isAnonymous = true;
                     if (node.Binding != null && !node.Binding.Name.IsNullOrWhiteSpace())
                     {
                         isAnonymous = false;
@@ -1789,7 +1815,7 @@ namespace Microsoft.Ajax.Utilities
 
                     if (m_settings.SymbolsMap != null && isAnonymous)
                     {
-                        BinaryOperator binaryOperator = node.Parent as BinaryOperator;
+                        var binaryOperator = node.Parent as BinaryOperator;
                         if (binaryOperator != null && binaryOperator.Operand1 is Lookup)
                         {
                             m_functionStack.Push("(anonymous) [{0}]".FormatInvariant(binaryOperator.Operand1));
@@ -1814,7 +1840,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     m_functionStack.Pop();
                 }
-           }
+            }
         }
 
         public void Visit(GetterSetter node)
@@ -1854,7 +1880,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public void Visit(IfNode node)
         {
             if (node != null)
@@ -1889,8 +1915,11 @@ namespace Microsoft.Ajax.Utilities
                     OutputPossibleLineBreak(';');
                 }
                 else if (node.TrueBlock.Count == 1
-                    && (node.FalseBlock == null || (!node.TrueBlock.EncloseBlock(EncloseBlockType.IfWithoutElse) && !node.TrueBlock.EncloseBlock(EncloseBlockType.SingleDoWhile)))
-                    && (!m_settings.MacSafariQuirks || !(node.TrueBlock[0] is FunctionObject)))
+                         &&
+                         (node.FalseBlock == null ||
+                          (!node.TrueBlock.EncloseBlock(EncloseBlockType.IfWithoutElse) &&
+                           !node.TrueBlock.EncloseBlock(EncloseBlockType.SingleDoWhile)))
+                         && (!m_settings.MacSafariQuirks || !(node.TrueBlock[0] is FunctionObject)))
                 {
                     // we only have a single statement in the true-branch; normally
                     // we wouldn't wrap that statement in braces. However, if there 
@@ -1985,7 +2014,7 @@ namespace Microsoft.Ajax.Utilities
                 // characters. The important comment, however, may contain some. We don't want to count
                 // the entire comment as a single line, AND we want to normalize the line-feed characters,
                 // so lets process the comment line-by-line
-                var lineFeedChars = new[] { '\n', '\r', '\u2028', '\u2029' };
+                var lineFeedChars = new[] {'\n', '\r', '\u2028', '\u2029'};
                 var startIndex = 0;
                 var firstLF = node.Comment.IndexOfAny(lineFeedChars, startIndex);
                 if (firstLF < 0)
@@ -2282,7 +2311,7 @@ namespace Microsoft.Ajax.Utilities
                 if (node.Root != null)
                 {
                     var constantWrapper = node.Root as ConstantWrapper;
-                    if (constantWrapper != null 
+                    if (constantWrapper != null
                         && (constantWrapper.IsFiniteNumericLiteral || constantWrapper.IsOtherDecimal))
                     {
                         // numeric constant wrapper that isn't NaN or Infinity - get the formatted text version.
@@ -2290,7 +2319,9 @@ namespace Microsoft.Ajax.Utilities
                         string numericText;
                         if (constantWrapper.Context == null
                             || !constantWrapper.Context.HasCode
-                            || (m_settings.IsModificationAllowed(TreeModifications.MinifyNumericLiterals) && !constantWrapper.MayHaveIssues))
+                            ||
+                            (m_settings.IsModificationAllowed(TreeModifications.MinifyNumericLiterals) &&
+                             !constantWrapper.MayHaveIssues))
                         {
                             // apply minification to the literal to get it as small as possible
                             numericText = NormalizeNumber(constantWrapper.ToNumber(), constantWrapper.Context);
@@ -2321,7 +2352,8 @@ namespace Microsoft.Ajax.Utilities
                                 // HOWEVER... octal literals don't need the dot. So if this number starts with zero and
                                 // has more than one digit, we need to check for octal literals and 0xd+ 0bd+ and 0od+ literals,
                                 // because THOSE don't need the extra dot, either. 
-                                bool addDecimalPoint = !numericText.StartsWith("0", StringComparison.Ordinal) || numericText.Length == 1;
+                                var addDecimalPoint = !numericText.StartsWith("0", StringComparison.Ordinal) ||
+                                                      numericText.Length == 1;
                                 if (!addDecimalPoint)
                                 {
                                     // But we might also have a number that just starts with zero and is a regular decimal (like 0009).
@@ -2692,7 +2724,7 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 OutputPossibleLineBreak('{');
-                MarkSegment(node, null, node.BraceContext); 
+                MarkSegment(node, null, node.BraceContext);
                 Indent();
 
                 AstNode prevSwitchCase = null;
@@ -2794,7 +2826,8 @@ namespace Microsoft.Ajax.Utilities
                 // get the text string to output. If we don't want to minify string literals,
                 // then we should also not minify template literals (since they're just special strings)
                 var text = node.Text;
-                if (node.TextContext != null && !m_settings.IsModificationAllowed(TreeModifications.MinifyStringLiterals))
+                if (node.TextContext != null &&
+                    !m_settings.IsModificationAllowed(TreeModifications.MinifyStringLiterals))
                 {
                     // use the raw version of the text source
                     text = node.TextContext.Code;
@@ -2810,10 +2843,7 @@ namespace Microsoft.Ajax.Utilities
 
                 if (node.Expressions != null && node.Expressions.Count > 0)
                 {
-                    node.Expressions.ForEach<TemplateLiteralExpression>(expr =>
-                        {
-                            expr.Accept(this);
-                        });
+                    node.Expressions.ForEach<TemplateLiteralExpression>(expr => { expr.Accept(this); });
                 }
             }
         }
@@ -3059,7 +3089,9 @@ namespace Microsoft.Ajax.Utilities
                         // if we have, we really only need to output one if we had one to begin with AND
                         // we are NOT removing unnecessary ones
                         if (!m_outputCCOn
-                            || (node.UseCCOn && !m_settings.IsModificationAllowed(TreeModifications.RemoveUnnecessaryCCOnStatements)))
+                            ||
+                            (node.UseCCOn &&
+                             !m_settings.IsModificationAllowed(TreeModifications.RemoveUnnecessaryCCOnStatements)))
                         {
                             Output("/*@cc_on=");
                             m_outputCCOn = true;
@@ -3139,7 +3171,9 @@ namespace Microsoft.Ajax.Utilities
                         // sources had one. Otherwise, we only only want to output one if we had one and we aren't
                         // removing unneccesary ones.
                         if (!m_outputCCOn
-                            || (node.ConditionalCommentContainsOn && !m_settings.IsModificationAllowed(TreeModifications.RemoveUnnecessaryCCOnStatements)))
+                            ||
+                            (node.ConditionalCommentContainsOn &&
+                             !m_settings.IsModificationAllowed(TreeModifications.RemoveUnnecessaryCCOnStatements)))
                         {
                             // output it now and set the flag that we have output them
                             Output("/*@cc_on");
@@ -3160,7 +3194,7 @@ namespace Microsoft.Ajax.Utilities
                         Output(OperatorString(node.OperatorToken));
                         MarkSegment(node, null, node.OperatorContext ?? node.Context);
                         SetContextOutputPosition(node.Context);
-                        
+
                         // if this is a yield delegator, output the asterisk
                         if (node.OperatorToken == JSToken.Yield && node.IsDelegator)
                         {
@@ -3251,7 +3285,8 @@ namespace Microsoft.Ajax.Utilities
                 m_noLineBreaks = false;
 
                 // if it ends in a newline, we're still on a newline
-                m_onNewLine = (text[text.Length - 1] == '\n' || text[text.Length - 1] == '\r'); ;
+                m_onNewLine = (text[text.Length - 1] == '\n' || text[text.Length - 1] == '\r');
+                ;
 
                 // now set the "last character" state
                 SetLastCharState(text);
@@ -3318,7 +3353,8 @@ namespace Microsoft.Ajax.Utilities
                         OutputSpaceOrLineBreak();
                     }
                 }
-                else if ((m_lastCharacter == '@' || JSScanner.IsValidIdentifierPart(m_lastCharacter)) && JSScanner.IsValidIdentifierPart(ch))
+                else if ((m_lastCharacter == '@' || JSScanner.IsValidIdentifierPart(m_lastCharacter)) &&
+                         JSScanner.IsValidIdentifierPart(ch))
                 {
                     // either the last character is a valid part of an identifier and the current character is, too;
                     // OR the last part was numeric and the current character is a .
@@ -3352,8 +3388,8 @@ namespace Microsoft.Ajax.Utilities
                     OutputSpaceOrLineBreak();
                 }
             }
-            else if ((m_lastCharacter == '@' || JSScanner.IsValidIdentifierPart(m_lastCharacter)) 
-                && (text[0] == '\\' || JSScanner.StartsWithValidIdentifierPart(text)))
+            else if ((m_lastCharacter == '@' || JSScanner.IsValidIdentifierPart(m_lastCharacter))
+                     && (text[0] == '\\' || JSScanner.StartsWithValidIdentifierPart(text)))
             {
                 // either the last character is a valid part of an identifier and the current character is, too;
                 // OR the last part was numeric and the current character is a .
@@ -3396,7 +3432,7 @@ namespace Microsoft.Ajax.Utilities
             if (!string.IsNullOrEmpty(text))
             {
                 // get the last character
-                char lastChar = text[text.Length - 1];
+                var lastChar = text[text.Length - 1];
 
                 // if it's not a plus or a minus, we don't care
                 if (lastChar == '+' || lastChar == '-')
@@ -3420,7 +3456,7 @@ namespace Microsoft.Ajax.Utilities
                         // account the previous state when we set the current state.
                         // it's a logical XOR -- if the two values are the same, m_lastCountOdd is false;
                         // it they are different, m_lastCountOdd is true.
-                        m_lastCountOdd = (text.Length % 2 == 1) ^ m_lastCountOdd;
+                        m_lastCountOdd = (text.Length%2 == 1) ^ m_lastCountOdd;
                     }
                     else
                     {
@@ -3429,7 +3465,7 @@ namespace Microsoft.Ajax.Utilities
                         // exclusively by the number of characters we found at the end of this string
                         // get the number of same characters ending this string, mod by 2, and if the
                         // result is 1, it's an odd number of characters.
-                        m_lastCountOdd = (text.Length - 1 - ndxDifferent) % 2 == 1;
+                        m_lastCountOdd = (text.Length - 1 - ndxDifferent)%2 == 1;
                     }
                 }
                 else
@@ -3476,7 +3512,7 @@ namespace Microsoft.Ajax.Utilities
                 // save the start of this segment
                 m_segmentStartLine = m_lineCount;
                 m_segmentStartColumn = m_lineLength;
-                
+
                 m_lineLength += WriteToStream(ch);
                 m_onNewLine = false;
                 m_lastCharacter = ch;
@@ -3551,7 +3587,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // the spaces won't get expanded to \u0020, so don't bother going
                     // through the WriteToStream method.
-                    var numSpaces = m_indentLevel * m_settings.IndentSize;
+                    var numSpaces = m_indentLevel*m_settings.IndentSize;
                     m_lineLength = numSpaces;
                     while (numSpaces-- > 0)
                     {
@@ -3602,7 +3638,7 @@ namespace Microsoft.Ajax.Utilities
 
                         // format the current character in \uXXXX, and start the next
                         // run at the NEXT character.
-                        sb.AppendFormat(CultureInfo.InvariantCulture, "\\u{0:x4}".FormatInvariant((int)text[ndx]));
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "\\u{0:x4}".FormatInvariant((int) text[ndx]));
                         runStart = ndx + 1;
                     }
                 }
@@ -3633,73 +3669,122 @@ namespace Microsoft.Ajax.Utilities
             if (m_settings.AlwaysEscapeNonAscii && ch > '\u007f')
             {
                 // expand it to the \uXXXX format, which is six characters
-                m_outputStream.Write("\\u{0:x4}", (int)ch);
+                m_outputStream.Write("\\u{0:x4}", (int) ch);
                 return 6;
             }
-            else
-            {
-                m_outputStream.Write(ch);
-                return 1;
-            }
+            m_outputStream.Write(ch);
+            return 1;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification="Big but simple case statement")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "Big but simple case statement")]
         public static string OperatorString(JSToken token)
         {
             switch (token)
             {
-                case JSToken.Decrement: return "--";
-                case JSToken.Delete: return "delete";
-                case JSToken.Increment: return "++";
-                case JSToken.TypeOf: return "typeof";
-                case JSToken.Void: return "void";
-                case JSToken.LogicalNot: return "!";
-                case JSToken.BitwiseNot: return "~";
-                case JSToken.Minus: return "-";
-                case JSToken.Plus: return "+";
-                case JSToken.Multiply: return "*";
-                case JSToken.BitwiseAnd: return "&";
-                case JSToken.BitwiseOr: return "|";
-                case JSToken.BitwiseXor: return "^";
-                case JSToken.LogicalAnd: return "&&";
-                case JSToken.LogicalOr: return "||";
-                case JSToken.Assign: return "=";
-                case JSToken.BitwiseAndAssign: return "&=";
-                case JSToken.BitwiseOrAssign: return "|=";
-                case JSToken.BitwiseXorAssign: return "^=";
-                case JSToken.Comma: return ",";
-                case JSToken.Equal: return "==";
-                case JSToken.GreaterThan: return ">";
-                case JSToken.GreaterThanEqual: return ">=";
-                case JSToken.In: return "in";
-                case JSToken.InstanceOf: return "instanceof";
-                case JSToken.LeftShift: return "<<";
-                case JSToken.LeftShiftAssign: return "<<=";
-                case JSToken.LessThan: return "<";
-                case JSToken.LessThanEqual: return "<=";
-                case JSToken.MinusAssign: return "-=";
-                case JSToken.Modulo: return "%";
-                case JSToken.ModuloAssign: return "%=";
-                case JSToken.MultiplyAssign: return "*=";
-                case JSToken.NotEqual: return "!=";
-                case JSToken.PlusAssign: return "+=";
-                case JSToken.RightShift: return ">>";
-                case JSToken.RightShiftAssign: return ">>=";
-                case JSToken.StrictEqual: return "===";
-                case JSToken.StrictNotEqual: return "!==";
-                case JSToken.UnsignedRightShift: return ">>>";
-                case JSToken.UnsignedRightShiftAssign: return ">>>=";
-                case JSToken.Divide: return "/";
-                case JSToken.DivideAssign: return "/=";
-                case JSToken.Let: return "let";
-                case JSToken.Const: return "const";
-                case JSToken.ArrowFunction: return "=>";
-                case JSToken.RestSpread: return "...";
-                case JSToken.Yield: return "yield";
-                case JSToken.Get: return "get";
-                case JSToken.Set: return "set";
+                case JSToken.Decrement:
+                    return "--";
+                case JSToken.Delete:
+                    return "delete";
+                case JSToken.Increment:
+                    return "++";
+                case JSToken.TypeOf:
+                    return "typeof";
+                case JSToken.Void:
+                    return "void";
+                case JSToken.LogicalNot:
+                    return "!";
+                case JSToken.BitwiseNot:
+                    return "~";
+                case JSToken.Minus:
+                    return "-";
+                case JSToken.Plus:
+                    return "+";
+                case JSToken.Multiply:
+                    return "*";
+                case JSToken.BitwiseAnd:
+                    return "&";
+                case JSToken.BitwiseOr:
+                    return "|";
+                case JSToken.BitwiseXor:
+                    return "^";
+                case JSToken.LogicalAnd:
+                    return "&&";
+                case JSToken.LogicalOr:
+                    return "||";
+                case JSToken.Assign:
+                    return "=";
+                case JSToken.BitwiseAndAssign:
+                    return "&=";
+                case JSToken.BitwiseOrAssign:
+                    return "|=";
+                case JSToken.BitwiseXorAssign:
+                    return "^=";
+                case JSToken.Comma:
+                    return ",";
+                case JSToken.Equal:
+                    return "==";
+                case JSToken.GreaterThan:
+                    return ">";
+                case JSToken.GreaterThanEqual:
+                    return ">=";
+                case JSToken.In:
+                    return "in";
+                case JSToken.InstanceOf:
+                    return "instanceof";
+                case JSToken.LeftShift:
+                    return "<<";
+                case JSToken.LeftShiftAssign:
+                    return "<<=";
+                case JSToken.LessThan:
+                    return "<";
+                case JSToken.LessThanEqual:
+                    return "<=";
+                case JSToken.MinusAssign:
+                    return "-=";
+                case JSToken.Modulo:
+                    return "%";
+                case JSToken.ModuloAssign:
+                    return "%=";
+                case JSToken.MultiplyAssign:
+                    return "*=";
+                case JSToken.NotEqual:
+                    return "!=";
+                case JSToken.PlusAssign:
+                    return "+=";
+                case JSToken.RightShift:
+                    return ">>";
+                case JSToken.RightShiftAssign:
+                    return ">>=";
+                case JSToken.StrictEqual:
+                    return "===";
+                case JSToken.StrictNotEqual:
+                    return "!==";
+                case JSToken.UnsignedRightShift:
+                    return ">>>";
+                case JSToken.UnsignedRightShiftAssign:
+                    return ">>>=";
+                case JSToken.Divide:
+                    return "/";
+                case JSToken.DivideAssign:
+                    return "/=";
+                case JSToken.Let:
+                    return "let";
+                case JSToken.Const:
+                    return "const";
+                case JSToken.ArrowFunction:
+                    return "=>";
+                case JSToken.RestSpread:
+                    return "...";
+                case JSToken.Yield:
+                    return "yield";
+                case JSToken.Get:
+                    return "get";
+                case JSToken.Set:
+                    return "set";
 
-                default: return string.Empty;
+                default:
+                    return string.Empty;
             }
         }
 
@@ -3738,7 +3823,7 @@ namespace Microsoft.Ajax.Utilities
         /// Output everything for a function except the initial keyword
         /// </summary>
         /// <param name="node"></param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void OutputFunctionArgsAndBody(FunctionObject node)
         {
             if (node != null)
@@ -3751,9 +3836,11 @@ namespace Microsoft.Ajax.Utilities
                     // and for arrow functions where there are zero or more than one parameter.
                     // if it IS an arrow function with a single parameter, we still want to wrap the
                     // parameter in parens if it's a rest argument.
-                    var wrapInParens = node.FunctionType != FunctionType.ArrowFunction 
-                        || node.ParameterDeclarations.Count != 1
-                        || (node.ParameterDeclarations[0] as ParameterDeclaration).IfNotNull(d => d.HasRest, true);
+                    var wrapInParens = node.FunctionType != FunctionType.ArrowFunction
+                                       || node.ParameterDeclarations.Count != 1
+                                       ||
+                                       (node.ParameterDeclarations[0] as ParameterDeclaration).IfNotNull(
+                                           d => d.HasRest, true);
 
                     if (wrapInParens)
                     {
@@ -3768,7 +3855,8 @@ namespace Microsoft.Ajax.Utilities
                         if (ndx > 0)
                         {
                             OutputPossibleLineBreak(',');
-                            MarkSegment(node, null, paramDecl.IfNotNull(p => p.TerminatingContext) ?? node.ParameterDeclarations.Context);
+                            MarkSegment(node, null,
+                                paramDecl.IfNotNull(p => p.TerminatingContext) ?? node.ParameterDeclarations.Context);
 
                             if (m_settings.OutputMode == OutputMode.MultipleLines)
                             {
@@ -3819,8 +3907,8 @@ namespace Microsoft.Ajax.Utilities
                     BreakLine(false);
                 }
                 else if (node.FunctionType == FunctionType.ArrowFunction
-                    && node.Body.Count == 1
-                    && node.Body.IsConcise)
+                         && node.Body.Count == 1
+                         && node.Body.IsConcise)
                 {
                     // the arrow function body has only one "statement" and it's not a return.
                     // assume it's a concise expression body and just output it
@@ -3961,7 +4049,7 @@ namespace Microsoft.Ajax.Utilities
                 // name, and we're pulling the GLOBAL properties. Might want to use properties
                 // on the Number object -- which, of course, assumes that Number doesn't
                 // resolve to a local variable...
-                string objectName = double.IsNaN(numericValue) ? "NaN" : "Infinity";
+                var objectName = double.IsNaN(numericValue) ? "NaN" : "Infinity";
 
                 // get the enclosing lexical environment
                 /*var enclosingScope = constant.EnclosingLexicalEnvironment;
@@ -4012,39 +4100,36 @@ namespace Microsoft.Ajax.Utilities
                 // global properties (make a special case for negative infinity)
                 return double.IsNegativeInfinity(numericValue) ? "-Infinity" : objectName;
             }
-            else if (numericValue == 0)
+            if (numericValue == 0)
             {
                 // special case zero because we don't need to go through all those
                 // gyrations to get a "0" -- and because negative zero is different
                 // than a positive zero
-                return 1 / numericValue < 0 ? "-0" : "0";
+                return 1/numericValue < 0 ? "-0" : "0";
             }
-            else
-            {
-                // normal string representations
-                string normal = GetSmallestRep(numericValue.ToStringInvariant("R"));
+            // normal string representations
+            var normal = GetSmallestRep(numericValue.ToStringInvariant("R"));
 
-                // if this is an integer (no decimal portion)....
-                if (Math.Floor(numericValue) == numericValue)
+            // if this is an integer (no decimal portion)....
+            if (Math.Floor(numericValue) == numericValue)
+            {
+                // then convert to hex and see if it's smaller.
+                // only really big numbers might be smaller in hex.
+                var hex = NormalOrHexIfSmaller(numericValue, normal);
+                if (hex.Length < normal.Length)
                 {
-                    // then convert to hex and see if it's smaller.
-                    // only really big numbers might be smaller in hex.
-                    string hex = NormalOrHexIfSmaller(numericValue, normal);
-                    if (hex.Length < normal.Length)
-                    {
-                        normal = hex;
-                    }
+                    normal = hex;
                 }
-                return normal;
             }
+            return normal;
         }
 
         private static string GetSmallestRep(string number)
         {
-            Match match = CommonData.DecimalFormat.Match(number);
+            var match = CommonData.DecimalFormat.Match(number);
             if (match.Success)
             {
-                string mantissa = match.Result("${man}");
+                var mantissa = match.Result("${man}");
                 if (string.IsNullOrEmpty(match.Result("${exp}")))
                 {
                     if (string.IsNullOrEmpty(mantissa))
@@ -4059,11 +4144,11 @@ namespace Microsoft.Ajax.Utilities
                         {
                             // see if there are trailing zeros
                             // that we can use e-notation to make smaller
-                            int numZeros = match.Result("${zer}").Length;
+                            var numZeros = match.Result("${zer}").Length;
                             if (numZeros > 2)
                             {
                                 number = match.Result("${neg}") + match.Result("${sig}")
-                                    + 'e' + numZeros.ToStringInvariant();
+                                         + 'e' + numZeros.ToStringInvariant();
                             }
                         }
                     }
@@ -4079,7 +4164,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // there is an exponent, but no significant mantissa
                     number = match.Result("${neg}") + match.Result("${mag}")
-                        + "e" + match.Result("${eng}") + match.Result("${pow}");
+                             + "e" + match.Result("${eng}") + match.Result("${pow}");
                 }
                 else
                 {
@@ -4088,19 +4173,20 @@ namespace Microsoft.Ajax.Utilities
 
                     // get the integer value of the exponent
                     int exponent;
-                    if ((match.Result("${eng}") + match.Result("${pow}")).TryParseIntInvariant(NumberStyles.Integer, out exponent))
+                    if ((match.Result("${eng}") + match.Result("${pow}")).TryParseIntInvariant(NumberStyles.Integer,
+                        out exponent))
                     {
                         // slap the mantissa directly to the magnitude without a decimal point.
                         // we'll subtract the number of characters we just added to the magnitude from
                         // the exponent
                         number = match.Result("${neg}") + match.Result("${mag}") + mantissa
-                            + 'e' + (exponent - mantissa.Length).ToStringInvariant();
+                                 + 'e' + (exponent - mantissa.Length).ToStringInvariant();
                     }
                     else
                     {
                         // should n't get here, but it we do, go with what we have
                         number = match.Result("${neg}") + match.Result("${mag}") + '.' + mantissa
-                            + 'e' + match.Result("${eng}") + match.Result("${pow}");
+                                 + 'e' + match.Result("${eng}") + match.Result("${pow}");
                     }
                 }
             }
@@ -4112,9 +4198,9 @@ namespace Microsoft.Ajax.Utilities
             // keep track of the maximum number of characters we can have in our
             // hexadecimal number before it'd be longer than the normal version.
             // subtract two characters for the 0x
-            int maxValue = normal.Length - 2;
+            var maxValue = normal.Length - 2;
 
-            int sign = Math.Sign(doubleValue);
+            var sign = Math.Sign(doubleValue);
             if (sign < 0)
             {
                 // negate the value so it's positive
@@ -4125,23 +4211,23 @@ namespace Microsoft.Ajax.Utilities
 
             // we don't want to get larger -- or even the same size, so we know
             // the maximum length is the length of the normal string less one
-            char[] charArray = new char[normal.Length - 1];
+            var charArray = new char[normal.Length - 1];
             // point PAST the last character in the array because we will decrement
             // the position before we add a character. that way position will always
             // point to the first valid character in the array.
-            int position = charArray.Length;
+            var position = charArray.Length;
 
             while (maxValue > 0 && doubleValue > 0)
             {
                 // get the right-most hex character
-                int digit = (int)(doubleValue % 16);
+                var digit = (int) (doubleValue%16);
 
                 // if the digit is less than ten, then we want to add it to '0' to get the decimal character.
                 // otherwise we want to add (digit - 10) to 'a' to get the alphabetic hex digit
-                charArray[--position] = (char)((digit < 10 ? '0' : 'a' - 10) + digit);
+                charArray[--position] = (char) ((digit < 10 ? '0' : 'a' - 10) + digit);
 
                 // next character
-                doubleValue = Math.Floor(doubleValue / 16);
+                doubleValue = Math.Floor(doubleValue/16);
                 --maxValue;
             }
 
@@ -4186,7 +4272,7 @@ namespace Microsoft.Ajax.Utilities
             // and we only need to if we end up escaping characters. 
             var rawStart = 0;
             StringBuilder sb = null;
-            string escapedText = string.Empty;
+            var escapedText = string.Empty;
 
             if (!string.IsNullOrEmpty(text))
             {
@@ -4283,7 +4369,7 @@ namespace Microsoft.Ajax.Utilities
 
                             // output the escape character, a "u", then the four-digit escaped character
                             sb.Append(@"\u");
-                            sb.Append(((int)ch).ToStringInvariant("x4"));
+                            sb.Append(((int) ch).ToStringInvariant("x4"));
                             break;
 
                         default:
@@ -4375,10 +4461,10 @@ namespace Microsoft.Ajax.Utilities
             // therefore we should use single-quotes for the delimiter.
             // otherwise there are more single-quotes than double-quotes (or equal values)
             // and it's okay to use double-quotes
-            int quoteFactor = 0;
+            var quoteFactor = 0;
             if (!text.IsNullOrWhiteSpace())
             {
-                for (int index = 0; index < text.Length; ++index)
+                for (var index = 0; index < text.Length; ++index)
                 {
                     if (text[index] == '\'')
                     {

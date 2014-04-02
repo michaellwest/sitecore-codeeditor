@@ -17,11 +17,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class FunctionScope : ActivationObject
     {
-        private HashSet<ActivationObject> m_refScopes;
+        private readonly HashSet<ActivationObject> m_refScopes;
 
         internal FunctionScope(ActivationObject parent, bool isExpression, CodeSettings settings, FunctionObject funcObj)
             : base(parent, settings)
@@ -49,7 +49,7 @@ namespace Microsoft.Ajax.Utilities
             // function scope. But if it doesn't, then this is actually the parent
             // scope for named function expressions that should contain just a field
             // for the function name
-            if (((FunctionObject)Owner).EnclosingScope == this)
+            if (Owner.EnclosingScope == this)
             {
                 // first bind any parameter names
                 DefineParameters();
@@ -72,7 +72,7 @@ namespace Microsoft.Ajax.Utilities
 
         private void DefineFunctionExpressionName()
         {
-            var functionObject = (FunctionObject)Owner;
+            var functionObject = (FunctionObject) Owner;
 
             // add a field for the function expression name so it can be self-referencing.
             var functionField = this.CreateField(functionObject.Binding.Name, functionObject, 0);
@@ -86,7 +86,7 @@ namespace Microsoft.Ajax.Utilities
 
         private void DefineParameters()
         {
-            var functionObject = (FunctionObject)Owner;
+            var functionObject = (FunctionObject) Owner;
             if (functionObject.ParameterDeclarations != null)
             {
                 // for each parameter...

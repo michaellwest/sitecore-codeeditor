@@ -28,12 +28,13 @@ namespace Sitecore.SharedSource.Pipelines.Save
                     var field = item.Fields[saveField.ID];
                     if (field == null)
                     {
-                        continue;;
+                        continue;
+                        ;
                     }
 
                     if (field.IsBlobField &&
-                         ((field.TypeKey == "attachment" || field.TypeKey == "code attachment") ||
-                          saveField.Value == Translate.Text("[Blob Value]")))
+                        ((field.TypeKey == "attachment" || field.TypeKey == "code attachment") ||
+                         saveField.Value == Translate.Text("[Blob Value]")))
                     {
                         continue;
                     }

@@ -15,7 +15,7 @@
 // limitations under the License.
 
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Base class for ComprehensionForClause and ComprehensionIfClause

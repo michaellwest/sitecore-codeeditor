@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class ConditionalCompilationSet : ConditionalCompilationStatement
     {
@@ -42,10 +42,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Value);
-            }
+            get { return EnumerateNonNullNodes(Value); }
         }
 
         public override void Accept(IVisitor visitor)

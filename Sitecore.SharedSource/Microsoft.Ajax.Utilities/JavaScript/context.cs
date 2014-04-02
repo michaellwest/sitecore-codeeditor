@@ -17,7 +17,7 @@
 using System;
 using System.ComponentModel;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class Context
     {
@@ -46,18 +46,12 @@ namespace Microsoft.Ajax.Utilities
 
         public int StartColumn
         {
-            get
-            {
-                return StartPosition - StartLinePosition;
-            }
+            get { return StartPosition - StartLinePosition; }
         }
 
         public int EndColumn
         {
-            get
-            {
-                return EndPosition - EndLinePosition;
-            }
+            get { return EndPosition - EndLinePosition; }
         }
 
         public bool HasCode
@@ -65,9 +59,9 @@ namespace Microsoft.Ajax.Utilities
             get
             {
                 return !Document.IsGenerated
-                    && EndPosition > StartPosition
-                    && EndPosition <= Document.Source.Length
-                    && EndPosition != StartPosition;
+                       && EndPosition > StartPosition
+                       && EndPosition <= Document.Source.Length
+                       && EndPosition != StartPosition;
             }
         }
 
@@ -76,8 +70,8 @@ namespace Microsoft.Ajax.Utilities
             get
             {
                 return (!Document.IsGenerated && EndPosition > StartPosition && EndPosition <= Document.Source.Length)
-                  ? Document.Source.Substring(StartPosition, EndPosition - StartPosition)
-                  : null;
+                    ? Document.Source.Substring(StartPosition, EndPosition - StartPosition)
+                    : null;
             }
         }
 
@@ -85,25 +79,19 @@ namespace Microsoft.Ajax.Utilities
         {
             get
             {
-                string source = this.Document.Source;
+                var source = this.Document.Source;
 
                 // just pull out the string that's between start position and end position
                 if (this.StartPosition >= source.Length)
                 {
                     return string.Empty;
                 }
-                else
+                var length = this.EndPosition - this.StartPosition;
+                if (this.StartPosition + length <= source.Length)
                 {
-                    int length = this.EndPosition - this.StartPosition;
-                    if (this.StartPosition + length <= source.Length)
-                    {
-                        return source.Substring(this.StartPosition, length).Trim();
-                    }
-                    else
-                    {
-                        return source.Substring(this.StartPosition).Trim();
-                    }
+                    return source.Substring(this.StartPosition, length).Trim();
                 }
+                return source.Substring(this.StartPosition).Trim();
             }
         }
 
@@ -123,7 +111,8 @@ namespace Microsoft.Ajax.Utilities
             Token = JSToken.None;
         }
 
-        public Context(DocumentContext document, int startLineNumber, int startLinePosition, int startPosition, int endLineNumber, int endLinePosition, int endPosition, JSToken token)
+        public Context(DocumentContext document, int startLineNumber, int startLinePosition, int startPosition,
+            int endLineNumber, int endLinePosition, int endPosition, JSToken token)
             : this(document)
         {
             StartLineNumber = startLineNumber;
@@ -139,11 +128,11 @@ namespace Microsoft.Ajax.Utilities
         {
             return new Context(this.Document)
             {
-                StartLineNumber = this.StartLineNumber, 
-                StartLinePosition = this.StartLinePosition, 
+                StartLineNumber = this.StartLineNumber,
+                StartLinePosition = this.StartLinePosition,
                 StartPosition = this.StartPosition,
-                EndLineNumber = this.EndLineNumber, 
-                EndLinePosition = this.EndLinePosition, 
+                EndLineNumber = this.EndLineNumber,
+                EndLinePosition = this.EndLinePosition,
                 EndPosition = this.EndPosition,
                 SourceOffsetStart = this.SourceOffsetStart,
                 SourceOffsetEnd = this.SourceOffsetEnd,
@@ -288,11 +277,11 @@ namespace Microsoft.Ajax.Utilities
             // then verify the values of the indexes into the source,
             // THEN try doing the text comparison
             return text != null
-                && EndPosition - StartPosition == text.Length
-                && EndPosition <= Document.Source.Length
-                && StartPosition >= 0
-                && StartPosition <= EndPosition
-                && string.CompareOrdinal(Document.Source, StartPosition, text, 0, text.Length) == 0;
+                   && EndPosition - StartPosition == text.Length
+                   && EndPosition <= Document.Source.Length
+                   && StartPosition >= 0
+                   && StartPosition <= EndPosition
+                   && string.CompareOrdinal(Document.Source, StartPosition, text, 0, text.Length) == 0;
         }
 
         internal void ReportUndefined(Lookup lookup)
@@ -321,7 +310,8 @@ namespace Microsoft.Ajax.Utilities
 
         internal void HandleError(JSError errorId, bool forceToError = false)
         {
-            if ((errorId != JSError.UndeclaredVariable && errorId != JSError.UndeclaredFunction) || !Document.HasAlreadySeenErrorFor(Code))
+            if ((errorId != JSError.UndeclaredVariable && errorId != JSError.UndeclaredFunction) ||
+                !Document.HasAlreadySeenErrorFor(Code))
             {
                 var severity = GetSeverity(errorId);
                 var errorMessage = GetErrorString(errorId);
@@ -331,20 +321,20 @@ namespace Microsoft.Ajax.Utilities
                     errorMessage += CommonStrings.ContextSeparator + context;
                 }
 
-                var error = new ContextError()
-                    {
-                        IsError = forceToError || severity < 2,
-                        File = Document.FileContext,
-                        Severity = severity,
-                        Subcategory = ContextError.GetSubcategory(severity),
-                        ErrorNumber = (int)errorId,
-                        ErrorCode = "JS{0}".FormatInvariant((int)errorId),
-                        StartLine = this.StartLineNumber,
-                        StartColumn = this.StartColumn + 1,
-                        EndLine = this.EndLineNumber,
-                        EndColumn = this.EndColumn + 1,
-                        Message = errorMessage,
-                    };
+                var error = new ContextError
+                {
+                    IsError = forceToError || severity < 2,
+                    File = Document.FileContext,
+                    Severity = severity,
+                    Subcategory = ContextError.GetSubcategory(severity),
+                    ErrorNumber = (int) errorId,
+                    ErrorCode = "JS{0}".FormatInvariant((int) errorId),
+                    StartLine = this.StartLineNumber,
+                    StartColumn = this.StartColumn + 1,
+                    EndLine = this.EndLineNumber,
+                    EndColumn = this.EndColumn + 1,
+                    Message = errorMessage,
+                };
 
                 Document.HandleError(error);
             }
@@ -356,8 +346,8 @@ namespace Microsoft.Ajax.Utilities
             // OR if it starts on the same line but at an earlier column
             // (or if the other context is null)
             return other == null
-                || StartLineNumber < other.StartLineNumber
-                || (StartLineNumber == other.StartLineNumber && StartColumn < other.StartColumn);
+                   || StartLineNumber < other.StartLineNumber
+                   || (StartLineNumber == other.StartLineNumber && StartColumn < other.StartColumn);
         }
 
         public override string ToString()

@@ -14,7 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+using System.Collections.Generic;
+using System.Reflection;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript;
+
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {
 #if NET_20
     using System.Collections;
@@ -137,15 +142,16 @@ namespace Microsoft.Ajax.Utilities
 #if DEBUG
     public static class ErrorStringHelper
     {
-        public static System.Collections.Generic.IEnumerable<string> AvailableCssStrings
+        public static IEnumerable<string> AvailableCssStrings
         {
             get
             {
-                var type = typeof(CssStrings);
-                var properties = type.GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.GetProperty | System.Reflection.BindingFlags.NonPublic);
+                var type = typeof (CssStrings);
+                var properties =
+                    type.GetProperties(BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic);
                 foreach (var property in properties)
                 {
-                    if (property.PropertyType == typeof(string))
+                    if (property.PropertyType == typeof (string))
                     {
                         yield return property.Name;
                     }
@@ -153,15 +159,16 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        public static System.Collections.Generic.IEnumerable<string> AvailableJSStrings
+        public static IEnumerable<string> AvailableJSStrings
         {
             get
             {
-                var type = typeof(JScript);
-                var properties = type.GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.GetProperty | System.Reflection.BindingFlags.NonPublic);
+                var type = typeof (JScript);
+                var properties =
+                    type.GetProperties(BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic);
                 foreach (var property in properties)
                 {
-                    if (property.PropertyType == typeof(string))
+                    if (property.PropertyType == typeof (string))
                     {
                         yield return property.Name;
                     }

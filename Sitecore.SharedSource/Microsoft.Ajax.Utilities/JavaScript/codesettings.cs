@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Settings for how local variables and functions can be renamed
@@ -135,7 +135,7 @@ namespace Microsoft.Ajax.Utilities
 
             // by default, let's NOT rename $super, so we don't break the Prototype library.
             // going to try to come up with a better solution, so this is just a stop-gap for now.
-            this.m_noRenameSet = new HashSet<string>(new string[] { "$super" });
+            this.m_noRenameSet = new HashSet<string>(new[] {"$super"});
 
             // nothing renamed by default
             this.m_identifierReplacementMap = new Dictionary<string, string>();
@@ -148,12 +148,11 @@ namespace Microsoft.Ajax.Utilities
         public CodeSettings Clone()
         {
             // create a new settings object and set all the properties using this settings object
-            var newSettings = new CodeSettings()
+            var newSettings = new CodeSettings
             {
                 // set the field, not the property. Setting the property will set a bunch of
                 // other properties, which may not represent their actual values.
                 m_minify = this.m_minify,
-
                 AllowEmbeddedAspNetBlocks = this.AllowEmbeddedAspNetBlocks,
                 AlwaysEscapeNonAscii = this.AlwaysEscapeNonAscii,
                 CollapseToLiteral = this.CollapseToLiteral,
@@ -215,7 +214,7 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// dictionary of identifiers we want to manually rename
         /// </summary>
-        private Dictionary<string, string> m_identifierReplacementMap;
+        private readonly Dictionary<string, string> m_identifierReplacementMap;
 
         /// <summary>
         /// Add a rename pair to the identifier rename map
@@ -225,7 +224,7 @@ namespace Microsoft.Ajax.Utilities
         /// <returns>true if added; false if either name is not a valid JavaScript identifier</returns>
         public bool AddRenamePair(string sourceName, string newName)
         {
-            bool successfullyAdded = false;
+            var successfullyAdded = false;
 
             // both names MUST be valid JavaScript identifiers
             if (JSScanner.IsValidIdentifier(sourceName) && JSScanner.IsValidIdentifier(newName))
@@ -261,10 +260,7 @@ namespace Microsoft.Ajax.Utilities
         /// </summary>
         public bool HasRenamePairs
         {
-            get
-            {
-                return m_identifierReplacementMap.Count > 0;
-            }
+            get { return m_identifierReplacementMap.Count > 0; }
         }
 
         /// <summary>
@@ -291,7 +287,7 @@ namespace Microsoft.Ajax.Utilities
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 foreach (var entry in m_identifierReplacementMap)
                 {
                     if (sb.Length > 0)
@@ -336,9 +332,12 @@ namespace Microsoft.Ajax.Utilities
 
         #region No automatic rename
 
-        private HashSet<string> m_noRenameSet;
+        private readonly HashSet<string> m_noRenameSet;
 
-        public IEnumerable<string> NoAutoRenameCollection { get { return m_noRenameSet; } }
+        public IEnumerable<string> NoAutoRenameCollection
+        {
+            get { return m_noRenameSet; }
+        }
 
         /// <summary>
         /// sets the collection of known global names to the enumeration of strings passed to this method
@@ -377,7 +376,7 @@ namespace Microsoft.Ajax.Utilities
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 foreach (var noRename in m_noRenameSet)
                 {
                     if (sb.Length > 0)
@@ -409,12 +408,15 @@ namespace Microsoft.Ajax.Utilities
 
         #region known globals
 
-        private HashSet<string> m_knownGlobals;
+        private readonly HashSet<string> m_knownGlobals;
 
         /// <summary>
         /// Gets the known global name collection
         /// </summary>
-        public IEnumerable<string> KnownGlobalCollection { get { return m_knownGlobals; } }
+        public IEnumerable<string> KnownGlobalCollection
+        {
+            get { return m_knownGlobals; }
+        }
 
         /// <summary>
         /// sets the collection of known global names to the array of string passed to this method
@@ -457,7 +459,7 @@ namespace Microsoft.Ajax.Utilities
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 foreach (var knownGlobal in m_knownGlobals)
                 {
                     if (sb.Length > 0)
@@ -490,12 +492,15 @@ namespace Microsoft.Ajax.Utilities
 
         #region Debug lookups
 
-        private HashSet<string> m_debugLookups;
+        private readonly HashSet<string> m_debugLookups;
 
         /// <summary>
         /// Gets the set of debug lookups
         /// </summary>
-        public IEnumerable<string> DebugLookupCollection { get { return m_debugLookups; } }
+        public IEnumerable<string> DebugLookupCollection
+        {
+            get { return m_debugLookups; }
+        }
 
         /// <summary>
         /// Set the collection of debug "lookup" identifiers
@@ -577,7 +582,7 @@ namespace Microsoft.Ajax.Utilities
                 m_debugLookups.Clear();
                 if (!string.IsNullOrEmpty(value))
                 {
-                    foreach(var debugLookup in value.Split(',', ';'))
+                    foreach (var debugLookup in value.Split(',', ';'))
                     {
                         AddDebugLookup(debugLookup);
                     }
@@ -594,50 +599,31 @@ namespace Microsoft.Ajax.Utilities
         /// or to let the output encoding object handle that via the JsEncoderFallback object for the
         /// specified output encoding format. Default is false (let the Encoding object handle it).
         /// </summary>
-        public bool AlwaysEscapeNonAscii
-        {
-            get;
-            set;
-        }
+        public bool AlwaysEscapeNonAscii { get; set; }
 
         /// <summary>
         /// collapse new Array() to [] and new Object() to {} [true]
         /// or leave ais [false]. Default is true.
         /// </summary>
-        public bool CollapseToLiteral
-        {
-            get; set;
-        }
+        public bool CollapseToLiteral { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether to use old-style const statements (just var-statements that
         /// define unchangeable fields) or new EcmaScript 6 lexical declarations.
         /// </summary>
-        public bool ConstStatementsMozilla
-        {
-            get;
-            set;
-        }
+        public bool ConstStatementsMozilla { get; set; }
 
         /// <summary>
         /// Throw an error if a source string is not safe for inclusion 
         /// in an HTML inline script block. Default is false.
         /// </summary>
-        public bool ErrorIfNotInlineSafe
-        {
-            get;
-            set;
-        }
+        public bool ErrorIfNotInlineSafe { get; set; }
 
         /// <summary>
         /// Evaluate expressions containing only literal bool, string, numeric, or null values [true]
         /// Leave literal expressions alone and do not evaluate them [false]. Default is true.
         /// </summary>
-        public bool EvalLiteralExpressions
-        {
-            get;
-            set;
-        }
+        public bool EvalLiteralExpressions { get; set; }
 
         /// <summary>
         /// Gets or sets a settings value indicating how "safe" eval-statements are to be assumed.
@@ -646,18 +632,12 @@ namespace Microsoft.Ajax.Utilities
         /// MakeAllSafe assumes eval-statements will reference any accessible local variable or function.
         /// Local variables that we assume may be referenced by eval-statements cannot be automatically renamed.
         /// </summary>
-        public EvalTreatment EvalTreatment
-        {
-            get; set;
-        }
+        public EvalTreatment EvalTreatment { get; set; }
 
         /// <summary>
         /// Gets or sets the format to use for the JavaScript processing.
         /// </summary>
-        public JavaScriptFormat Format
-        {
-            get; set;
-        }
+        public JavaScriptFormat Format { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether or not to ignore conditional-compilation comment syntax (true) or
@@ -675,10 +655,7 @@ namespace Microsoft.Ajax.Utilities
         /// Gets or sets a boolean value indicating whether to break up string literals containing &lt;/script&gt; so inline code won't break [true, default]
         /// or to leave string literals as-is [false]
         /// </summary>
-        public bool InlineSafeStrings
-        {
-            get; set;
-        }
+        public bool InlineSafeStrings { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether/how local variables and functions should be automatically renamed:
@@ -686,19 +663,13 @@ namespace Microsoft.Ajax.Utilities
         /// CrunchAll - rename all local variables and functions to shorter names; 
         /// KeepLocalizationVars - rename all local variables and functions that do NOT start with L_
         /// </summary>
-        public LocalRenaming LocalRenaming
-        {
-            get; set;
-        }
+        public LocalRenaming LocalRenaming { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether to add characters to the output to make sure Mac Safari bugs are not generated [true, default], or to
         /// disregard potential known Mac Safari bugs in older versions [false]
         /// </summary>
-        public bool MacSafariQuirks
-        {
-            get; set;
-        }
+        public bool MacSafariQuirks { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether any operations are to be applied to the parsed tree [true, default],
@@ -706,13 +677,13 @@ namespace Microsoft.Ajax.Utilities
         /// </summary>
         public bool MinifyCode
         {
-            get 
+            get
             {
                 // just return the minify flag
                 return m_minify;
             }
-            set 
-            { 
+            set
+            {
                 // when we set this flag, we want to turn other things on and off at the same time
                 m_minify = value;
 
@@ -729,7 +700,7 @@ namespace Microsoft.Ajax.Utilities
 
                 // dependent switches
                 this.LocalRenaming = m_minify ? LocalRenaming.CrunchAll : LocalRenaming.KeepAll;
-                this.KillSwitch = m_minify ? 0 : ~((long)TreeModifications.PreserveImportantComments);
+                this.KillSwitch = m_minify ? 0 : ~((long) TreeModifications.PreserveImportantComments);
             }
         }
 
@@ -737,122 +708,79 @@ namespace Microsoft.Ajax.Utilities
         /// Gets or sets a boolean value indicating whether object property names with the specified "from" names will
         /// get renamed to the corresponding "to" names (true, default) when using the manual-rename feature, or left alone (false)
         /// </summary>
-        public bool ManualRenamesProperties
-        {
-            get; set;
-        }
+        public bool ManualRenamesProperties { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether or not the input files should be preprocessed only (default is false)
         /// </summary>
-        public bool PreprocessOnly 
-        { 
-            get; 
-            set; 
-        }
+        public bool PreprocessOnly { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether all function names must be preserved and remain as-named (true),
         /// or can be automatically renamed (false, default).
         /// </summary>
-        public bool PreserveFunctionNames
-        {
-            get; set;
-        }
+        public bool PreserveFunctionNames { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to preserve important comments in the output.
         /// Default is true, preserving important comments. Important comments have an exclamation
         /// mark as the very first in-comment character (//! or /*!).
         /// </summary>
-        public bool PreserveImportantComments
-        {
-            get; set;
-        }
+        public bool PreserveImportantComments { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to always quote object literal property names.
         /// Default is false.
         /// </summary>
-        public bool QuoteObjectLiteralProperties
-        {
-            get; set;
-        }
+        public bool QuoteObjectLiteralProperties { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether or not to reorder function and variable
         /// declarations within scopes (true, default), or to leave the order as specified in 
         /// the original source.
         /// </summary>
-        public bool ReorderScopeDeclarations
-        {
-            get; set;
-        }
+        public bool ReorderScopeDeclarations { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether or not to remove unreferenced function expression names (true, default)
         /// or to leave the names of function expressions, even if they are unreferenced (false).
         /// </summary>
-        public bool RemoveFunctionExpressionNames
-        {
-            get; set;
-        }
+        public bool RemoveFunctionExpressionNames { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether to remove unneeded code, such as uncalled local functions or unreachable code [true, default], 
         /// or to keep such code in the output [false].
         /// </summary>
-        public bool RemoveUnneededCode
-        {
-            get; set;
-        }
+        public bool RemoveUnneededCode { get; set; }
 
         /// <summary>
         /// Gets or sets an enumeration that gives the parser a hint as to which version of EcmaScript standards to parse the source as.
         /// See <see cref="JSParser.ParsedVersion"/> after parsing for which version the parser thought it had based on features found in the script.
         /// Errors/warnings, and optimized output may change based on this settings value.
         /// </summary>
-        public ScriptVersion ScriptVersion
-        {
-            get;
-            set;
-        }
+        public ScriptVersion ScriptVersion { get; set; }
 
         /// <summary>
         /// Gets or sets the source mode
         /// </summary>
-        public JavaScriptSourceMode SourceMode
-        {
-            get; set;
-        }
+        public JavaScriptSourceMode SourceMode { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether or not to force the input code into strict mode (true)
         /// or rely on the sources to turn on strict mode via the "use strict" prologue directive (false, default).
         /// </summary>
-        public bool StrictMode
-        {
-            get;
-            set;
-        }
+        public bool StrictMode { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicating whether to strip debug statements [true, default],
         /// or leave debug statements in the output [false]
         /// </summary>
-        public bool StripDebugStatements
-        {
-            get; set;
-        }
+        public bool StripDebugStatements { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ISourceMap"/> instance. Default is null, which won't output a symbol map.
         /// </summary>
-        public ISourceMap SymbolsMap
-        {
-            get;
-            set;
-        }
+        public ISourceMap SymbolsMap { get; set; }
 
         #endregion
 
@@ -866,7 +794,7 @@ namespace Microsoft.Ajax.Utilities
         /// <returns>true only if NONE of the passed modifications have their kill bits set</returns>
         public bool IsModificationAllowed(TreeModifications modification)
         {
-            return (KillSwitch & (long)modification) == 0;
+            return (KillSwitch & (long) modification) == 0;
         }
 
         #endregion
@@ -878,25 +806,25 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// Default. No specific tree modification
         /// </summary>
-        None                                        = 0x0000000000000000,
+        None = 0x0000000000000000,
 
         /// <summary>
         /// Preserve "important" comments in output: /*! ... */
         /// </summary>
-        PreserveImportantComments                   = 0x0000000000000001,
+        PreserveImportantComments = 0x0000000000000001,
 
         /// <summary>
         /// Replace a member-bracket call with a member-dot construct if the member
         /// name is a string literal that can be an identifier.
         /// A["B"] ==&gt; A.B
         /// </summary>
-        BracketMemberToDotMember                    = 0x0000000000000002,
+        BracketMemberToDotMember = 0x0000000000000002,
 
         /// <summary>
         /// Replace a new Object constructor call with an object literal
         /// new Object() ==&gt; {}
         /// </summary>
-        NewObjectToObjectLiteral                    = 0x0000000000000004,
+        NewObjectToObjectLiteral = 0x0000000000000004,
 
         /// <summary>
         /// Change Array constructor calls with array literals.
@@ -905,80 +833,80 @@ namespace Microsoft.Ajax.Utilities
         /// new Array() ==&gt; []
         /// new Array(A,B,C) ==&gt; [A,B,C]
         /// </summary>
-        NewArrayToArrayLiteral                      = 0x0000000000000008,
+        NewArrayToArrayLiteral = 0x0000000000000008,
 
         /// <summary>
         /// Remove the default case in a switch statement if the block contains
         /// only a break statement.
         /// remove default:break;
         /// </summary>
-        RemoveEmptyDefaultCase                      = 0x0000000000000010,
+        RemoveEmptyDefaultCase = 0x0000000000000010,
 
         /// <summary>
         /// If there is no default case, remove any case statements that contain
         /// only a single break statement.
         /// remove case A:break;
         /// </summary>
-        RemoveEmptyCaseWhenNoDefault                = 0x0000000000000020,
+        RemoveEmptyCaseWhenNoDefault = 0x0000000000000020,
 
         /// <summary>
         /// Remove the break statement from the last case block of a switch statement.
         /// switch(A){case B: C;break;} ==&gt; switch(A){case B:C;}
         /// </summary>
-        RemoveBreakFromLastCaseBlock                = 0x0000000000000040,
+        RemoveBreakFromLastCaseBlock = 0x0000000000000040,
 
         /// <summary>
         /// Remove an empty finally statement if there is a non-empty catch block.
         /// try{...}catch(E){...}finally{} ==&gt; try{...}catch(E){...}
         /// </summary>
-        RemoveEmptyFinally                          = 0x0000000000000080,
+        RemoveEmptyFinally = 0x0000000000000080,
 
         /// <summary>
         /// Remove duplicate var declarations in a var statement that have no initializers.
         /// var A,A=B  ==&gt;  var A=B
         /// var A=B,A  ==&gt;  var A=B
         /// </summary>
-        RemoveDuplicateVar                          = 0x0000000000000100,
+        RemoveDuplicateVar = 0x0000000000000100,
 
         /// <summary>
         /// Combine adjacent var statements.
         /// var A;var B  ==&gt;  var A,B
         /// </summary>
-        CombineVarStatements                        = 0x0000000000000200,
+        CombineVarStatements = 0x0000000000000200,
 
         /// <summary>
         /// Move preceeding var statement into the initializer of the for statement.
         /// var A;for(var B;;);  ==&gt;  for(var A,B;;);
         /// var A;for(;;)  ==&gt; for(var A;;)
         /// </summary>
-        MoveVarIntoFor                              = 0x0000000000000400,
+        MoveVarIntoFor = 0x0000000000000400,
 
         /// <summary>
         /// Combine adjacent var statement and return statement to a single return statement
         /// var A=B;return A  ==&gt; return B
         /// </summary>
-        VarInitializeReturnToReturnInitializer      = 0x0000000000000800,
+        VarInitializeReturnToReturnInitializer = 0x0000000000000800,
 
         /// <summary>
         /// Replace an if-statement that has empty true and false branches with just the 
         /// condition expression.
         /// if(A);else;  ==&gt; A;
         /// </summary>
-        IfEmptyToExpression                         = 0x0000000000001000,
+        IfEmptyToExpression = 0x0000000000001000,
 
         /// <summary>
         /// replace if-statement that only has a single call statement in the true branch
         /// with a logical-and statement
         /// if(A)B() ==&gt; A&amp;&amp;B()
         /// </summary>
-        IfConditionCallToConditionAndCall           = 0x0000000000002000,
+        IfConditionCallToConditionAndCall = 0x0000000000002000,
 
         /// <summary>
         /// Replace an if-else-statement where both branches are only a single return
         /// statement with a single return statement and a conditional operator.
         /// if(A)return B;else return C  ==&gt;  return A?B:C 
         /// </summary>
-        IfElseReturnToReturnConditional             = 0x0000000000004000,
+        IfElseReturnToReturnConditional = 0x0000000000004000,
 
         /// <summary>
         /// If a function ends in an if-statement that only has a true-branch containing
@@ -986,84 +914,84 @@ namespace Microsoft.Ajax.Utilities
         /// the condition expression.
         /// function A(...){...;if(B)return}  ==&gt; function A(...){...;B}
         /// </summary>
-        IfConditionReturnToCondition                = 0x0000000000008000,
+        IfConditionReturnToCondition = 0x0000000000008000,
 
         /// <summary>
         /// If the true-block of an if-statment is empty and the else-block is not,
         /// negate the condition and move the else-block to the true-block.
         /// if(A);else B  ==&gt;  if(!A)B
         /// </summary>
-        IfConditionFalseToIfNotConditionTrue        = 0x0000000000010000,
+        IfConditionFalseToIfNotConditionTrue = 0x0000000000010000,
 
         /// <summary>
         /// Combine adjacent string literals.
         /// "A"+"B"  ==&gt; "AB"
         /// </summary>
-        CombineAdjacentStringLiterals               = 0x0000000000020000,
+        CombineAdjacentStringLiterals = 0x0000000000020000,
 
         /// <summary>
         /// Remove unary-plus operators when the operand is a numeric literal
         /// +123  ==&gt;  123
         /// </summary>
-        RemoveUnaryPlusOnNumericLiteral             = 0x0000000000040000,
+        RemoveUnaryPlusOnNumericLiteral = 0x0000000000040000,
 
         /// <summary>
         /// Apply (and cascade) unary-minus operators to the value of a numeric literal
         /// -(4)  ==&gt;  -4   (unary minus applied to a numeric 4 ==&gt; numeric -4)
         /// -(-4)  ==&gt;  4   (same as above, but cascading)
         /// </summary>
-        ApplyUnaryMinusToNumericLiteral             = 0x0000000000080000,
+        ApplyUnaryMinusToNumericLiteral = 0x0000000000080000,
 
         /// <summary>
         /// Apply minification technics to string literals
         /// </summary>
-        MinifyStringLiterals                        = 0x0000000000100000,
+        MinifyStringLiterals = 0x0000000000100000,
 
         /// <summary>
         /// Apply minification techniques to numeric literals
         /// </summary>
-        MinifyNumericLiterals                       = 0x0000000000200000,
+        MinifyNumericLiterals = 0x0000000000200000,
 
         /// <summary>
         /// Remove unused function parameters
         /// </summary>
-        RemoveUnusedParameters                      = 0x0000000000400000,
+        RemoveUnusedParameters = 0x0000000000400000,
 
         /// <summary>
         /// remove "debug" statements
         /// </summary>
-        StripDebugStatements                        = 0x0000000000800000,
+        StripDebugStatements = 0x0000000000800000,
 
         /// <summary>
         /// Rename local variables and functions
         /// </summary>
-        LocalRenaming                               = 0x0000000001000000,
+        LocalRenaming = 0x0000000001000000,
 
         /// <summary>
         /// Remove unused function expression names
         /// </summary>
-        RemoveFunctionExpressionNames               = 0x0000000002000000,
+        RemoveFunctionExpressionNames = 0x0000000002000000,
 
         /// <summary>
         /// Remove unnecessary labels from break or continue statements
         /// </summary>
-        RemoveUnnecessaryLabels                     = 0x0000000004000000,
+        RemoveUnnecessaryLabels = 0x0000000004000000,
 
         /// <summary>
         /// Remove unnecessary @cc_on statements
         /// </summary>
-        RemoveUnnecessaryCCOnStatements             = 0x0000000008000000,
+        RemoveUnnecessaryCCOnStatements = 0x0000000008000000,
 
         /// <summary>
         /// Convert (new Date()).getTime() to +new Date
         /// </summary>
-        DateGetTimeToUnaryPlus                      = 0x0000000010000000,
+        DateGetTimeToUnaryPlus = 0x0000000010000000,
 
         /// <summary>
         /// Evaluate numeric literal expressions.
         /// 1 + 2  ==&gt; 3
         /// </summary>
-        EvaluateNumericExpressions                  = 0x0000000020000000,
+        EvaluateNumericExpressions = 0x0000000020000000,
 
         /// <summary>
         /// Simplify a common method on converting string to numeric: 
@@ -1071,12 +999,12 @@ namespace Microsoft.Ajax.Utilities
         /// (Subtracting zero converts lookup to number, then doesn't modify
         /// it; unary plus also converts operand to numeric)
         /// </summary>
-        SimplifyStringToNumericConversion           = 0x0000000040000000,
+        SimplifyStringToNumericConversion = 0x0000000040000000,
 
         /// <summary>
         /// Rename properties in object literals, member-dot, and member-bracket operations
         /// </summary>
-        PropertyRenaming                            = 0x0000000080000000,
+        PropertyRenaming = 0x0000000080000000,
 
         /// <summary>
         /// Use preprocessor defines and the ///#IFDEF directive
@@ -1085,79 +1013,78 @@ namespace Microsoft.Ajax.Utilities
         // people put -kill:-1 thinking they're just turning off minification, but they were ALSO turning off all the ///#IF processing
         // and getting unexpected errors when both paths make the output.
         //PreprocessorDefines                         = 0x0000000100000000,
-
         /// <summary>
         /// Remove the quotes arounf objectl literal property names when
         /// the names are valid identifiers.
         /// </summary>
-        RemoveQuotesFromObjectLiteralNames          = 0x0000000200000000,
+        RemoveQuotesFromObjectLiteralNames = 0x0000000200000000,
 
         /// <summary>
         /// Change boolean literals to not operators.
         /// true  -> !0
         /// false -> !1
         /// </summary>
-        BooleanLiteralsToNotOperators               = 0x0000000400000000,
+        BooleanLiteralsToNotOperators = 0x0000000400000000,
 
         /// <summary>
         /// Change if-statements with expression statements as their branches to expressions
         /// </summary>
-        IfExpressionsToExpression                   = 0x0000000800000000,
+        IfExpressionsToExpression = 0x0000000800000000,
 
         /// <summary>
         /// Combine adjacent expression statements into a single expression statement
         /// using the comma operator
         /// </summary>
-        CombineAdjacentExpressionStatements         = 0x0000001000000000,
+        CombineAdjacentExpressionStatements = 0x0000001000000000,
 
         /// <summary>
         /// If the types of both sides of a strict operator (=== or !==) are known
         /// to be the same, we can reduce the operators to == or !=
         /// </summary>
-        ReduceStrictOperatorIfTypesAreSame          = 0x0000002000000000,
+        ReduceStrictOperatorIfTypesAreSame = 0x0000002000000000,
 
         /// <summary>
         /// If the types of both sides of a strict operator (=== or !==) are known
         /// to be different, than we can reduct the binary operator to false or true (respectively)
         /// </summary>
-        ReduceStrictOperatorIfTypesAreDifferent     = 0x0000004000000000,
+        ReduceStrictOperatorIfTypesAreDifferent = 0x0000004000000000,
 
         /// <summary>
         /// Move function declarations to the top of the containing scope
         /// </summary>
-        MoveFunctionToTopOfScope                    = 0x0000008000000000,
+        MoveFunctionToTopOfScope = 0x0000008000000000,
 
         /// <summary>
         /// Combine var statements at the top of the containing scope
         /// </summary>
-        CombineVarStatementsToTopOfScope            = 0x0000010000000000,
+        CombineVarStatementsToTopOfScope = 0x0000010000000000,
 
         /// <summary>
         /// If the condition of an if-statement or conditional starts with a not-operator,
         /// get rid of the not-operator and swap the true/false branches.
         /// </summary>
-        IfNotTrueFalseToIfFalseTrue                 = 0x0000020000000000,
+        IfNotTrueFalseToIfFalseTrue = 0x0000020000000000,
 
         /// <summary>
         /// Whether it's okay to move an expression containing an in-operator into a for-statement.
         /// </summary>
-        MoveInExpressionsIntoForStatement           = 0x0000040000000000,
+        MoveInExpressionsIntoForStatement = 0x0000040000000000,
 
         /// <summary>
         /// Whether it's okay to convert function...{...if(cond)return;s1;s2} to function...{...if(!cond){s1;s2}}
         /// </summary>
-        InvertIfReturn                              = 0x0000080000000000,
+        InvertIfReturn = 0x0000080000000000,
 
         /// <summary>
         /// Whether it's okay to combine nested if-statments if(cond1)if(cond2){...} to if(cond1&amp;&amp;cond2){...}
         /// </summary>
-        CombineNestedIfs                            = 0x0000100000000000,
+        CombineNestedIfs = 0x0000100000000000,
 
         /// <summary>
         /// Whether it's okay to combine equivalent if-statments that return the same expression.
         /// if(cond1)return expr;if(cond2)return expr; =&gt; if(cond1||cond2)return expr;
         /// </summary>
-        CombineEquivalentIfReturns                  = 0x0000200000000000,
+        CombineEquivalentIfReturns = 0x0000200000000000,
 
         /// <summary>
         /// Whether to convert certain while-statements to for-statements.
@@ -1165,39 +1092,39 @@ namespace Microsoft.Ajax.Utilities
         /// var ...;while(1)... => for(var ...;;)
         /// var ...;while(cond)... => for(var ...;cond;)...
         /// </summary>
-        ChangeWhileToFor                            = 0x0000400000000000,
+        ChangeWhileToFor = 0x0000400000000000,
 
         /// <summary>
         /// Whether to invert iterator{if(cond)continue;st1;st2} to iterator{if(!cond){st1;st2}}
         /// </summary>
-        InvertIfContinue                            = 0x0000800000000000,
+        InvertIfContinue = 0x0000800000000000,
 
         /// <summary>
         /// Whether to convert [a,b,c].join(s) to "asbsc" if all items are constants.
         /// </summary>
-        EvaluateLiteralJoins                        = 0x0001000000000000,
+        EvaluateLiteralJoins = 0x0001000000000000,
 
         /// <summary>
         /// Whether we should remove unused variable, or variables assigned a constant in their
         /// initializer and referenced only once.
         /// </summary>
-        RemoveUnusedVariables                       = 0x0002000000000000,
+        RemoveUnusedVariables = 0x0002000000000000,
 
         /// <summary>
         /// Whether we should unfold comma-separated expressions statements into separate statements
         /// as a final minification step (if it doesn't create more bytes)
         /// </summary>
-        UnfoldCommaExpressionStatements             = 0x0004000000000000,
+        UnfoldCommaExpressionStatements = 0x0004000000000000,
 
         /// <summary>
         /// Whether to convert [a,b,c].length to 3 (if all items are constants)
         /// and "123".length to 3 
         /// </summary>
-        EvaluateLiteralLengths                      = 0x0008000000000000,
+        EvaluateLiteralLengths = 0x0008000000000000,
 
         /// <summary>
         /// Whether to remove the "window." portion of a typeof operand
         /// </summary>
-        RemoveWindowDotFromTypeOf                   = 0x0010000000000000,
+        RemoveWindowDotFromTypeOf = 0x0010000000000000,
     }
 }

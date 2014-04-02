@@ -15,7 +15,7 @@
 // limitations under the License.
 
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public static class BindingTransform
     {
@@ -59,15 +59,15 @@ namespace Microsoft.Ajax.Utilities
                 // convert binding identifier to a lookup (reference identifier)
                 return ConvertFromBindingIdentifier(bindingIdentifier);
             }
-            else if ((arrayLiteral = node as ArrayLiteral) != null)
+            if ((arrayLiteral = node as ArrayLiteral) != null)
             {
                 return ConvertFromBindingArrayLiteral(arrayLiteral);
             }
-            else if ((objectLiteral = node as ObjectLiteral) != null)
+            if ((objectLiteral = node as ObjectLiteral) != null)
             {
                 return ConvertFromBindingObjectLiteral(objectLiteral);
             }
-            else if ((objectProperty = node as ObjectLiteralProperty) != null)
+            if ((objectProperty = node as ObjectLiteralProperty) != null)
             {
                 return ConvertFromBindingObjectProperty(objectProperty);
             }
@@ -82,10 +82,10 @@ namespace Microsoft.Ajax.Utilities
             if (bindingIdentifier != null)
             {
                 lookup = new Lookup(bindingIdentifier.Context)
-                    {
-                        Name = bindingIdentifier.Name,
-                        VariableField = bindingIdentifier.VariableField
-                    };
+                {
+                    Name = bindingIdentifier.Name,
+                    VariableField = bindingIdentifier.VariableField
+                };
 
                 // the binding is now referenced from the lookup
                 bindingIdentifier.VariableField.IfNotNull(v => v.References.Add(lookup));
@@ -100,9 +100,9 @@ namespace Microsoft.Ajax.Utilities
             if (bindingLiteral != null)
             {
                 arrayLiteral = new ArrayLiteral(bindingLiteral.Context)
-                    {
-                        TerminatingContext = bindingLiteral.TerminatingContext,
-                    };
+                {
+                    TerminatingContext = bindingLiteral.TerminatingContext,
+                };
                 if (bindingLiteral.Elements != null)
                 {
                     arrayLiteral.Elements = new AstNodeList(bindingLiteral.Elements.Context);
@@ -122,9 +122,9 @@ namespace Microsoft.Ajax.Utilities
             if (bindingLiteral != null)
             {
                 objectLiteral = new ObjectLiteral(bindingLiteral.Context)
-                 {
-                     TerminatingContext = bindingLiteral.TerminatingContext,
-                 };
+                {
+                    TerminatingContext = bindingLiteral.TerminatingContext,
+                };
 
                 if (bindingLiteral.Properties != null)
                 {
@@ -145,11 +145,11 @@ namespace Microsoft.Ajax.Utilities
             if (bindingLiteral != null)
             {
                 prop = new ObjectLiteralProperty(bindingLiteral.Context)
-                    {
-                        Name = ConvertFromBindingObjectName(bindingLiteral.Name),
-                        Value = ConvertFromBinding(bindingLiteral.Value),
-                        TerminatingContext = bindingLiteral.TerminatingContext
-                    };
+                {
+                    Name = ConvertFromBindingObjectName(bindingLiteral.Name),
+                    Value = ConvertFromBinding(bindingLiteral.Value),
+                    TerminatingContext = bindingLiteral.TerminatingContext
+                };
             }
 
             return prop;
@@ -161,12 +161,12 @@ namespace Microsoft.Ajax.Utilities
             if (bindingLiteral != null)
             {
                 name = new ObjectLiteralField(bindingLiteral.Name, bindingLiteral.PrimitiveType, bindingLiteral.Context)
-                    {
-                        ColonContext = bindingLiteral.ColonContext,
-                        IsIdentifier = bindingLiteral.IsIdentifier,
-                        MayHaveIssues = bindingLiteral.MayHaveIssues,
-                        TerminatingContext = bindingLiteral.TerminatingContext
-                    };
+                {
+                    ColonContext = bindingLiteral.ColonContext,
+                    IsIdentifier = bindingLiteral.IsIdentifier,
+                    MayHaveIssues = bindingLiteral.MayHaveIssues,
+                    TerminatingContext = bindingLiteral.TerminatingContext
+                };
             }
 
             return name;
@@ -190,25 +190,25 @@ namespace Microsoft.Ajax.Utilities
                 // convert binding identifier to a lookup (reference identifier)
                 return ConvertToBindingIdentifier(lookup);
             }
-            else if ((arrayLiteral = node as ArrayLiteral) != null)
+            if ((arrayLiteral = node as ArrayLiteral) != null)
             {
                 return ConvertToBindingArrayLiteral(arrayLiteral);
             }
-            else if ((objectLiteral = node as ObjectLiteral) != null)
+            if ((objectLiteral = node as ObjectLiteral) != null)
             {
                 return ConvertToBindingObjectLiteral(objectLiteral);
             }
-            else if ((objectProperty = node as ObjectLiteralProperty) != null)
+            if ((objectProperty = node as ObjectLiteralProperty) != null)
             {
                 return ConvertToBindingObjectProperty(objectProperty);
             }
-            else if ((constantWrapper = node as ConstantWrapper) != null
+            if ((constantWrapper = node as ConstantWrapper) != null
                 && constantWrapper.Value == Missing.Value)
             {
                 // must preserve missing constant values in array literals, too
                 return constantWrapper;
             }
-            else if ((importExportSpecifier = node as ImportExportSpecifier) != null)
+            if ((importExportSpecifier = node as ImportExportSpecifier) != null)
             {
                 return ConvertToBindingSpecifier(importExportSpecifier);
             }
@@ -223,17 +223,17 @@ namespace Microsoft.Ajax.Utilities
             if (lookup != null)
             {
                 bindingIdentifier = new BindingIdentifier(lookup.Context)
-                    {
-                        Name = lookup.Name,
-                        VariableField = lookup.VariableField
-                    };
+                {
+                    Name = lookup.Name,
+                    VariableField = lookup.VariableField
+                };
 
                 // the field now has another declaration, and one less reference
-                lookup.VariableField.IfNotNull(v => 
-                    {
-                        v.Declarations.Add(bindingIdentifier);
-                        v.References.Remove(lookup);
-                    });
+                lookup.VariableField.IfNotNull(v =>
+                {
+                    v.Declarations.Add(bindingIdentifier);
+                    v.References.Remove(lookup);
+                });
             }
 
             return bindingIdentifier;
@@ -245,9 +245,9 @@ namespace Microsoft.Ajax.Utilities
             if (arrayLiteral != null)
             {
                 bindingLiteral = new ArrayLiteral(arrayLiteral.Context)
-                    {
-                        TerminatingContext = arrayLiteral.TerminatingContext
-                    };
+                {
+                    TerminatingContext = arrayLiteral.TerminatingContext
+                };
                 if (arrayLiteral.Elements != null)
                 {
                     bindingLiteral.Elements = new AstNodeList(arrayLiteral.Elements.Context);
@@ -267,21 +267,20 @@ namespace Microsoft.Ajax.Utilities
             if (objectLiteral != null)
             {
                 bindingLiteral = new ObjectLiteral(objectLiteral.Context)
-                    {
-                        TerminatingContext = objectLiteral.TerminatingContext
-                    };
+                {
+                    TerminatingContext = objectLiteral.TerminatingContext
+                };
 
                 if (objectLiteral.Properties != null)
                 {
                     bindingLiteral.Properties = new AstNodeList(objectLiteral.Properties.Context);
                     foreach (var property in objectLiteral.Properties)
                     {
-
                         bindingLiteral.Properties.Append(ConvertToBinding(property));
                     }
                 }
             }
-             
+
             return bindingLiteral;
         }
 
@@ -307,12 +306,12 @@ namespace Microsoft.Ajax.Utilities
             if (objectName != null)
             {
                 newName = new ObjectLiteralField(objectName.Name, objectName.PrimitiveType, objectName.Context)
-                    {
-                        IsIdentifier = objectName.IsIdentifier,
-                        ColonContext = objectName.ColonContext,
-                        MayHaveIssues = objectName.MayHaveIssues,
-                        TerminatingContext = objectName.TerminatingContext
-                    };
+                {
+                    IsIdentifier = objectName.IsIdentifier,
+                    ColonContext = objectName.ColonContext,
+                    MayHaveIssues = objectName.MayHaveIssues,
+                    TerminatingContext = objectName.TerminatingContext
+                };
             }
 
             return newName;
@@ -372,9 +371,9 @@ namespace Microsoft.Ajax.Utilities
         private static ParameterDeclaration ConvertToParameter(AstNode node, int position)
         {
             var paramDecl = new ParameterDeclaration(node.Context)
-                {
-                    Position = position
-                };
+            {
+                Position = position
+            };
 
             // check to see if there's a unary spread operator
             var unaryOp = node as UnaryOperator;

@@ -14,15 +14,15 @@
 
 using System.Diagnostics;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Determines whether or not a node needs parentheses around it within a new operator
     /// </summary>
     internal class NewParensVisitor : IVisitor
     {
-        private bool m_needsParens;// = false;
-        private bool m_outerHasNoArguments;
+        private bool m_needsParens; // = false;
+        private readonly bool m_outerHasNoArguments;
 
         public static bool NeedsParens(AstNode expression, bool outerHasNoArguments)
         {

@@ -16,9 +16,8 @@
 
 using System;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     public sealed class GetterSetter : ObjectLiteralField
     {
         public bool IsGetter { get; set; }
@@ -43,4 +42,3 @@ namespace Microsoft.Ajax.Utilities
         }
     }
 }
-

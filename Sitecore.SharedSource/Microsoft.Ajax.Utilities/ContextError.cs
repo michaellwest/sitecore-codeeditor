@@ -18,7 +18,7 @@ using System;
 using System.ComponentModel;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {
     public class ContextError
     {
@@ -157,9 +157,5 @@ namespace Microsoft.Ajax.Utilities
     public class ContextErrorEventArgs : EventArgs
     {
         public ContextError Error { get; set; }
-
-        public ContextErrorEventArgs()
-        {
-        }
     }
 }

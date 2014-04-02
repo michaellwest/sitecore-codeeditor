@@ -16,9 +16,8 @@
 
 using System.Reflection;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     public sealed class CatchScope : BlockScope
     {
         public ParameterDeclaration CatchParameter { get; set; }

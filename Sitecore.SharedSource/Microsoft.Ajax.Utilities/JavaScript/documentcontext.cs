@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class DocumentContext
     {
@@ -41,12 +41,12 @@ namespace Microsoft.Ajax.Utilities
         public DocumentContext Clone()
         {
             return new DocumentContext(this.Source)
-                {
-                    IsGenerated = this.IsGenerated,
-                    FileContext = this.FileContext,
-                    Parser = this.Parser,
-                    m_reportedVariables = this.m_reportedVariables,
-                };
+            {
+                IsGenerated = this.IsGenerated,
+                FileContext = this.FileContext,
+                Parser = this.Parser,
+                m_reportedVariables = this.m_reportedVariables,
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -87,6 +87,5 @@ namespace Microsoft.Ajax.Utilities
             m_reportedVariables.Add(varName, varName);
             return false;
         }
-
     }
 }

@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class ObjectLiteralProperty : AstNode
     {
@@ -70,10 +70,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Name, Value);
-            }
+            get { return EnumerateNonNullNodes(Name, Value); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

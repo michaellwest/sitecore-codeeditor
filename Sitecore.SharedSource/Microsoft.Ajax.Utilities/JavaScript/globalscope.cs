@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class GlobalScope : ActivationObject
     {
@@ -27,14 +27,19 @@ namespace Microsoft.Ajax.Utilities
         // look for a few common prefixes, and the pattern: prefix + Pascal-case identifier.
         // this will allow us to catch things like msRequestAutomationFrame, msmsGetWeakWinRTProperty, mozPaintCount, etc.
         // and will also pick up the dozens of DOM element names like HTMLAnchorElement and HTMLTableColElement.
-        private static Regex s_blanketPrefixes = new Regex(@"^(?:ms|MS|o|webkit|moz|Gecko|HTML)(?:[A-Z][a-z0-9]*)+$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+        private static readonly Regex s_blanketPrefixes =
+            new Regex(@"^(?:ms|MS|o|webkit|moz|Gecko|HTML)(?:[A-Z][a-z0-9]*)+$",
+                RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-        private HashSet<string> m_globalProperties;
-        private HashSet<string> m_globalFunctions;
+        private readonly HashSet<string> m_globalProperties;
+        private readonly HashSet<string> m_globalFunctions;
         private HashSet<string> m_assumedGlobals;
         private HashSet<UndefinedReference> m_undefined;
 
-        public ICollection<UndefinedReference> UndefinedReferences { get { return m_undefined; } }
+        public ICollection<UndefinedReference> UndefinedReferences
+        {
+            get { return m_undefined; }
+        }
 
         internal GlobalScope(CodeSettings settings)
             : base(null, settings)
@@ -42,64 +47,161 @@ namespace Microsoft.Ajax.Utilities
             ScopeType = ScopeType.Global;
 
             // define the Global object's properties, and methods
-            m_globalProperties = new HashSet<string> { 
-                "DOMParser", 
-                "Image", "Infinity", 
-                "JSON", 
+            m_globalProperties = new HashSet<string>
+            {
+                "DOMParser",
+                "Image",
+                "Infinity",
+                "JSON",
                 "Math",
-                "NaN", 
-                "System", 
-                "Windows", "WinJS", 
-                "XMLHttpRequest", 
-                "applicationCache", 
-                "clientInformation", "clipboardData", "closed", "console", 
-                "defaultStatus", "devicePixelRatio", "document", 
-                "event", "external", 
-                "frameElement", "frames", 
-                "history", 
-                "indexedDB", "innerHeight", "innerWidth",
-                "length", "localStorage", "location", 
-                "name", "navigator", 
-                "offscreenBuffering", "opener", "outerHeight", "outerWidth",
-                "pageXOffset", "pageYOffset", "parent", 
-                "screen", "screenLeft", "screenTop", "screenX", "screenY", "self", "sessionStorage", "status", 
-                "top", 
-                "undefined", 
-                "window"};
+                "NaN",
+                "System",
+                "Windows",
+                "WinJS",
+                "XMLHttpRequest",
+                "applicationCache",
+                "clientInformation",
+                "clipboardData",
+                "closed",
+                "console",
+                "defaultStatus",
+                "devicePixelRatio",
+                "document",
+                "event",
+                "external",
+                "frameElement",
+                "frames",
+                "history",
+                "indexedDB",
+                "innerHeight",
+                "innerWidth",
+                "length",
+                "localStorage",
+                "location",
+                "name",
+                "navigator",
+                "offscreenBuffering",
+                "opener",
+                "outerHeight",
+                "outerWidth",
+                "pageXOffset",
+                "pageYOffset",
+                "parent",
+                "screen",
+                "screenLeft",
+                "screenTop",
+                "screenX",
+                "screenY",
+                "self",
+                "sessionStorage",
+                "status",
+                "top",
+                "undefined",
+                "window"
+            };
 
-            m_globalFunctions = new HashSet<string> {
-                "ActiveXObject", "Array", "ArrayBuffer", "ArrayBufferView", 
-                "Boolean", 
-                "DataView", "Date", "Debug", 
-                "Error", "EvalError", "EventSource", 
-                "File", "FileList", "FileReader", "Float32Array", "Float64Array", "Function", 
-                "Int16Array", "Int32Array", "Int8Array", "Iterator", 
+            m_globalFunctions = new HashSet<string>
+            {
+                "ActiveXObject",
+                "Array",
+                "ArrayBuffer",
+                "ArrayBufferView",
+                "Boolean",
+                "DataView",
+                "Date",
+                "Debug",
+                "Error",
+                "EvalError",
+                "EventSource",
+                "File",
+                "FileList",
+                "FileReader",
+                "Float32Array",
+                "Float64Array",
+                "Function",
+                "Int16Array",
+                "Int32Array",
+                "Int8Array",
+                "Iterator",
                 "Map",
-                "Node", "NodeFilter", "NodeIterator", "NodeList", "NodeSelector", "Number", 
-                "Object", 
-                "Proxy", 
-                "RangeError", 
-                "ReferenceError", 
-                "RegExp", 
-                "Set", "SharedWorker", "String", "SyntaxError", 
-                "TypeError", 
-                "Uint8Array", "Uint8ClampedArray", "Uint16Array", "Uint32Array", "URIError", "URL",
-                "WeakMap", "WebSocket", "Worker",
-                "addEventListener", "alert", "attachEvent", 
-                "blur", 
-                "cancelAnimationFrame", "captureEvents", "clearImmediate", "clearInterval", "clearTimeout", "close", "confirm", "createPopup", 
-                "decodeURI", "decodeURIComponent", "detachEvent", "dispatchEvent", 
-                "encodeURI", "encodeURIComponent", "escape", "eval", "execScript", 
-                "focus", 
-                "getComputedStyle", "getSelection", 
-                "importScripts", "isFinite", "isNaN",
-                "matchMedia", "moveBy", "moveTo",
-                "navigate", 
-                "open", 
-                "parseFloat", "parseInt", "postMessage", "prompt", 
-                "releaseEvents", "removeEventListener", "requestAnimationFrame", "resizeBy", "resizeTo", 
-                "scroll", "scrollBy", "scrollTo", "setActive", "setImmediate", "setInterval", "setTimeout", "showModalDialog", "showModelessDialog", "styleMedia",
-                "unescape"};
+                "Node",
+                "NodeFilter",
+                "NodeIterator",
+                "NodeList",
+                "NodeSelector",
+                "Number",
+                "Object",
+                "Proxy",
+                "RangeError",
+                "ReferenceError",
+                "RegExp",
+                "Set",
+                "SharedWorker",
+                "String",
+                "SyntaxError",
+                "TypeError",
+                "Uint8Array",
+                "Uint8ClampedArray",
+                "Uint16Array",
+                "Uint32Array",
+                "URIError",
+                "URL",
+                "WeakMap",
+                "WebSocket",
+                "Worker",
+                "addEventListener",
+                "alert",
+                "attachEvent",
+                "blur",
+                "cancelAnimationFrame",
+                "captureEvents",
+                "clearImmediate",
+                "clearInterval",
+                "clearTimeout",
+                "close",
+                "confirm",
+                "createPopup",
+                "decodeURI",
+                "decodeURIComponent",
+                "detachEvent",
+                "dispatchEvent",
+                "encodeURI",
+                "encodeURIComponent",
+                "escape",
+                "eval",
+                "execScript",
+                "focus",
+                "getComputedStyle",
+                "getSelection",
+                "importScripts",
+                "isFinite",
+                "isNaN",
+                "matchMedia",
+                "moveBy",
+                "moveTo",
+                "navigate",
+                "open",
+                "parseFloat",
+                "parseInt",
+                "postMessage",
+                "prompt",
+                "releaseEvents",
+                "removeEventListener",
+                "requestAnimationFrame",
+                "resizeBy",
+                "resizeTo",
+                "scroll",
+                "scrollBy",
+                "scrollTo",
+                "setActive",
+                "setImmediate",
+                "setInterval",
+                "setTimeout",
+                "showModalDialog",
+                "showModelessDialog",
+                "styleMedia",
+                "unescape"
+            };
         }
 
         public void AddUndefinedReference(UndefinedReference exception)
@@ -117,7 +219,9 @@ namespace Microsoft.Ajax.Utilities
             if (settings != null)
             {
                 // start off with any known globals
-                m_assumedGlobals = settings.KnownGlobalCollection == null ? new HashSet<string>() : new HashSet<string>(settings.KnownGlobalCollection);
+                m_assumedGlobals = settings.KnownGlobalCollection == null
+                    ? new HashSet<string>()
+                    : new HashSet<string>(settings.KnownGlobalCollection);
 
                 // chek to see if there are any debug lookups
                 foreach (var debugLookup in settings.DebugLookupCollection)
@@ -163,7 +267,7 @@ namespace Microsoft.Ajax.Utilities
             // within the page but outside this module.
 
             // traverse through our children scopes
-            foreach (ActivationObject scope in ChildScopes)
+            foreach (var scope in ChildScopes)
             {
                 // don't recurse existing child scopes
                 if (!scope.Existing)
@@ -178,7 +282,7 @@ namespace Microsoft.Ajax.Utilities
             get
             {
                 // check the name table
-                JSVariableField variableField = base[name];
+                var variableField = base[name];
 
                 // not found so far, check the global properties
                 if (variableField == null)
@@ -213,7 +317,8 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        private JSVariableField ResolveFromCollection(string name, HashSet<string> collection, FieldType fieldType, bool isFunction)
+        private JSVariableField ResolveFromCollection(string name, HashSet<string> collection, FieldType fieldType,
+            bool isFunction)
         {
             if (collection.Contains(name))
             {

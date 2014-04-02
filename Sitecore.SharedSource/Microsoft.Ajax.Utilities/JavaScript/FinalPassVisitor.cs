@@ -14,12 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     internal class FinalPassVisitor : TreeVisitor
     {
-        private CodeSettings m_settings;
-        private StatementStartVisitor m_statementStart;
+        private readonly CodeSettings m_settings;
+        private readonly StatementStartVisitor m_statementStart;
 
         private FinalPassVisitor(CodeSettings codeSettings)
         {
@@ -49,7 +49,9 @@ namespace Microsoft.Ajax.Utilities
                     && m_settings.IsModificationAllowed(TreeModifications.UnfoldCommaExpressionStatements)
                     && ((parentBlock = node.Parent as Block) != null)
                     && (parentBlock.Parent == null
-                        || ((functionObject = parentBlock.Parent as FunctionObject) != null && (functionObject.FunctionType != FunctionType.ArrowFunction || parentBlock.Count > 1))
+                        ||
+                        ((functionObject = parentBlock.Parent as FunctionObject) != null &&
+                         (functionObject.FunctionType != FunctionType.ArrowFunction || parentBlock.Count > 1))
                         || parentBlock.Parent is TryNode
                         || parentBlock.Parent is SwitchCase
                         || parentBlock.Count > 1))
@@ -137,7 +139,7 @@ namespace Microsoft.Ajax.Utilities
                             // it after the current node and leave the node list where it is.
                             parentBlock.InsertAfter(node, CreateSplitNodeFromEnd(nodeList, ndx));
                         }
-                        
+
                         // and now that we've broken it, bail.
                         break;
                     }
@@ -168,10 +170,10 @@ namespace Microsoft.Ajax.Utilities
                 nodeList.RemoveAt(ndx);
 
                 newNode = new CommaOperator(left.Context.FlattenToStart())
-                    {
-                        Operand1 = left,
-                        Operand2 = right
-                    };
+                {
+                    Operand1 = left,
+                    Operand2 = right
+                };
             }
             else
             {
@@ -201,10 +203,10 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 newNode = new CommaOperator(left.Context.FlattenToStart())
-                    {
-                        Operand1 = left,
-                        Operand2 = right
-                    };
+                {
+                    Operand1 = left,
+                    Operand2 = right
+                };
             }
 
             return newNode;
@@ -247,7 +249,7 @@ namespace Microsoft.Ajax.Utilities
                 // don't break if the next statement is a function or an object literal
                 return false;
             }
-            else if ((nodeList = node as AstNodeList) != null)
+            if ((nodeList = node as AstNodeList) != null)
             {
                 // if there aren't any operands in the list, we can break this,
                 // otherwise check to see if the first item can be broken.
@@ -267,10 +269,10 @@ namespace Microsoft.Ajax.Utilities
                     && m_settings.IsModificationAllowed(TreeModifications.BooleanLiteralsToNotOperators))
                 {
                     node.Parent.ReplaceChild(node, new UnaryOperator(node.Context)
-                        {
-                            Operand = new ConstantWrapper(node.ToBoolean() ? 0 : 1, PrimitiveType.Number, node.Context),
-                            OperatorToken = JSToken.LogicalNot
-                        });
+                    {
+                        Operand = new ConstantWrapper(node.ToBoolean() ? 0 : 1, PrimitiveType.Number, node.Context),
+                        OperatorToken = JSToken.LogicalNot
+                    });
                 }
             }
         }

@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class TryNode : AstNode
     {
@@ -88,10 +88,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(TryBlock, CatchParameter, CatchBlock, FinallyBlock);
-            }
+            get { return EnumerateNonNullNodes(TryBlock, CatchParameter, CatchBlock, FinallyBlock); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
@@ -104,10 +101,10 @@ namespace Microsoft.Ajax.Utilities
             if (CatchParameter == oldNode)
             {
                 return (newNode as ParameterDeclaration).IfNotNull(p =>
-                    {
-                        CatchParameter = p;
-                        return true;
-                    });
+                {
+                    CatchParameter = p;
+                    return true;
+                });
             }
             if (CatchBlock == oldNode)
             {

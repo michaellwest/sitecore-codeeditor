@@ -16,10 +16,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Standard JSON source map format, version 3
@@ -39,15 +40,15 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>whether we have output a property yet</summary>
         private bool m_hasProperty;
 
-        private HashSet<string> m_sourceFiles;
+        private readonly HashSet<string> m_sourceFiles;
 
-        private List<string> m_sourceFileList;
+        private readonly List<string> m_sourceFileList;
 
-        private HashSet<string> m_names;
+        private readonly HashSet<string> m_names;
 
-        private List<string> m_nameList;
+        private readonly List<string> m_nameList;
 
-        private List<Segment> m_segments;
+        private readonly List<Segment> m_segments;
 
         private int m_lastDestinationLine;
 
@@ -72,20 +73,12 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// Gets or sets an optional source root URI that will be added to the map object as the sourceRoot property if set
         /// </summary>
-        public string SourceRoot
-        {
-            get;
-            set;
-        }
+        public string SourceRoot { get; set; }
 
         /// <summary>
         /// Gets or sets a flag indicating whether or not to prepend the map file with an XSSI (cross-site script injection) protection string
         /// </summary>
-        public bool SafeHeader
-        {
-            get;
-            set;
-        }
+        public bool SafeHeader { get; set; }
 
         public static string ImplementationName
         {
@@ -180,7 +173,7 @@ namespace Microsoft.Ajax.Utilities
             return null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "startLine+1")]
+        [SuppressMessage("Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "startLine+1")]
         public void MarkSegment(AstNode node, int startLine, int startColumn, string name, Context context)
         {
             if (startLine == int.MaxValue)
@@ -305,16 +298,21 @@ namespace Microsoft.Ajax.Utilities
 
         #region GenerateMappings method
 
-        private Segment CreateSegment(int destinationLine, int destinationColumn, int sourceLine, int sourceColumn, string fileName, string symbolName)
+        private Segment CreateSegment(int destinationLine, int destinationColumn, int sourceLine, int sourceColumn,
+            string fileName, string symbolName)
         {
             // create the segment with relative offsets for the destination column, source line, and source column.
             // destination line should be absolute. Destination column resets to absolute whenever the destination line advances.
-            var segment = new Segment()
+            var segment = new Segment
             {
                 DestinationLine = destinationLine,
-                DestinationColumn = m_lastDestinationColumn < 0 || m_lastDestinationLine < destinationLine ? destinationColumn : destinationColumn - m_lastDestinationColumn,
+                DestinationColumn =
+                    m_lastDestinationColumn < 0 || m_lastDestinationLine < destinationLine
+                        ? destinationColumn
+                        : destinationColumn - m_lastDestinationColumn,
                 SourceLine = fileName == null ? -1 : m_lastSourceLine < 0 ? sourceLine : sourceLine - m_lastSourceLine,
-                SourceColumn = fileName == null ? -1 : m_lastSourceColumn < 0 ? sourceColumn : sourceColumn - m_lastSourceColumn,
+                SourceColumn =
+                    fileName == null ? -1 : m_lastSourceColumn < 0 ? sourceColumn : sourceColumn - m_lastSourceColumn,
                 FileName = fileName,
                 SymbolName = symbolName
             };
@@ -346,8 +344,7 @@ namespace Microsoft.Ajax.Utilities
                     do
                     {
                         sb.Append(';');
-                    }
-                    while (++currentLine < segment.DestinationLine);
+                    } while (++currentLine < segment.DestinationLine);
                 }
                 else if (sb.Length > 0)
                 {
@@ -417,8 +414,7 @@ namespace Microsoft.Ajax.Utilities
                 // which we then BASE64 encode and add to the string builder.
                 // and if there's anything left, loop around again.
                 sb.Append(s_base64[digit]);
-            }
-            while (value > 0);
+            } while (value > 0);
         }
 
         #endregion
@@ -535,7 +531,7 @@ namespace Microsoft.Ajax.Utilities
                         if (ch < ' ')
                         {
                             // other control characters must be escaped as \uXXXX
-                            m_writer.Write("\\u{0:x4}", (int)ch);
+                            m_writer.Write("\\u{0:x4}", (int) ch);
                         }
                         else
                         {

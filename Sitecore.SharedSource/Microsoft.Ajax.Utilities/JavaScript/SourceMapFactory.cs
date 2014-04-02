@@ -17,7 +17,7 @@
 using System;
 using System.IO;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public static class SourceMapFactory
     {
@@ -32,11 +32,15 @@ namespace Microsoft.Ajax.Utilities
             ISourceMap implementation = null;
 
             // which implementation to instantiate?
-            if (string.Compare(implementationName, V3SourceMap.ImplementationName, StringComparison.OrdinalIgnoreCase) == 0)
+            if (
+                string.Compare(implementationName, V3SourceMap.ImplementationName, StringComparison.OrdinalIgnoreCase) ==
+                0)
             {
                 implementation = new V3SourceMap(writer);
             }
-            else if (string.Compare(implementationName, ScriptSharpSourceMap.ImplementationName, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (
+                string.Compare(implementationName, ScriptSharpSourceMap.ImplementationName,
+                    StringComparison.OrdinalIgnoreCase) == 0)
             {
                 implementation = new ScriptSharpSourceMap(writer);
             }

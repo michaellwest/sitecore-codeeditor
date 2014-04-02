@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class RegExpLiteral : Expression
     {
@@ -23,10 +23,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override bool IsConstant
         {
-            get
-            {
-                return true;
-            }
+            get { return true; }
         }
 
         public RegExpLiteral(Context context)
@@ -46,8 +43,8 @@ namespace Microsoft.Ajax.Utilities
         {
             var otherRegExp = otherNode as RegExpLiteral;
             return otherRegExp != null
-                && string.CompareOrdinal(Pattern, otherRegExp.Pattern) == 0
-                && string.CompareOrdinal(PatternSwitches, otherRegExp.PatternSwitches) == 0;
+                   && string.CompareOrdinal(Pattern, otherRegExp.Pattern) == 0
+                   && string.CompareOrdinal(PatternSwitches, otherRegExp.PatternSwitches) == 0;
         }
     }
 }

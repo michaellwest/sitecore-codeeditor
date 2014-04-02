@@ -16,10 +16,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {
     public class InvalidSwitchEventArgs : EventArgs
     {
@@ -50,7 +53,7 @@ namespace Microsoft.Ajax.Utilities
         /// Existing files will be overwritten, but existing files marked with the read-only flag will not
         /// </summary>
         Auto = 0,
-        
+
         /// <summary>
         /// Any existing file will be overwritten, regardless of the state of its read-only flag
         /// </summary>
@@ -67,7 +70,7 @@ namespace Microsoft.Ajax.Utilities
     {
         #region private fields
 
-        private bool m_isMono;
+        private readonly bool m_isMono;
         private bool m_noPretty;
 
         #endregion
@@ -174,7 +177,7 @@ namespace Microsoft.Ajax.Utilities
 
         public static string[] ToArguments(string commandLine)
         {
-            List<string> args = new List<string>();
+            var args = new List<string>();
 
             if (!string.IsNullOrEmpty(commandLine))
             {
@@ -232,7 +235,7 @@ namespace Microsoft.Ajax.Utilities
 
                                         // insert a single double-quote into the string builder
                                         sb.Append('"');
-                                        
+
                                         // skip over the quote and start on the NEXT character
                                         start = ++ndx + 1;
                                     }
@@ -260,7 +263,7 @@ namespace Microsoft.Ajax.Utilities
                                 {
                                     break;
                                 }
-                                else if (ch == '"')
+                                if (ch == '"')
                                 {
                                     // we found a start delimiter
                                     inDelimiter = true;
@@ -336,11 +339,13 @@ namespace Microsoft.Ajax.Utilities
         /// Takes an array of arguments and parses the switches into the appropriate settings objects
         /// </summary>
         /// <param name="args"></param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode", Justification="Big switch statement"), 
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Big switch statement")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode",
+            Justification = "Big switch statement"),
+         SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+             Justification = "Big switch statement")]
         public void Parse(string[] args)
         {
-            var listSeparators = new[] { ',', ';' };
+            var listSeparators = new[] {',', ';'};
             if (args != null)
             {
                 var levelSpecified = false;
@@ -356,9 +361,11 @@ namespace Microsoft.Ajax.Utilities
                     // don't use the forward-slash for switches if this is running under the Mono runtime. 
                     // Mono is a .NET for UNIX implementation, and the UNIX OS uses forward slashes as the directory separator.
                     if (thisArg.Length > 1
-                      && (thisArg.StartsWith("-", StringComparison.Ordinal) // this is a normal hyphen (minus character)
-                      || thisArg.StartsWith("–", StringComparison.Ordinal) // this character is what Word will convert a hyphen to
-                      || (!m_isMono && thisArg.StartsWith("/", StringComparison.Ordinal))))
+                        &&
+                        (thisArg.StartsWith("-", StringComparison.Ordinal) // this is a normal hyphen (minus character)
+                         || thisArg.StartsWith("–", StringComparison.Ordinal)
+                            // this character is what Word will convert a hyphen to
+                         || (!m_isMono && thisArg.StartsWith("/", StringComparison.Ordinal))))
                     {
                         // general switch syntax is -switch:param
                         var parts = thisArg.Substring(1).Split(':');
@@ -378,7 +385,8 @@ namespace Microsoft.Ajax.Utilities
                                 ReportFormat = null;
                                 if (paramPartUpper != null)
                                 {
-                                    var items = paramPartUpper.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries);
+                                    var items = paramPartUpper.Split(listSeparators,
+                                        StringSplitOptions.RemoveEmptyEntries);
                                     foreach (var item in items)
                                     {
                                         if (string.CompareOrdinal(item, "OUT") == 0)
@@ -431,7 +439,7 @@ namespace Microsoft.Ajax.Utilities
                             case "BRACES":
                                 if (paramPartUpper == "NEW")
                                 {
-                                    JSSettings.BlocksStartOnSameLine = 
+                                    JSSettings.BlocksStartOnSameLine =
                                         CssSettings.BlocksStartOnSameLine = BlockStart.NewLine;
                                 }
                                 else if (paramPartUpper == "SAME")
@@ -473,7 +481,9 @@ namespace Microsoft.Ajax.Utilities
                                 }
                                 else if (BooleanSwitch(paramPartUpper, true, out parameterFlag))
                                 {
-                                    Clobber = parameterFlag ? ExistingFileTreatment.Overwrite : ExistingFileTreatment.Auto;
+                                    Clobber = parameterFlag
+                                        ? ExistingFileTreatment.Overwrite
+                                        : ExistingFileTreatment.Auto;
                                 }
                                 else
                                 {
@@ -651,7 +661,9 @@ namespace Microsoft.Ajax.Utilities
                                 }
                                 else
                                 {
-                                    foreach (string define in paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
+                                    foreach (
+                                        var define in
+                                            paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
                                     {
                                         string trimmedName;
                                         string value;
@@ -682,7 +694,8 @@ namespace Microsoft.Ajax.Utilities
                                         }
 
                                         // if we're defining the DEBUG name, set the strip-debug-statements flag to false
-                                        if (string.Compare(trimmedName, "DEBUG", StringComparison.OrdinalIgnoreCase) == 0)
+                                        if (string.Compare(trimmedName, "DEBUG", StringComparison.OrdinalIgnoreCase) ==
+                                            0)
                                         {
                                             JSSettings.StripDebugStatements = false;
                                         }
@@ -700,7 +713,7 @@ namespace Microsoft.Ajax.Utilities
                                 }
                                 else
                                 {
-                                    string encoding = args[++ndx];
+                                    var encoding = args[++ndx];
 
                                     // whether this is an in or an out encoding
                                     if (paramPartUpper == "IN")
@@ -830,7 +843,9 @@ namespace Microsoft.Ajax.Utilities
                                 }
                                 else
                                 {
-                                    foreach (string global in paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
+                                    foreach (
+                                        var global in
+                                            paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
                                     {
                                         // better be a valid JavaScript identifier
                                         if (!JSSettings.AddKnownGlobal(global))
@@ -853,7 +868,9 @@ namespace Microsoft.Ajax.Utilities
                                 }
                                 else
                                 {
-                                    foreach (string errorCode in paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
+                                    foreach (
+                                        var errorCode in
+                                            paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
                                     {
                                         if (string.Compare(errorCode, "ALL", StringComparison.OrdinalIgnoreCase) == 0)
                                         {
@@ -880,7 +897,9 @@ namespace Microsoft.Ajax.Utilities
                                 else
                                 {
                                     // for each comma-separated part...
-                                    foreach (var inlinePart in paramPartUpper.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
+                                    foreach (
+                                        var inlinePart in
+                                            paramPartUpper.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
                                     {
                                         if (string.CompareOrdinal(inlinePart, "FORCE") == 0)
                                         {
@@ -1013,7 +1032,9 @@ namespace Microsoft.Ajax.Utilities
                                     if (paramPartUpper.StartsWith("0X", StringComparison.OrdinalIgnoreCase))
                                     {
                                         // it's hex -- convert the number after the "0x"
-                                        if (paramPartUpper.Substring(2).TryParseLongInvariant(NumberStyles.AllowHexSpecifier, out killSwitch))
+                                        if (
+                                            paramPartUpper.Substring(2)
+                                                .TryParseLongInvariant(NumberStyles.AllowHexSpecifier, out killSwitch))
                                         {
                                             // save the switch for both JS and Css
                                             JSSettings.KillSwitch = CssSettings.KillSwitch = killSwitch;
@@ -1030,7 +1051,8 @@ namespace Microsoft.Ajax.Utilities
                                             OnInvalidSwitch(switchPart, paramPart);
                                         }
                                     }
-                                    else if (paramPartUpper.TryParseLongInvariant(NumberStyles.AllowLeadingSign, out killSwitch))
+                                    else if (paramPartUpper.TryParseLongInvariant(NumberStyles.AllowLeadingSign,
+                                        out killSwitch))
                                     {
                                         // save the switch for both JS and CSS
                                         JSSettings.KillSwitch = CssSettings.KillSwitch = killSwitch;
@@ -1057,9 +1079,9 @@ namespace Microsoft.Ajax.Utilities
                                     // if no number specified, use the max default threshold
                                     JSSettings.LineBreakThreshold =
                                         CssSettings.LineBreakThreshold = int.MaxValue - 1000;
-                                    
+
                                     // single-line mode
-                                    JSSettings.OutputMode = 
+                                    JSSettings.OutputMode =
                                         CssSettings.OutputMode = OutputMode.SingleLine;
 
                                     // and four spaces per indent level
@@ -1069,7 +1091,8 @@ namespace Microsoft.Ajax.Utilities
                                 else
                                 {
                                     // split along commas (case-insensitive)
-                                    var lineParts = paramPartUpper.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries);
+                                    var lineParts = paramPartUpper.Split(listSeparators,
+                                        StringSplitOptions.RemoveEmptyEntries);
 
                                     // by default, the line-break index will be 1 (the second option).
                                     // we will change this index to 0 if the first parameter is multi/single
@@ -1126,7 +1149,8 @@ namespace Microsoft.Ajax.Utilities
                                             if (breakIndex > 0)
                                             {
                                                 // second optional part is single or multiple line output
-                                                if (string.IsNullOrEmpty(lineParts[breakIndex]) || lineParts[breakIndex][0] == 'S')
+                                                if (string.IsNullOrEmpty(lineParts[breakIndex]) ||
+                                                    lineParts[breakIndex][0] == 'S')
                                                 {
                                                     // single-line mode
                                                     JSSettings.OutputMode =
@@ -1154,7 +1178,8 @@ namespace Microsoft.Ajax.Utilities
                                                 {
                                                     // get the numeric portion; must be a decimal integer
                                                     int indentSize;
-                                                    if (lineParts[breakIndex].TryParseIntInvariant(NumberStyles.None, out indentSize))
+                                                    if (lineParts[breakIndex].TryParseIntInvariant(NumberStyles.None,
+                                                        out indentSize))
                                                     {
                                                         // same value for JS and CSS.
                                                         // don't need to check for negative, because the tryparse method above does NOT
@@ -1332,7 +1357,9 @@ namespace Microsoft.Ajax.Utilities
                                 }
                                 else if (BooleanSwitch(paramPartUpper, true, out parameterFlag))
                                 {
-                                    Clobber = parameterFlag ? ExistingFileTreatment.Preserve : ExistingFileTreatment.Auto;
+                                    Clobber = parameterFlag
+                                        ? ExistingFileTreatment.Preserve
+                                        : ExistingFileTreatment.Auto;
                                 }
                                 else
                                 {
@@ -1348,7 +1375,9 @@ namespace Microsoft.Ajax.Utilities
                                 }
                                 else
                                 {
-                                    foreach (string ident in paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
+                                    foreach (
+                                        var ident in
+                                            paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries))
                                     {
                                         // better be a valid JavaScript identifier
                                         if (!JSSettings.AddNoAutoRename(ident))
@@ -1430,7 +1459,7 @@ namespace Microsoft.Ajax.Utilities
 
                                 // and some other flags for pretty-mode
                                 JSSettings.OutputMode = CssSettings.OutputMode = OutputMode.MultipleLines;
-                                CssSettings.KillSwitch = ~((long)TreeModifications.PreserveImportantComments);
+                                CssSettings.KillSwitch = ~((long) TreeModifications.PreserveImportantComments);
 
                                 // optional integer switch argument
                                 if (paramPartUpper != null)
@@ -1444,7 +1473,7 @@ namespace Microsoft.Ajax.Utilities
                                         // allow for a sign -- no sign, no negative.
                                         JSSettings.IndentSize = CssSettings.IndentSize = indentSize;
                                     }
-                                    else 
+                                    else
                                     {
                                         OnInvalidSwitch(switchPart, paramPart);
                                     }
@@ -1468,7 +1497,8 @@ namespace Microsoft.Ajax.Utilities
 
                                     // there is at least one equal sign -- treat this as a set of JS identifier
                                     // pairs. split on commas -- multiple pairs can be specified
-                                    var paramPairs = paramPart.Split(listSeparators, StringSplitOptions.RemoveEmptyEntries);
+                                    var paramPairs = paramPart.Split(listSeparators,
+                                        StringSplitOptions.RemoveEmptyEntries);
                                     foreach (var paramPair in paramPairs)
                                     {
                                         // split on the equal sign -- each pair needs to have an equal sige
@@ -1477,8 +1507,8 @@ namespace Microsoft.Ajax.Utilities
                                         {
                                             // there is an equal sign. The first part is the source name and the
                                             // second part is the new name to which to rename those entities.
-                                            string fromIdentifier = pairParts[0];
-                                            string toIdentifier = pairParts[1];
+                                            var fromIdentifier = pairParts[0];
+                                            var toIdentifier = pairParts[1];
 
                                             // make sure both parts are valid JS identifiers
                                             var fromIsValid = JSScanner.IsValidIdentifier(fromIdentifier);
@@ -1738,9 +1768,9 @@ namespace Microsoft.Ajax.Utilities
                                 levelSpecified = true;
                                 break;
 
-                            //
-                            // Backward-compatibility switches different from new switches
-                            //
+                                //
+                                // Backward-compatibility switches different from new switches
+                                //
 
                             case "D":
                                 // if the -pretty switch has been specified, we have an incompatible set of switches.
@@ -1880,7 +1910,7 @@ namespace Microsoft.Ajax.Utilities
                                     CssSettings.TermSemicolons = true;
                                 break;
 
-                            // end backward-compatible section
+                                // end backward-compatible section
 
                             default:
                                 ndx = OnUnknownParameter(args, ndx, switchPart, paramPart);
@@ -1900,7 +1930,8 @@ namespace Microsoft.Ajax.Utilities
 
         #region event handler overrides
 
-        protected virtual int OnUnknownParameter(IList<string> arguments, int index, string switchPart, string parameterPart)
+        protected virtual int OnUnknownParameter(IList<string> arguments, int index, string switchPart,
+            string parameterPart)
         {
             if (UnknownParameter != null)
             {
@@ -1929,7 +1960,7 @@ namespace Microsoft.Ajax.Utilities
         {
             if (InvalidSwitch != null)
             {
-                InvalidSwitch(this, new InvalidSwitchEventArgs() { SwitchPart = switchPart, ParameterPart = parameterPart });
+                InvalidSwitch(this, new InvalidSwitchEventArgs {SwitchPart = switchPart, ParameterPart = parameterPart});
             }
         }
 
@@ -1974,7 +2005,8 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification="duly noted")]
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "duly noted"
+            )]
         public static bool BooleanSwitch(string booleanText, bool defaultValue, out bool booleanValue)
         {
             // assume it's valid unless proven otherwise
@@ -2025,7 +2057,7 @@ namespace Microsoft.Ajax.Utilities
             // later with an explcit kill switch.
             if (!killSpecified && JSSettings.KillSwitch != 0)
             {
-                JSSettings.KillSwitch &= ~((long)TreeModifications.LocalRenaming);
+                JSSettings.KillSwitch &= ~((long) TreeModifications.LocalRenaming);
             }
         }
 

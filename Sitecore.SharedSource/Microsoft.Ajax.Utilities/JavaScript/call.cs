@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class CallNode : Expression
     {
@@ -46,17 +46,9 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        public bool IsConstructor
-        {
-            get;
-            set;
-        }
+        public bool IsConstructor { get; set; }
 
-        public bool InBrackets
-        {
-            get;
-            set;
-        }
+        public bool InBrackets { get; set; }
 
         public CallNode(Context context)
             : base(context)
@@ -85,7 +77,7 @@ namespace Microsoft.Ajax.Utilities
                 // calls to any member operator where the property name starts with "on" and
                 // we are passing in arguments as if it were NOT an expression, and it won't
                 // get combined.
-                Member callMember = Function as Member;
+                var callMember = Function as Member;
                 if (callMember != null
                     && callMember.Name.StartsWith("on", StringComparison.Ordinal)
                     && Arguments.Count > 0)
@@ -109,10 +101,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Function, Arguments);
-            }
+            get { return EnumerateNonNullNodes(Function, Arguments); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
@@ -130,15 +119,12 @@ namespace Microsoft.Ajax.Utilities
                     Arguments = null;
                     return true;
                 }
-                else
+                // if the new node isn't an AstNodeList, ignore it
+                var newList = newNode as AstNodeList;
+                if (newList != null)
                 {
-                    // if the new node isn't an AstNodeList, ignore it
-                    var newList = newNode as AstNodeList;
-                    if (newList != null)
-                    {
-                        Arguments = newList;
-                        return true;
-                    }
+                    Arguments = newList;
+                    return true;
                 }
             }
             return false;
@@ -159,10 +145,10 @@ namespace Microsoft.Ajax.Utilities
             // are all equivalent (and be sure to check for brackets and constructor)
             var otherCall = otherNode as CallNode;
             return otherCall != null
-                && this.InBrackets == otherCall.InBrackets
-                && this.IsConstructor == otherCall.IsConstructor
-                && this.Function.IsEquivalentTo(otherCall.Function)
-                && this.Arguments.IsEquivalentTo(otherCall.Arguments);
+                   && this.InBrackets == otherCall.InBrackets
+                   && this.IsConstructor == otherCall.IsConstructor
+                   && this.Function.IsEquivalentTo(otherCall.Function)
+                   && this.Arguments.IsEquivalentTo(otherCall.Arguments);
         }
     }
 }

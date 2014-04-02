@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class ModuleDeclaration : AstNode, IModuleReference
     {
@@ -89,17 +89,18 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(m_binding, m_body);
-            }
+            get { return EnumerateNonNullNodes(m_binding, m_body); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
         {
             if (Binding == oldNode)
             {
-                return (newNode as BindingIdentifier).IfNotNull(b => { Binding = b; return true; });
+                return (newNode as BindingIdentifier).IfNotNull(b =>
+                {
+                    Binding = b;
+                    return true;
+                });
             }
 
             if (Body == oldNode)

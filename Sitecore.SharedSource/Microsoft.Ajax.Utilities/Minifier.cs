@@ -19,8 +19,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {
     /// <summary>
     /// Minifier class for quick minification of JavaScript or Stylesheet code without needing to
@@ -35,24 +37,22 @@ namespace Microsoft.Ajax.Utilities
         /// Warning level threshold for reporting errors.
         /// Default value is zero: syntax/run-time errors.
         /// </summary>
-        public int WarningLevel
-        {
-            get; set;
-        }
+        public int WarningLevel { get; set; }
 
         /// <summary>
         /// File name to use in error reporting.
         /// Default value is null: use Minify... method name.
         /// </summary>
-        public string FileName
-        {
-            get; set;
-        }
+        public string FileName { get; set; }
 
         /// <summary>
         /// Collection of ContextError objects found during minification process
         /// </summary>
-        public ICollection<ContextError> ErrorList { get { return m_errorList; } }
+        public ICollection<ContextError> ErrorList
+        {
+            get { return m_errorList; }
+        }
+
         private List<ContextError> m_errorList; // = null;
 
         /// <summary>
@@ -60,8 +60,8 @@ namespace Microsoft.Ajax.Utilities
         /// </summary>
         public ICollection<string> Errors
         {
-            get 
-            { 
+            get
+            {
                 var errorList = new List<string>(ErrorList.Count);
                 foreach (var error in ErrorList)
                 {
@@ -118,7 +118,8 @@ namespace Microsoft.Ajax.Utilities
                     }
 
                     // parse the input
-                    var scriptBlock = parser.Parse(new DocumentContext(source) { FileContext = this.FileName }, codeSettings);
+                    var scriptBlock = parser.Parse(new DocumentContext(source) {FileContext = this.FileName},
+                        codeSettings);
                     if (scriptBlock != null && !preprocessOnly)
                     {
                         // we'll return the crunched code
@@ -128,12 +129,12 @@ namespace Microsoft.Ajax.Utilities
                             // that specifically returns valid JSON.
                             if (!JSONOutputVisitor.Apply(stringWriter, scriptBlock, codeSettings))
                             {
-                                m_errorList.Add(new ContextError()
-                                    {
-                                        Severity = 0,
-                                        File = this.FileName,
-                                        Message = CommonStrings.InvalidJSONOutput,
-                                    });
+                                m_errorList.Add(new ContextError
+                                {
+                                    Severity = 0,
+                                    File = this.FileName,
+                                    Message = CommonStrings.InvalidJSONOutput,
+                                });
                             }
                         }
                         else
@@ -148,12 +149,12 @@ namespace Microsoft.Ajax.Utilities
             }
             catch (Exception e)
             {
-                m_errorList.Add(new ContextError()
-                    {
-                        Severity = 0,
-                        File = this.FileName,
-                        Message = e.Message,
-                    });
+                m_errorList.Add(new ContextError
+                {
+                    Severity = 0,
+                    File = this.FileName,
+                    Message = e.Message,
+                });
                 throw;
             }
 
@@ -201,12 +202,12 @@ namespace Microsoft.Ajax.Utilities
         public string MinifyStyleSheet(string source, CssSettings settings, CodeSettings scriptSettings)
         {
             // initialize some values, including the error list (which shoudl start off empty)
-            string minifiedResults = string.Empty;
+            var minifiedResults = string.Empty;
             m_errorList = new List<ContextError>();
 
             // create the parser object and if we specified some settings,
             // use it to set the Parser's settings object
-            CssParser parser = new CssParser();
+            var parser = new CssParser();
             parser.FileContext = FileName;
 
             if (settings != null)
@@ -220,7 +221,7 @@ namespace Microsoft.Ajax.Utilities
             }
 
             // hook the error handler
-            parser.CssError += new EventHandler<ContextErrorEventArgs>(OnCssError);
+            parser.CssError += OnCssError;
 
             // try parsing the source and return the results
             try
@@ -229,17 +230,18 @@ namespace Microsoft.Ajax.Utilities
             }
             catch (Exception e)
             {
-                m_errorList.Add(new ContextError()
-                    {
-                        Severity = 0,
-                        File = this.FileName,
-                        Message = e.Message,
-                    });
+                m_errorList.Add(new ContextError
+                {
+                    Severity = 0,
+                    File = this.FileName,
+                    Message = e.Message,
+                });
                 throw;
             }
             return minifiedResults;
         }
 #endif
+
         #endregion
 
         #region Error-handling Members

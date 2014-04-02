@@ -16,9 +16,8 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     public sealed class IfNode : AstNode
     {
         private AstNode m_condition;
@@ -100,17 +99,14 @@ namespace Microsoft.Ajax.Utilities
 
         public void SwapBranches()
         {
-            Block temp = m_trueBlock;
+            var temp = m_trueBlock;
             m_trueBlock = m_falseBlock;
             m_falseBlock = temp;
         }
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Condition, TrueBlock, FalseBlock);
-            }
+            get { return EnumerateNonNullNodes(Condition, TrueBlock, FalseBlock); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
@@ -142,12 +138,12 @@ namespace Microsoft.Ajax.Utilities
             {
                 return FalseBlock.EncloseBlock(type);
             }
-            else if (type == EncloseBlockType.IfWithoutElse)
+            if (type == EncloseBlockType.IfWithoutElse)
             {
                 // there is no else branch -- we might have to enclose the outer block
                 return true;
             }
-            else if (TrueBlock != null)
+            if (TrueBlock != null)
             {
                 return TrueBlock.EncloseBlock(type);
             }

@@ -14,12 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+using System.Diagnostics.CodeAnalysis;
+
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Summary description for variablestatement.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "AST statement")]
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "AST statement")]
     public sealed class Var : Declaration
     {
         public Var(Context context)

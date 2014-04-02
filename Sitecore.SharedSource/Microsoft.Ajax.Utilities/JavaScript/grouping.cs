@@ -14,10 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
-{
-    using System.Collections.Generic;
+using System.Collections.Generic;
 
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
+{
     /// <summary>
     /// Implementation of parenthetical '(' expr ')' operators
     /// </summary>
@@ -58,18 +58,12 @@ namespace Microsoft.Ajax.Utilities
 
         public override OperatorPrecedence Precedence
         {
-            get
-            {
-                return OperatorPrecedence.Primary;
-            }
+            get { return OperatorPrecedence.Primary; }
         }
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Operand);
-            }
+            get { return EnumerateNonNullNodes(Operand); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
@@ -90,15 +84,12 @@ namespace Microsoft.Ajax.Utilities
             // parentheses, so maybe it'd still be the equivalent, no?
             var otherGroup = otherNode as GroupingOperator;
             return (otherGroup != null && Operand.IsEquivalentTo(otherGroup.Operand))
-                || Operand.IsEquivalentTo(otherNode);
+                   || Operand.IsEquivalentTo(otherNode);
         }
 
         public override bool IsConstant
         {
-            get
-            {
-                return Operand.IfNotNull(o => o.IsConstant);
-            }
+            get { return Operand.IfNotNull(o => o.IsConstant); }
         }
 
         public override string ToString()

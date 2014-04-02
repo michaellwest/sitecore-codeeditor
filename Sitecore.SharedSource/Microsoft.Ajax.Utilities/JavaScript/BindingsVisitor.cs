@@ -16,12 +16,12 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class BindingsVisitor : IVisitor
     {
-        private IList<BindingIdentifier> m_bindings;
-        private IList<Lookup> m_lookups;
+        private readonly IList<BindingIdentifier> m_bindings;
+        private readonly IList<Lookup> m_lookups;
 
         private BindingsVisitor()
         {

@@ -14,12 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities.Configuration
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Xml;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Xml;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript;
 
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
+{
     public static class ManifestFactory
     {
         #region constants
@@ -93,7 +95,7 @@ namespace Microsoft.Ajax.Utilities.Configuration
 
         #region private read methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private static OutputGroup ReadOutputElement(XmlReader reader)
         {
             var outputNode = new OutputGroup();
@@ -133,7 +135,7 @@ namespace Microsoft.Ajax.Utilities.Configuration
                                 break;
 
                             case MapPathAttributeName:
-                                outputNode.SymbolMap = new SymbolMap()
+                                outputNode.SymbolMap = new SymbolMap
                                 {
                                     Path = reader.Value
                                 };
@@ -185,7 +187,7 @@ namespace Microsoft.Ajax.Utilities.Configuration
         {
             string fromIdentifier = null;
             string toIdentifier = null;
-            
+
             reader.Read();
             while (reader.MoveToNextAttribute())
             {
@@ -408,7 +410,7 @@ namespace Microsoft.Ajax.Utilities.Configuration
 
     public class Manifest
     {
-        public IDictionary<string,string> DefaultArguments { get; private set; }
+        public IDictionary<string, string> DefaultArguments { get; private set; }
         public IDictionary<string, string> RenameIdentifiers { get; private set; }
         public ICollection<string> NoRenameIdentifiers { get; private set; }
         public IList<OutputGroup> Outputs { get; private set; }

@@ -16,9 +16,8 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     public sealed class ForNode : IterationStatement
     {
         private AstNode m_initializer;
@@ -96,10 +95,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Initializer, Condition, Incrementer, Body);
-            }
+            get { return EnumerateNonNullNodes(Initializer, Condition, Incrementer, Body); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class ForIn : IterationStatement
     {
@@ -73,10 +73,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Variable, Collection, Body);
-            }
+            get { return EnumerateNonNullNodes(Variable, Collection, Body); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

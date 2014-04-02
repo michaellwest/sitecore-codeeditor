@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// This visitor has a Match method that takes a node and an string representing an identifier list separated by periods: IDENT(.IDENT)*
@@ -24,10 +24,6 @@ namespace Microsoft.Ajax.Utilities
         private string[] m_parts;
         private bool m_isMatch;
         private int m_index;
-
-        public MatchPropertiesVisitor()
-        {
-        }
 
         public bool Match(AstNode node, string identifiers)
         {
@@ -114,8 +110,8 @@ namespace Microsoft.Ajax.Utilities
             {
                 // see if the name matches; and if there is a field, it should be a global
                 if (string.CompareOrdinal(node.Name, m_parts[0]) == 0
-                    && (node.VariableField == null || node.VariableField.FieldType == FieldType.UndefinedGlobal 
-                    || node.VariableField.FieldType == FieldType.Global))
+                    && (node.VariableField == null || node.VariableField.FieldType == FieldType.UndefinedGlobal
+                        || node.VariableField.FieldType == FieldType.Global))
                 {
                     // match!
                     m_isMatch = true;

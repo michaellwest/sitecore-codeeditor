@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class UnaryOperator : Expression
     {
@@ -92,10 +92,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Operand);
-            }
+            get { return EnumerateNonNullNodes(Operand); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
@@ -112,22 +109,19 @@ namespace Microsoft.Ajax.Utilities
         {
             var otherUnary = otherNode as UnaryOperator;
             return otherUnary != null
-                && OperatorToken == otherUnary.OperatorToken
-                && Operand.IsEquivalentTo(otherUnary.Operand);
+                   && OperatorToken == otherUnary.OperatorToken
+                   && Operand.IsEquivalentTo(otherUnary.Operand);
         }
 
         public override bool IsConstant
         {
-            get
-            {
-                return Operand.IfNotNull(o => o.IsConstant);
-            }
+            get { return Operand.IfNotNull(o => o.IsConstant); }
         }
 
         public override string ToString()
         {
             return OutputVisitor.OperatorString(OperatorToken)
-                + (Operand == null ? "<null>" : Operand.ToString());
+                   + (Operand == null ? "<null>" : Operand.ToString());
         }
     }
 }

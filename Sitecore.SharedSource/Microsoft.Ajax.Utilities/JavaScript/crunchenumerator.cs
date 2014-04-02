@@ -18,11 +18,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class CrunchEnumerator
     {
-        private HashSet<string> m_skipNames;
+        private readonly HashSet<string> m_skipNames;
         private int m_currentName = -1;
 
         // this first set of characters is broken out from the second set because the allowed first-characters
@@ -30,11 +30,23 @@ namespace Microsoft.Ajax.Utilities
         // be the same. For instance, names can't start with numbers, but they can contain numbers after the first char.
         // we're actually going to tune these two sets rather than just have the max allowed because we want to 
         // make the final g-zipped results smaller.
-        private static string s_varFirstLetters = "ntirufeoshclavypwbkdg";//"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_$";
-        public static string FirstLetters { get { return s_varFirstLetters; } set { s_varFirstLetters = value; } }
+        private static string s_varFirstLetters = "ntirufeoshclavypwbkdg";
+            //"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_$";
 
-        private static string s_varPartLetters  = "tirufeoshclavypwbkdgn";//"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$";
-        public static string PartLetters { get { return s_varPartLetters ?? s_varFirstLetters; } set { s_varPartLetters = value; } }     
+        public static string FirstLetters
+        {
+            get { return s_varFirstLetters; }
+            set { s_varFirstLetters = value; }
+        }
+
+        private static string s_varPartLetters = "tirufeoshclavypwbkdgn";
+            //"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$";
+
+        public static string PartLetters
+        {
+            get { return s_varPartLetters ?? s_varFirstLetters; }
+            set { s_varPartLetters = value; }
+        }
 
         internal CrunchEnumerator(IEnumerable<string> avoidNames)
         {
@@ -52,17 +64,13 @@ namespace Microsoft.Ajax.Utilities
                 name = CurrentName;
                 // keep advancing until we find one that isn't in the skip list or a keyword
                 // (use strict mode to be safe)
-            }
-            while (m_skipNames.Contains(name) || JSScanner.IsKeyword(name, true));
+            } while (m_skipNames.Contains(name) || JSScanner.IsKeyword(name, true));
             return name;
         }
 
         private string CurrentName
         {
-            get
-            {
-                return GenerateNameFromNumber(m_currentName);
-            }
+            get { return GenerateNameFromNumber(m_currentName); }
         }
 
         public static string CrunchedLabel(int nestLevel)
@@ -93,7 +101,7 @@ namespace Microsoft.Ajax.Utilities
         /// <returns>minified variable name</returns>
         public static string GenerateNameFromNumber(int index)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             // this REALLY needs some 'splainin.
             // first off, we want to use a different set of characters for the first digit
@@ -119,13 +127,13 @@ namespace Microsoft.Ajax.Utilities
             // we can go through before we need to increase the number of digits again.
             if (index >= 0)
             {
-                sb.Append(s_varFirstLetters[index % s_varFirstLetters.Length]);
+                sb.Append(s_varFirstLetters[index%s_varFirstLetters.Length]);
                 index /= s_varFirstLetters.Length;
 
                 // this is where we substract the one after our division to get the next character (if any)
                 while (--index >= 0)
                 {
-                    sb.Append(s_varPartLetters[index % s_varPartLetters.Length]);
+                    sb.Append(s_varPartLetters[index%s_varPartLetters.Length]);
                     index /= s_varPartLetters.Length;
                 }
             }
@@ -147,7 +155,9 @@ namespace Microsoft.Ajax.Utilities
         // singleton instance
         public static readonly IComparer<JSVariableField> Instance = new ReferenceComparer();
         // never instantiate outside this class
-        private ReferenceComparer() { }
+        private ReferenceComparer()
+        {
+        }
 
         #region IComparer<JSVariableField> Members
 

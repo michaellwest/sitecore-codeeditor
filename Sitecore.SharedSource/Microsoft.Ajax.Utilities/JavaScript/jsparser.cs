@@ -17,11 +17,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public enum ScriptVersion
     {
@@ -33,7 +34,7 @@ namespace Microsoft.Ajax.Utilities
     /// <summary>
     /// Class used to parse JavaScript source code into an abstract syntax tree.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public class JSParser
     {
         #region private fields
@@ -44,12 +45,12 @@ namespace Microsoft.Ajax.Utilities
 
         private bool m_newModule;
 
-        private CodeSettings m_settings;// = null;
+        private CodeSettings m_settings; // = null;
 
         private bool m_foundEndOfLine;
-        private IList<Context> m_importantComments;
+        private readonly IList<Context> m_importantComments;
 
-        private Dictionary<string, LabelInfo> m_labelInfo;
+        private readonly Dictionary<string, LabelInfo> m_labelInfo;
 
         #endregion
 
@@ -57,10 +58,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Context CurrentPositionContext
         {
-            get
-            {
-                return m_currentToken.FlattenToStart();
-            }
+            get { return m_currentToken.FlattenToStart(); }
         }
 
         #endregion
@@ -132,7 +130,11 @@ namespace Microsoft.Ajax.Utilities
         /// Gets the array of timing points from a Parse run
         /// </summary>
         private long[] m_timingPoints;
-        public IList<long> TimingPoints { get { return m_timingPoints; } }
+
+        public IList<long> TimingPoints
+        {
+            get { return m_timingPoints; }
+        }
 
         #endregion
 
@@ -239,7 +241,9 @@ namespace Microsoft.Ajax.Utilities
         /// </summary>
         /// <param name="settings">code settings to use to process the source code</param>
         /// <returns>root Block node representing the top-level statements</returns>
-        [Obsolete("This method will be removed in version 6. Please use the default constructor and use a Parse override that is passed the source.", false)]
+        [Obsolete(
+            "This method will be removed in version 6. Please use the default constructor and use a Parse override that is passed the source.",
+            false)]
         public Block Parse(CodeSettings settings)
         {
             if (m_scanner == null)
@@ -326,9 +330,9 @@ namespace Microsoft.Ajax.Utilities
                     // a larger structure, and we could return a different block that we would need
                     // to continue processing.
                     scriptBlock = returnBlock = ParseStatements(new Block(CurrentPositionContext)
-                        {
-                            EnclosingScope = this.GlobalScope
-                        });
+                    {
+                        EnclosingScope = this.GlobalScope
+                    });
                     break;
 
                 case JavaScriptSourceMode.Module:
@@ -336,17 +340,17 @@ namespace Microsoft.Ajax.Utilities
                     // create a root block with the global scope, add a module with its module body,
                     // then parse the input as statements into the module body.
                     returnBlock = scriptBlock = new Block(CurrentPositionContext)
-                        {
-                            EnclosingScope = this.GlobalScope
-                        };
+                    {
+                        EnclosingScope = this.GlobalScope
+                    };
                     var module = new ModuleDeclaration(CurrentPositionContext)
+                    {
+                        IsImplicit = true,
+                        Body = new Block(CurrentPositionContext)
                         {
-                            IsImplicit = true,
-                            Body = new Block(CurrentPositionContext)
-                                {
-                                    IsModule = true
-                                }
-                        };
+                            IsModule = true
+                        }
+                    };
                     scriptBlock.Append(module);
 
                     // we just created an implicit ES6 module, so we are already parsing as ES6
@@ -361,9 +365,9 @@ namespace Microsoft.Ajax.Utilities
                     // create a block, get the first token, add in the parse of a single expression, 
                     // and we'll go fron there.
                     returnBlock = scriptBlock = new Block(CurrentPositionContext)
-                        {
-                            EnclosingScope = this.GlobalScope
-                        };
+                    {
+                        EnclosingScope = this.GlobalScope
+                    };
                     try
                     {
                         var expr = ParseExpression();
@@ -385,26 +389,26 @@ namespace Microsoft.Ajax.Utilities
                     // function expression. We're going to resolve the global block, but only return the body
                     // of the function.
                     scriptBlock = new Block(CurrentPositionContext)
-                        {
-                            EnclosingScope = this.GlobalScope
-                        };
+                    {
+                        EnclosingScope = this.GlobalScope
+                    };
 
                     var parameters = new AstNodeList(CurrentPositionContext);
                     parameters.Append(new ParameterDeclaration(CurrentPositionContext)
+                    {
+                        Binding = new BindingIdentifier(CurrentPositionContext)
                         {
-                            Binding = new BindingIdentifier(CurrentPositionContext)
-                            {
-                                Name = "event",
-                                RenameNotAllowed = true
-                            }
-                        });
+                            Name = "event",
+                            RenameNotAllowed = true
+                        }
+                    });
 
                     var funcExpression = new FunctionObject(CurrentPositionContext)
-                        {
-                            FunctionType = FunctionType.Expression,
-                            ParameterDeclarations = parameters,
-                            Body = new Block(CurrentPositionContext)
-                        };
+                    {
+                        FunctionType = FunctionType.Expression,
+                        ParameterDeclarations = parameters,
+                        Body = new Block(CurrentPositionContext)
+                    };
                     scriptBlock.Append(funcExpression);
                     ParseFunctionBody(funcExpression.Body);
 
@@ -517,10 +521,10 @@ namespace Microsoft.Ajax.Utilities
                 // format the error code
                 if (m_settings != null && !m_settings.IgnoreErrorCollection.Contains(se.ErrorCode))
                 {
-                    CompilerError(this, new ContextErrorEventArgs()
-                        {
-                            Error = se
-                        });
+                    CompilerError(this, new ContextErrorEventArgs
+                    {
+                        Error = se
+                    });
                 }
             }
         }
@@ -548,7 +552,7 @@ namespace Microsoft.Ajax.Utilities
             try
             {
                 var possibleDirectivePrologue = true;
-                int lastEndPosition = m_currentToken.EndPosition;
+                var lastEndPosition = m_currentToken.EndPosition;
                 while (m_currentToken.IsNot(JSToken.EndOfFile))
                 {
                     AstNode ast = null;
@@ -567,9 +571,9 @@ namespace Microsoft.Ajax.Utilities
                             {
                                 // use a directive prologue node instead
                                 ast = new DirectivePrologue(constantWrapper.Value.ToString(), ast.Context)
-                                    {
-                                        MayHaveIssues = constantWrapper.MayHaveIssues
-                                    };
+                                {
+                                    MayHaveIssues = constantWrapper.MayHaveIssues
+                                };
                             }
                         }
                         else if (!m_newModule)
@@ -605,18 +609,18 @@ namespace Microsoft.Ajax.Utilities
                                 // create a new block that has the global scope and remove the
                                 // global scope from this block
                                 returnBlock = new Block(block.Context.Clone())
-                                    {
-                                        EnclosingScope = block.EnclosingScope
-                                    };
+                                {
+                                    EnclosingScope = block.EnclosingScope
+                                };
                                 block.EnclosingScope = null;
 
                                 // add a new implicit module declaration to the new global block, with the block
                                 // we've been processing as its body. we'll return the new global block.
                                 returnBlock.Append(new ModuleDeclaration(new Context(m_currentToken.Document))
-                                    {
-                                        IsImplicit = true,
-                                        Body = block,
-                                    });
+                                {
+                                    IsImplicit = true,
+                                    Body = block,
+                                });
                             }
                         }
 
@@ -636,7 +640,6 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 AppendImportantComments(block);
-
             }
             catch (EndOfStreamException)
             {
@@ -681,7 +684,7 @@ namespace Microsoft.Ajax.Utilities
         // ParseStatement deals with the end of statement issue (EOL vs ';') so if any of the
         // ParseXXX routine does it as well, it should return directly from the switch statement
         // without any further execution in the ParseStatement
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private AstNode ParseStatement(bool fSourceElement, bool skipImportantComment = false)
         {
             AstNode statement = null;
@@ -867,7 +870,8 @@ namespace Microsoft.Ajax.Utilities
                             // module. Let's make it a DirectivePrologue if it isn't already
                             if (!(statement is DirectivePrologue))
                             {
-                                statement = new DirectivePrologue(constantWrapper.Value.ToString(), constantWrapper.Context)
+                                statement = new DirectivePrologue(constantWrapper.Value.ToString(),
+                                    constantWrapper.Context)
                                 {
                                     MayHaveIssues = constantWrapper.MayHaveIssues
                                 };
@@ -886,7 +890,8 @@ namespace Microsoft.Ajax.Utilities
 
                     lookup = statement as Lookup;
                     if (lookup != null
-                        && lookup.Name.StartsWith("<%=", StringComparison.Ordinal) && lookup.Name.EndsWith("%>", StringComparison.Ordinal))
+                        && lookup.Name.StartsWith("<%=", StringComparison.Ordinal) &&
+                        lookup.Name.EndsWith("%>", StringComparison.Ordinal))
                     {
                         // single lookup, but it's actually one or more ASP.NET blocks.
                         // convert back to an asp.net block node
@@ -938,7 +943,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 // zero-based nest level corresponds to how many labels we are working with
                 // so far. and a zero reference count
-                labelInfo = new LabelInfo { NestLevel = m_labelInfo.Count, RefCount = 0 };
+                labelInfo = new LabelInfo {NestLevel = m_labelInfo.Count, RefCount = 0};
                 m_labelInfo.Add(id, labelInfo);
             }
 
@@ -981,8 +986,8 @@ namespace Microsoft.Ajax.Utilities
 
         private AstNode ParseStatementLevelConditionalComment(bool fSourceElement)
         {
-            Context context = m_currentToken.Clone();
-            ConditionalCompilationComment conditionalComment = new ConditionalCompilationComment(context);
+            var context = m_currentToken.Clone();
+            var conditionalComment = new ConditionalCompilationComment(context);
 
             GetNextToken();
             while (m_currentToken.IsNot(JSToken.ConditionalCommentEnd) && m_currentToken.IsNot(JSToken.EndOfFile))
@@ -1008,7 +1013,7 @@ namespace Microsoft.Ajax.Utilities
 
         private ConditionalCompilationSet ParseConditionalCompilationSet()
         {
-            Context context = m_currentToken.Clone();
+            var context = m_currentToken.Clone();
             string variableName = null;
             AstNode value = null;
             GetNextToken();
@@ -1042,15 +1047,15 @@ namespace Microsoft.Ajax.Utilities
             }
 
             return new ConditionalCompilationSet(context)
-                {
-                    VariableName = variableName,
-                    Value = value
-                };
+            {
+                VariableName = variableName,
+                Value = value
+            };
         }
 
         private ConditionalCompilationStatement ParseConditionalCompilationIf(bool isElseIf)
         {
-            Context context = m_currentToken.Clone();
+            var context = m_currentToken.Clone();
             AstNode condition = null;
             GetNextToken();
             if (m_currentToken.Is(JSToken.LeftParenthesis))
@@ -1085,15 +1090,15 @@ namespace Microsoft.Ajax.Utilities
             if (isElseIf)
             {
                 return new ConditionalCompilationElseIf(context)
-                    {
-                        Condition = condition
-                    };
-            }
-
-            return new ConditionalCompilationIf(context)
                 {
                     Condition = condition
                 };
+            }
+
+            return new ConditionalCompilationIf(context)
+            {
+                Condition = condition
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -1108,10 +1113,10 @@ namespace Microsoft.Ajax.Utilities
             // when we encounter a left-brace and we will want to keep it going forward. If we are optimizing
             // the code, we will reset these properties as we encounter them so that unneeded curly-braces 
             // can be removed.
-            Block codeBlock = new Block(m_currentToken.Clone())
-                {
-                    ForceBraces = true
-                };
+            var codeBlock = new Block(m_currentToken.Clone())
+            {
+                ForceBraces = true
+            };
             codeBlock.BraceOnNewLine = m_foundEndOfLine;
             GetNextToken();
 
@@ -1194,30 +1199,30 @@ namespace Microsoft.Ajax.Utilities
             if (m_currentToken.Is(JSToken.Var))
             {
                 varList = new Var(m_currentToken.Clone())
-                    {
-                        StatementToken = m_currentToken.Token,
-                        KeywordContext = m_currentToken.Clone()
-                    };
+                {
+                    StatementToken = m_currentToken.Token,
+                    KeywordContext = m_currentToken.Clone()
+                };
             }
             else if (m_currentToken.IsOne(JSToken.Const, JSToken.Let))
             {
                 if (m_currentToken.Is(JSToken.Const) && m_settings.ConstStatementsMozilla)
                 {
                     varList = new ConstStatement(m_currentToken.Clone())
-                        {
-                            StatementToken = m_currentToken.Token,
-                            KeywordContext = m_currentToken.Clone()
-                        };
+                    {
+                        StatementToken = m_currentToken.Token,
+                        KeywordContext = m_currentToken.Clone()
+                    };
                 }
                 else
                 {
                     // this is EcmaScript6-specific statement
                     ParsedVersion = ScriptVersion.EcmaScript6;
                     varList = new LexicalDeclaration(m_currentToken.Clone())
-                        {
-                            StatementToken = m_currentToken.Token,
-                            KeywordContext = m_currentToken.Clone()
-                        };
+                    {
+                        StatementToken = m_currentToken.Token,
+                        KeywordContext = m_currentToken.Clone()
+                    };
                 }
             }
             else
@@ -1235,8 +1240,7 @@ namespace Microsoft.Ajax.Utilities
                     varList.Append(varDecl);
                     varList.Context.UpdateWith(varDecl.Context);
                 }
-            }
-            while (m_currentToken.Is(JSToken.Comma));
+            } while (m_currentToken.Is(JSToken.Comma));
 
             ExpectSemicolon(varList);
             return varList;
@@ -1244,7 +1248,7 @@ namespace Microsoft.Ajax.Utilities
 
         private VariableDeclaration ParseVarDecl(JSToken inToken)
         {
-            Context context = m_currentToken.Clone();
+            var context = m_currentToken.Clone();
             VariableDeclaration varDecl = null;
             var binding = ParseBinding();
             if (binding != null)
@@ -1252,8 +1256,8 @@ namespace Microsoft.Ajax.Utilities
                 Context assignContext = null;
                 AstNode initializer = null;
 
-                bool ccSpecialCase = false;
-                bool ccOn = false;
+                var ccSpecialCase = false;
+                var ccOn = false;
 
                 if (m_currentToken.Is(JSToken.ConditionalCommentStart))
                 {
@@ -1309,7 +1313,8 @@ namespace Microsoft.Ajax.Utilities
                     m_currentToken.HandleError(JSError.ConditionalCompilationTooComplex);
 
                     // skip to end of conditional comment
-                    while (m_currentToken.IsNot(JSToken.EndOfFile) && m_currentToken.IsNot(JSToken.ConditionalCommentEnd))
+                    while (m_currentToken.IsNot(JSToken.EndOfFile) &&
+                           m_currentToken.IsNot(JSToken.ConditionalCommentEnd))
                     {
                         GetNextToken();
                     }
@@ -1334,7 +1339,8 @@ namespace Microsoft.Ajax.Utilities
                     initializer = null;
 
                     // skip to end of conditional comment
-                    while (m_currentToken.IsNot(JSToken.EndOfFile) && m_currentToken.IsNot(JSToken.ConditionalCommentEnd))
+                    while (m_currentToken.IsNot(JSToken.EndOfFile) &&
+                           m_currentToken.IsNot(JSToken.ConditionalCommentEnd))
                     {
                         GetNextToken();
                     }
@@ -1342,13 +1348,13 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 varDecl = new VariableDeclaration(context)
-                    {
-                        Binding = binding,
-                        AssignContext = assignContext,
-                        Initializer = initializer,
-                        IsCCSpecialCase = ccSpecialCase,
-                        UseCCOn = ccOn
-                    };
+                {
+                    Binding = binding,
+                    AssignContext = assignContext,
+                    Initializer = initializer,
+                    IsCCSpecialCase = ccSpecialCase,
+                    UseCCOn = ccOn
+                };
             }
 
             return varDecl;
@@ -1367,9 +1373,9 @@ namespace Microsoft.Ajax.Utilities
             if (m_currentToken.Is(JSToken.Identifier))
             {
                 binding = new BindingIdentifier(m_currentToken.Clone())
-                    {
-                        Name = m_scanner.Identifier
-                    };
+                {
+                    Name = m_scanner.Identifier
+                };
                 GetNextToken();
             }
             else if (m_currentToken.Is(JSToken.LeftBracket))
@@ -1388,9 +1394,9 @@ namespace Microsoft.Ajax.Utilities
                 if (null != identifier)
                 {
                     binding = new BindingIdentifier(m_currentToken.Clone())
-                        {
-                            Name = identifier
-                        };
+                    {
+                        Name = identifier
+                    };
                     GetNextToken();
                 }
                 else if (JSScanner.IsValidIdentifier(identifier = m_currentToken.Code))
@@ -1398,9 +1404,9 @@ namespace Microsoft.Ajax.Utilities
                     // it's probably just a keyword
                     ReportError(JSError.NoIdentifier);
                     binding = new BindingIdentifier(m_currentToken.Clone())
-                        {
-                            Name = identifier
-                        };
+                    {
+                        Name = identifier
+                    };
                     GetNextToken();
                 }
                 else
@@ -1425,7 +1431,7 @@ namespace Microsoft.Ajax.Utilities
         //---------------------------------------------------------------------------------------
         private IfNode ParseIfStatement()
         {
-            Context ifCtx = m_currentToken.Clone();
+            var ifCtx = m_currentToken.Clone();
             AstNode condition = null;
             AstNode trueBranch = null;
             AstNode falseBranch = null;
@@ -1513,12 +1519,12 @@ namespace Microsoft.Ajax.Utilities
             }
 
             return new IfNode(ifCtx)
-                {
-                    Condition = condition,
-                    TrueBlock = AstNode.ForceToBlock(trueBranch),
-                    ElseContext = elseCtx,
-                    FalseBlock = AstNode.ForceToBlock(falseBranch)
-                };
+            {
+                Condition = condition,
+                TrueBlock = AstNode.ForceToBlock(trueBranch),
+                ElseContext = elseCtx,
+                FalseBlock = AstNode.ForceToBlock(falseBranch)
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -1538,11 +1544,11 @@ namespace Microsoft.Ajax.Utilities
         //    <empty> |
         //    InitializerNoIn // same as initializer but does not process 'in' as an operator
         //---------------------------------------------------------------------------------------
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private AstNode ParseForStatement()
         {
             AstNode forNode = null;
-            Context forCtx = m_currentToken.Clone();
+            var forCtx = m_currentToken.Clone();
             GetNextToken();
             if (m_currentToken.Is(JSToken.LeftParenthesis))
             {
@@ -1564,19 +1570,19 @@ namespace Microsoft.Ajax.Utilities
                 if (m_currentToken.Is(JSToken.Var))
                 {
                     declaration = new Var(m_currentToken.Clone())
-                        {
-                            StatementToken = m_currentToken.Token,
-                            KeywordContext = m_currentToken.Clone()
-                        };
+                    {
+                        StatementToken = m_currentToken.Token,
+                        KeywordContext = m_currentToken.Clone()
+                    };
                 }
                 else
                 {
                     ParsedVersion = ScriptVersion.EcmaScript6;
                     declaration = new LexicalDeclaration(m_currentToken.Clone())
-                        {
-                            StatementToken = m_currentToken.Token,
-                            KeywordContext = m_currentToken.Clone()
-                        };
+                    {
+                        StatementToken = m_currentToken.Token,
+                        KeywordContext = m_currentToken.Clone()
+                    };
                 }
 
                 GetNextToken();
@@ -1671,12 +1677,12 @@ namespace Microsoft.Ajax.Utilities
             if (isForIn)
             {
                 forNode = new ForIn(forCtx)
-                    {
-                        Variable = initializer,
-                        OperatorContext = operatorContext,
-                        Collection = condOrColl,
-                        Body = AstNode.ForceToBlock(body),
-                    };
+                {
+                    Variable = initializer,
+                    OperatorContext = operatorContext,
+                    Collection = condOrColl,
+                    Body = AstNode.ForceToBlock(body),
+                };
             }
             else
             {
@@ -1690,14 +1696,14 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 forNode = new ForNode(forCtx)
-                    {
-                        Initializer = initializer,
-                        Separator1Context = separator1Context,
-                        Condition = condOrColl,
-                        Separator2Context = separator2Context,
-                        Incrementer = increment,
-                        Body = AstNode.ForceToBlock(body)
-                    };
+                {
+                    Initializer = initializer,
+                    Separator1Context = separator1Context,
+                    Condition = condOrColl,
+                    Separator2Context = separator2Context,
+                    Incrementer = increment,
+                    Body = AstNode.ForceToBlock(body)
+                };
             }
 
             return forNode;
@@ -1784,12 +1790,12 @@ namespace Microsoft.Ajax.Utilities
             }
 
             return new DoWhile(doCtx)
-                {
-                    Body = AstNode.ForceToBlock(body),
-                    WhileContext = whileContext,
-                    Condition = condition,
-                    TerminatingContext = terminatorContext
-                };
+            {
+                Body = AstNode.ForceToBlock(body),
+                WhileContext = whileContext,
+                Condition = condition,
+                TerminatingContext = terminatorContext
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -1800,7 +1806,7 @@ namespace Microsoft.Ajax.Utilities
         //---------------------------------------------------------------------------------------
         private WhileNode ParseWhileStatement()
         {
-            Context whileCtx = m_currentToken.Clone();
+            var whileCtx = m_currentToken.Clone();
             AstNode condition = null;
             AstNode body = null;
 
@@ -1846,10 +1852,10 @@ namespace Microsoft.Ajax.Utilities
             body = ParseStatement(false, true);
 
             return new WhileNode(whileCtx)
-                {
-                    Condition = condition,
-                    Body = AstNode.ForceToBlock(body)
-                };
+            {
+                Condition = condition,
+                Body = AstNode.ForceToBlock(body)
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -1873,7 +1879,9 @@ namespace Microsoft.Ajax.Utilities
             GetNextToken();
 
             string label = null;
-            if (!m_foundEndOfLine && (m_currentToken.Is(JSToken.Identifier) || (label = JSKeyword.CanBeIdentifier(m_currentToken.Token)) != null))
+            if (!m_foundEndOfLine &&
+                (m_currentToken.Is(JSToken.Identifier) ||
+                 (label = JSKeyword.CanBeIdentifier(m_currentToken.Token)) != null))
             {
                 continueNode.UpdateWith(m_currentToken);
                 continueNode.LabelContext = m_currentToken.Clone();
@@ -1918,7 +1926,9 @@ namespace Microsoft.Ajax.Utilities
             GetNextToken();
 
             string label = null;
-            if (!m_foundEndOfLine && (m_currentToken.Is(JSToken.Identifier) || (label = JSKeyword.CanBeIdentifier(m_currentToken.Token)) != null))
+            if (!m_foundEndOfLine &&
+                (m_currentToken.Is(JSToken.Identifier) ||
+                 (label = JSKeyword.CanBeIdentifier(m_currentToken.Token)) != null))
             {
                 breakNode.UpdateWith(m_currentToken);
                 breakNode.LabelContext = m_currentToken.Clone();
@@ -1993,7 +2003,7 @@ namespace Microsoft.Ajax.Utilities
         //---------------------------------------------------------------------------------------
         private WithNode ParseWithStatement()
         {
-            Context withCtx = m_currentToken.Clone();
+            var withCtx = m_currentToken.Clone();
             AstNode obj = null;
 
             GetNextToken();
@@ -2029,10 +2039,10 @@ namespace Microsoft.Ajax.Utilities
             var statement = ParseStatement(false, true);
 
             return new WithNode(withCtx)
-                {
-                    WithObject = obj,
-                    Body = AstNode.ForceToBlock(statement)
-                };
+            {
+                WithObject = obj,
+                Body = AstNode.ForceToBlock(statement)
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -2055,10 +2065,10 @@ namespace Microsoft.Ajax.Utilities
         //    <empty> |
         //    'default' ':' OptionalStatements
         //---------------------------------------------------------------------------------------
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private AstNode ParseSwitchStatement()
         {
-            Context switchCtx = m_currentToken.Clone();
+            var switchCtx = m_currentToken.Clone();
             AstNode expr = null;
             AstNodeList cases = null;
             var braceOnNewLine = false;
@@ -2099,7 +2109,7 @@ namespace Microsoft.Ajax.Utilities
 
             // parse the switch body
             cases = new AstNodeList(CurrentPositionContext);
-            bool defaultStatement = false;
+            var defaultStatement = false;
             while (m_currentToken.IsNot(JSToken.RightCurly))
             {
                 SwitchCase caseClause = null;
@@ -2153,11 +2163,11 @@ namespace Microsoft.Ajax.Utilities
 
                 caseCtx.UpdateWith(statements.Context);
                 caseClause = new SwitchCase(caseCtx)
-                    {
-                        CaseValue = caseValue,
-                        ColonContext = colonContext,
-                        Statements = statements
-                    };
+                {
+                    CaseValue = caseValue,
+                    ColonContext = colonContext,
+                    Statements = statements
+                };
                 cases.Append(caseClause);
             }
 
@@ -2165,12 +2175,12 @@ namespace Microsoft.Ajax.Utilities
             GetNextToken();
 
             return new Switch(switchCtx)
-                {
-                    Expression = expr,
-                    BraceContext = braceContext,
-                    Cases = cases,
-                    BraceOnNewLine = braceOnNewLine
-                };
+            {
+                Expression = expr,
+                BraceContext = braceContext,
+                Cases = cases,
+                BraceOnNewLine = braceOnNewLine
+            };
         }
 
         //---------------------------------------------------------------------------------------
@@ -2222,7 +2232,7 @@ namespace Microsoft.Ajax.Utilities
         //---------------------------------------------------------------------------------------
         private AstNode ParseTryStatement()
         {
-            Context tryCtx = m_currentToken.Clone();
+            var tryCtx = m_currentToken.Clone();
             Block body = null;
             Context catchContext = null;
             ParameterDeclaration catchParameter = null;
@@ -2230,7 +2240,7 @@ namespace Microsoft.Ajax.Utilities
             Context finallyContext = null;
             Block finallyBlock = null;
 
-            bool catchOrFinally = false;
+            var catchOrFinally = false;
             GetNextToken();
             if (m_currentToken.IsNot(JSToken.LeftCurly))
             {
@@ -2307,14 +2317,14 @@ namespace Microsoft.Ajax.Utilities
             }
 
             return new TryNode(tryCtx)
-                {
-                    TryBlock = body,
-                    CatchContext = catchContext,
-                    CatchParameter = catchParameter,
-                    CatchBlock = catchBlock,
-                    FinallyContext = finallyContext,
-                    FinallyBlock = finallyBlock
-                };
+            {
+                TryBlock = body,
+                CatchContext = catchContext,
+                CatchParameter = catchParameter,
+                CatchBlock = catchBlock,
+                FinallyContext = finallyContext,
+                FinallyBlock = finallyBlock
+            };
         }
 
         private AstNode ParseModule()
@@ -2358,7 +2368,7 @@ namespace Microsoft.Ajax.Utilities
             }
             else if (m_currentToken.Is(JSToken.Identifier) || JSKeyword.CanBeIdentifier(m_currentToken.Token) != null)
             {
-                binding = (BindingIdentifier)ParseBinding();
+                binding = (BindingIdentifier) ParseBinding();
                 context.UpdateWith(binding.Context);
 
                 if (m_currentToken.Is("from"))
@@ -2390,13 +2400,13 @@ namespace Microsoft.Ajax.Utilities
             }
 
             var moduleDecl = new ModuleDeclaration(context)
-                {
-                    ModuleName = moduleName,
-                    ModuleContext = moduleContext,
-                    Body = body,
-                    Binding = binding,
-                    FromContext = fromContext
-                };
+            {
+                ModuleName = moduleName,
+                ModuleContext = moduleContext,
+                Body = body,
+                Binding = binding,
+                FromContext = fromContext
+            };
 
             if (binding != null)
             {
@@ -2411,9 +2421,9 @@ namespace Microsoft.Ajax.Utilities
             // we know we're parsing an ES6 export
             ParsedVersion = ScriptVersion.EcmaScript6;
             var exportNode = new ExportNode(m_currentToken.Clone())
-                {
-                    KeywordContext = m_currentToken.Clone(),
-                };
+            {
+                KeywordContext = m_currentToken.Clone(),
+            };
             GetNextToken();
             if (m_currentToken.IsOne(JSToken.Var, JSToken.Const, JSToken.Let, JSToken.Function, JSToken.Class))
             {
@@ -2450,7 +2460,7 @@ namespace Microsoft.Ajax.Utilities
 
                 ExpectSemicolon(exportNode);
             }
-            else 
+            else
             {
                 if (m_currentToken.Is(JSToken.Identifier) || JSKeyword.CanBeIdentifier(m_currentToken.Token) != null)
                 {
@@ -2461,7 +2471,7 @@ namespace Microsoft.Ajax.Utilities
                     };
                     exportNode.Append(lookup);
                     GetNextToken();
-                } 
+                }
                 else if (m_currentToken.Is(JSToken.Multiply))
                 {
                     // export * (from "module")?
@@ -2481,13 +2491,14 @@ namespace Microsoft.Ajax.Utilities
                         if (m_currentToken.IsNot(JSToken.RightCurly))
                         {
                             string identifier = null;
-                            if (m_currentToken.Is(JSToken.Identifier) || (identifier = JSKeyword.CanBeIdentifier(m_currentToken.Token)) != null)
+                            if (m_currentToken.Is(JSToken.Identifier) ||
+                                (identifier = JSKeyword.CanBeIdentifier(m_currentToken.Token)) != null)
                             {
                                 var specifierContext = m_currentToken.Clone();
                                 var lookup = new Lookup(m_currentToken.Clone())
-                                    {
-                                        Name = identifier ?? m_scanner.Identifier
-                                    };
+                                {
+                                    Name = identifier ?? m_scanner.Identifier
+                                };
                                 GetNextToken();
 
                                 Context asContext = null;
@@ -2513,12 +2524,12 @@ namespace Microsoft.Ajax.Utilities
                                 }
 
                                 var specifier = new ImportExportSpecifier(specifierContext)
-                                    {
-                                        LocalIdentifier = lookup,
-                                        AsContext = asContext,
-                                        ExternalName = externalName,
-                                        NameContext = nameContext
-                                    };
+                                {
+                                    LocalIdentifier = lookup,
+                                    AsContext = asContext,
+                                    ExternalName = externalName,
+                                    NameContext = nameContext
+                                };
                                 exportNode.Append(specifier);
 
                                 if (m_currentToken.Is(JSToken.Comma))
@@ -2531,8 +2542,7 @@ namespace Microsoft.Ajax.Utilities
                                 ReportError(JSError.NoIdentifier);
                             }
                         }
-                    }
-                    while (m_currentToken.Is(JSToken.Comma));
+                    } while (m_currentToken.Is(JSToken.Comma));
 
                     if (m_currentToken.Is(JSToken.RightCurly))
                     {
@@ -2581,9 +2591,9 @@ namespace Microsoft.Ajax.Utilities
             // we know we're parsing an ES6 import
             ParsedVersion = ScriptVersion.EcmaScript6;
             var importNode = new ImportNode(m_currentToken.Clone())
-                {
-                    KeywordContext = m_currentToken.Clone(),
-                };
+            {
+                KeywordContext = m_currentToken.Clone(),
+            };
             GetNextToken();
             if (m_currentToken.Is(JSToken.StringLiteral))
             {
@@ -2619,7 +2629,8 @@ namespace Microsoft.Ajax.Utilities
                                     asContext = m_currentToken.Clone();
                                     GetNextToken();
 
-                                    if (m_currentToken.Is(JSToken.Identifier) || JSKeyword.CanBeIdentifier(m_currentToken.Token) != null)
+                                    if (m_currentToken.Is(JSToken.Identifier) ||
+                                        JSKeyword.CanBeIdentifier(m_currentToken.Token) != null)
                                     {
                                         localIdentifier = ParseBinding();
                                     }
@@ -2632,9 +2643,9 @@ namespace Microsoft.Ajax.Utilities
                                 {
                                     // the external name is also the local binding
                                     localIdentifier = new BindingIdentifier(nameContext)
-                                        {
-                                            Name = externalName
-                                        };
+                                    {
+                                        Name = externalName
+                                    };
                                     externalName = null;
                                     nameContext = null;
                                 }
@@ -2658,8 +2669,7 @@ namespace Microsoft.Ajax.Utilities
                                 ReportError(JSError.NoIdentifier);
                             }
                         }
-                    }
-                    while (m_currentToken.Is(JSToken.Comma));
+                    } while (m_currentToken.Is(JSToken.Comma));
 
                     if (m_currentToken.Is(JSToken.RightCurly))
                     {
@@ -2725,13 +2735,13 @@ namespace Microsoft.Ajax.Utilities
         //    <empty> |
         //    Identifier, IdentifierList
         //---------------------------------------------------------------------------------------
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private FunctionObject ParseFunction(FunctionType functionType, Context fncCtx)
         {
             BindingIdentifier name = null;
             AstNodeList formalParameters = null;
             Block body = null;
-            bool inExpression = (functionType == FunctionType.Expression);
+            var inExpression = (functionType == FunctionType.Expression);
 
             // skip the opening token (function, get, or set).
             // methods will start off with no prefix -- right to the name.
@@ -2752,20 +2762,20 @@ namespace Microsoft.Ajax.Utilities
             if (m_currentToken.Is(JSToken.Identifier))
             {
                 name = new BindingIdentifier(m_currentToken.Clone())
-                    {
-                        Name = m_scanner.Identifier
-                    };
+                {
+                    Name = m_scanner.Identifier
+                };
                 GetNextToken();
             }
             else
             {
-                string identifier = JSKeyword.CanBeIdentifier(m_currentToken.Token);
+                var identifier = JSKeyword.CanBeIdentifier(m_currentToken.Token);
                 if (null != identifier)
                 {
                     name = new BindingIdentifier(m_currentToken.Clone())
-                        {
-                            Name = identifier
-                        };
+                    {
+                        Name = identifier
+                    };
                     GetNextToken();
                 }
                 else
@@ -2783,9 +2793,9 @@ namespace Microsoft.Ajax.Utilities
                         {
                             identifier = m_currentToken.Code;
                             name = new BindingIdentifier(CurrentPositionContext)
-                                {
-                                    Name = identifier
-                                };
+                            {
+                                Name = identifier
+                            };
                             GetNextToken();
                         }
                     }
@@ -2800,11 +2810,11 @@ namespace Microsoft.Ajax.Utilities
                 // be able to parse it and return the intended results. 
                 // Skip to the open paren and use whatever is in-between as the function name. Doesn't matter that it's 
                 // an invalid identifier; it won't be accessible as a valid field anyway.
-                bool expandedIndentifier = false;
+                var expandedIndentifier = false;
                 while (m_currentToken.IsNot(JSToken.LeftParenthesis)
-                    && m_currentToken.IsNot(JSToken.LeftCurly)
-                    && m_currentToken.IsNot(JSToken.Semicolon)
-                    && m_currentToken.IsNot(JSToken.EndOfFile))
+                       && m_currentToken.IsNot(JSToken.LeftCurly)
+                       && m_currentToken.IsNot(JSToken.Semicolon)
+                       && m_currentToken.IsNot(JSToken.EndOfFile))
                 {
                     name.Context.UpdateWith(m_currentToken);
                     GetNextToken();
@@ -2872,20 +2882,20 @@ namespace Microsoft.Ajax.Utilities
             }
 
             return new FunctionObject(fncCtx)
-                {
-                    FunctionType = functionType,
-                    Binding = name,
-                    ParameterDeclarations = formalParameters,
-                    Body = body,
-                    IsGenerator = isGenerator
-                };
+            {
+                FunctionType = functionType,
+                Binding = name,
+                ParameterDeclarations = formalParameters,
+                Body = body,
+                IsGenerator = isGenerator
+            };
         }
 
         private void ParseFunctionBody(Block body)
         {
             var possibleDirectivePrologue = true;
             while (m_currentToken.IsNot(JSToken.RightCurly)
-                && m_currentToken.IsNot(JSToken.EndOfFile))
+                   && m_currentToken.IsNot(JSToken.EndOfFile))
             {
                 // function body's are SourceElements (Statements + FunctionDeclarations)
                 var statement = ParseStatement(true);
@@ -3099,16 +3109,16 @@ namespace Microsoft.Ajax.Utilities
 
             // create the class
             classNode = new ClassNode(context)
-                {
-                    ClassType = classType,
-                    ClassContext = classContext,
-                    Binding = binding,
-                    ExtendsContext = extendsContext,
-                    Heritage = heritage,
-                    OpenBrace = openBrace,
-                    Elements = elements,
-                    CloseBrace = closeBrace,
-                };
+            {
+                ClassType = classType,
+                ClassContext = classContext,
+                Binding = binding,
+                ExtendsContext = extendsContext,
+                Heritage = heritage,
+                OpenBrace = openBrace,
+                Elements = elements,
+                CloseBrace = closeBrace,
+            };
 
             return classNode;
         }
@@ -3234,22 +3244,22 @@ namespace Microsoft.Ajax.Utilities
         private AstNode ParseExpression(bool single = false, JSToken inToken = JSToken.None)
         {
             bool bAssign;
-            AstNode lhs = ParseUnaryExpression(out bAssign, false);
+            var lhs = ParseUnaryExpression(out bAssign, false);
             return ParseExpression(lhs, single, bAssign, inToken);
         }
 
         private AstNode ParseExpression(AstNode leftHandSide, bool single, bool bCanAssign, JSToken inToken)
         {
             // new op stack with dummy op
-            Stack<Context> opsStack = new Stack<Context>();
+            var opsStack = new Stack<Context>();
             opsStack.Push(null);
 
             // term stack, push left-hand side onto it
-            Stack<AstNode> termStack = new Stack<AstNode>();
+            var termStack = new Stack<AstNode>();
             termStack.Push(leftHandSide);
 
             AstNode expr = null;
-            for (; ; )
+            for (;;)
             {
                 // if 'binary op' or 'conditional'
                 // if we are looking for a single expression, then also bail when we hit a comma
@@ -3262,7 +3272,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // for the current token, get the operator precedence and whether it's a right-association operator
                     var prec = JSScanner.GetOperatorPrecedence(m_currentToken);
-                    bool rightAssoc = JSScanner.IsRightAssociativeOperator(m_currentToken.Token);
+                    var rightAssoc = JSScanner.IsRightAssociativeOperator(m_currentToken.Token);
 
                     // while the current operator has lower precedence than the operator at the top of the stack
                     // or it has the same precedence and it is left associative (that is, no 'assign op' or 'conditional')
@@ -3271,8 +3281,8 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // pop the top two elements off the stack along with the current operator, 
                         // combine them, then push the results back onto the term stack
-                        AstNode operand2 = termStack.Pop();
-                        AstNode operand1 = termStack.Pop();
+                        var operand2 = termStack.Pop();
+                        var operand1 = termStack.Pop();
                         expr = CreateExpressionNode(opsStack.Pop(), operand1, operand2);
                         termStack.Push(expr);
 
@@ -3288,7 +3298,7 @@ namespace Microsoft.Ajax.Utilities
                     if (m_currentToken.Is(JSToken.ConditionalIf))
                     {
                         // pop term stack
-                        AstNode condition = termStack.Pop();
+                        var condition = termStack.Pop();
 
                         // if this is an assignment, throw a warning in case the developer
                         // meant to use == instead of =
@@ -3303,7 +3313,7 @@ namespace Microsoft.Ajax.Utilities
                         GetNextToken();
 
                         // get expr1 in logOrExpr ? expr1 : expr2
-                        AstNode operand1 = ParseExpression(true);
+                        var operand1 = ParseExpression(true);
 
                         Context colonCtx = null;
                         if (m_currentToken.IsNot(JSToken.Colon))
@@ -3318,16 +3328,16 @@ namespace Microsoft.Ajax.Utilities
                         GetNextToken();
 
                         // get expr2 in logOrExpr ? expr1 : expr2
-                        AstNode operand2 = ParseExpression(true, inToken);
+                        var operand2 = ParseExpression(true, inToken);
 
                         expr = new Conditional(condition.Context.CombineWith(operand2.Context))
-                            {
-                                Condition = condition,
-                                QuestionContext = questionCtx,
-                                TrueExpression = operand1,
-                                ColonContext = colonCtx,
-                                FalseExpression = operand2
-                            };
+                        {
+                            Condition = condition,
+                            QuestionContext = questionCtx,
+                            TrueExpression = operand1,
+                            ColonContext = colonCtx,
+                            FalseExpression = operand2
+                        };
                         termStack.Push(expr);
                     }
                     else
@@ -3373,8 +3383,8 @@ namespace Microsoft.Ajax.Utilities
             {
                 // pop the top two term and the top operator, combine them into a new term,
                 // and push the results back onto the term stacck
-                AstNode operand2 = termStack.Pop();
-                AstNode operand1 = termStack.Pop();
+                var operand2 = termStack.Pop();
+                var operand1 = termStack.Pop();
                 expr = CreateExpressionNode(opsStack.Pop(), operand1, operand2);
 
                 // push node onto the stack
@@ -3395,11 +3405,11 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // yield expression
                         term = new UnaryOperator(term.Context.CombineWith(expression.Context))
-                            {
-                                OperatorToken = JSToken.Yield,
-                                OperatorContext = term.Context,
-                                Operand = expression
-                            };
+                        {
+                            OperatorToken = JSToken.Yield,
+                            OperatorContext = term.Context,
+                            Operand = expression
+                        };
                     }
                 }
             }
@@ -3426,11 +3436,11 @@ namespace Microsoft.Ajax.Utilities
         private AstNode ParseUnaryExpression(out bool isLeftHandSideExpr, bool isMinus)
         {
             isLeftHandSideExpr = false;
-            bool dummy = false;
+            var dummy = false;
             Context exprCtx = null;
             AstNode expr = null;
 
-        TryItAgain:
+            TryItAgain:
             AstNode ast = null;
             var opToken = m_currentToken.Token;
             switch (opToken)
@@ -3457,11 +3467,11 @@ namespace Microsoft.Ajax.Utilities
                     GetNextToken();
                     expr = ParseUnaryExpression(out dummy, false);
                     ast = new UnaryOperator(exprCtx.CombineWith(expr.Context))
-                        {
-                            Operand = expr,
-                            OperatorContext = exprCtx,
-                            OperatorToken = opToken
-                        };
+                    {
+                        Operand = expr,
+                        OperatorContext = exprCtx,
+                        OperatorToken = opToken
+                    };
                     break;
 
                 case JSToken.ConditionalCommentStart:
@@ -3474,7 +3484,7 @@ namespace Microsoft.Ajax.Utilities
                         GetNextToken();
                         goto TryItAgain;
                     }
-                    else if (m_currentToken.Is(JSToken.ConditionalCompilationOn))
+                    if (m_currentToken.Is(JSToken.ConditionalCompilationOn))
                     {
                         // /*@cc_on -- check for @IDENT@*/ or !@*/
                         GetNextToken();
@@ -3482,10 +3492,10 @@ namespace Microsoft.Ajax.Utilities
                         {
                             // /*@cc_on@IDENT -- check for @*/
                             ast = new ConstantWrapperPP(m_currentToken.Clone())
-                                {
-                                    VarName = m_currentToken.Code,
-                                    ForceComments = true
-                                };
+                            {
+                                VarName = m_currentToken.Code,
+                                ForceComments = true
+                            };
 
                             GetNextToken();
 
@@ -3514,11 +3524,11 @@ namespace Microsoft.Ajax.Utilities
                                 exprCtx.UpdateWith(expr.Context);
 
                                 var unary = new UnaryOperator(exprCtx)
-                                    {
-                                        Operand = expr,
-                                        OperatorContext = operatorContext,
-                                        OperatorToken = JSToken.LogicalNot
-                                    };
+                                {
+                                    Operand = expr,
+                                    OperatorContext = operatorContext,
+                                    OperatorToken = JSToken.LogicalNot
+                                };
                                 unary.OperatorInConditionalCompilationComment = true;
                                 unary.ConditionalCommentContainsOn = true;
                                 ast = unary;
@@ -3550,11 +3560,11 @@ namespace Microsoft.Ajax.Utilities
                             exprCtx.UpdateWith(expr.Context);
 
                             var unary = new UnaryOperator(exprCtx)
-                                {
-                                    Operand = expr,
-                                    OperatorContext = operatorContext,
-                                    OperatorToken = JSToken.LogicalNot
-                                };
+                            {
+                                Operand = expr,
+                                OperatorContext = operatorContext,
+                                OperatorToken = JSToken.LogicalNot
+                            };
                             unary.OperatorInConditionalCompilationComment = true;
                             ast = unary;
                         }
@@ -3569,10 +3579,10 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // @IDENT -- check for @*/
                         ast = new ConstantWrapperPP(m_currentToken.Clone())
-                            {
-                                VarName = m_currentToken.Code,
-                                ForceComments = true
-                            };
+                        {
+                            VarName = m_currentToken.Code,
+                            ForceComments = true
+                        };
                         GetNextToken();
 
                         if (m_currentToken.Is(JSToken.ConditionalCommentEnd))
@@ -3629,12 +3639,12 @@ namespace Microsoft.Ajax.Utilities
                         exprCtx = ast.Context.Clone();
                         exprCtx.UpdateWith(m_currentToken);
                         ast = new UnaryOperator(exprCtx)
-                            {
-                                Operand = ast,
-                                OperatorToken = m_currentToken.Token,
-                                OperatorContext = m_currentToken.Clone(),
-                                IsPostfix = true
-                            };
+                        {
+                            Operand = ast,
+                            OperatorToken = m_currentToken.Token,
+                            OperatorContext = m_currentToken.Clone(),
+                            IsPostfix = true
+                        };
                         GetNextToken();
                     }
                     else if (m_currentToken.Is(JSToken.Decrement))
@@ -3643,12 +3653,12 @@ namespace Microsoft.Ajax.Utilities
                         exprCtx = ast.Context.Clone();
                         exprCtx.UpdateWith(m_currentToken);
                         ast = new UnaryOperator(exprCtx)
-                            {
-                                Operand = ast,
-                                OperatorToken = m_currentToken.Token,
-                                OperatorContext = m_currentToken.Clone(),
-                                IsPostfix = true
-                            };
+                        {
+                            Operand = ast,
+                            OperatorToken = m_currentToken.Token,
+                            OperatorContext = m_currentToken.Clone(),
+                            IsPostfix = true
+                        };
                         GetNextToken();
                     }
                 }
@@ -3678,14 +3688,14 @@ namespace Microsoft.Ajax.Utilities
         //    <empty> |
         //    Identifier
         //---------------------------------------------------------------------------------------
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode"), 
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode"),
+         SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private AstNode ParseLeftHandSideExpression(bool isMinus)
         {
             AstNode ast = null;
             List<Context> newContexts = null;
 
-        TryItAgain:
+            TryItAgain:
 
             // new expression
             while (m_currentToken.Is(JSToken.New))
@@ -3695,15 +3705,15 @@ namespace Microsoft.Ajax.Utilities
                 newContexts.Add(m_currentToken.Clone());
                 GetNextToken();
             }
-            JSToken token = m_currentToken.Token;
+            var token = m_currentToken.Token;
             switch (token)
             {
-                // primary expression
+                    // primary expression
                 case JSToken.Identifier:
                     ast = new Lookup(m_currentToken.Clone())
-                        {
-                            Name = m_scanner.Identifier
-                        };
+                    {
+                        Name = m_scanner.Identifier
+                    };
                     GetNextToken();
                     break;
 
@@ -3718,10 +3728,10 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // we have /*@id
                         ast = new ConstantWrapperPP(m_currentToken.Clone())
-                            {
-                                VarName = m_currentToken.Code,
-                                ForceComments = true
-                            };
+                        {
+                            VarName = m_currentToken.Code,
+                            ForceComments = true
+                        };
 
                         GetNextToken();
 
@@ -3754,7 +3764,8 @@ namespace Microsoft.Ajax.Utilities
                         m_currentToken.HandleError(JSError.ConditionalCompilationTooComplex);
 
                         // skip to end of conditional comment
-                        while (m_currentToken.IsNot(JSToken.EndOfFile) && m_currentToken.IsNot(JSToken.ConditionalCommentEnd))
+                        while (m_currentToken.IsNot(JSToken.EndOfFile) &&
+                               m_currentToken.IsNot(JSToken.ConditionalCommentEnd))
                         {
                             GetNextToken();
                         }
@@ -3770,59 +3781,60 @@ namespace Microsoft.Ajax.Utilities
 
                 case JSToken.StringLiteral:
                     ast = new ConstantWrapper(m_scanner.StringLiteralValue, PrimitiveType.String, m_currentToken.Clone())
-                        {
-                            MayHaveIssues = m_scanner.LiteralHasIssues
-                        };
+                    {
+                        MayHaveIssues = m_scanner.LiteralHasIssues
+                    };
                     GetNextToken();
                     break;
 
                 case JSToken.IntegerLiteral:
                 case JSToken.NumericLiteral:
+                {
+                    var numericContext = m_currentToken.Clone();
+                    double doubleValue;
+                    if (ConvertNumericLiteralToDouble(m_currentToken.Code, (token == JSToken.IntegerLiteral),
+                        out doubleValue))
                     {
-                        Context numericContext = m_currentToken.Clone();
-                        double doubleValue;
-                        if (ConvertNumericLiteralToDouble(m_currentToken.Code, (token == JSToken.IntegerLiteral), out doubleValue))
+                        // conversion worked fine
+                        // check for some boundary conditions
+                        var mayHaveIssues = m_scanner.LiteralHasIssues;
+                        if (doubleValue == double.MaxValue)
                         {
-                            // conversion worked fine
-                            // check for some boundary conditions
-                            var mayHaveIssues = m_scanner.LiteralHasIssues;
-                            if (doubleValue == double.MaxValue)
-                            {
-                                ReportError(JSError.NumericMaximum, numericContext);
-                            }
-                            else if (isMinus && -doubleValue == double.MinValue)
-                            {
-                                ReportError(JSError.NumericMinimum, numericContext);
-                            }
-
-                            // create the constant wrapper from the value
-                            ast = new ConstantWrapper(doubleValue, PrimitiveType.Number, numericContext)
-                                {
-                                    MayHaveIssues = mayHaveIssues
-                                };
+                            ReportError(JSError.NumericMaximum, numericContext);
                         }
-                        else
+                        else if (isMinus && -doubleValue == double.MinValue)
                         {
-                            // if we went overflow or are not a number, then we will use the "Other"
-                            // primitive type so we don't try doing any numeric calcs with it. 
-                            if (double.IsInfinity(doubleValue))
-                            {
-                                // overflow
-                                // and if we ARE an overflow, report it
-                                ReportError(JSError.NumericOverflow, numericContext);
-                            }
-
-                            // regardless, we're going to create a special constant wrapper
-                            // that simply echos the input as-is
-                            ast = new ConstantWrapper(m_currentToken.Code, PrimitiveType.Other, numericContext)
-                            {
-                                MayHaveIssues = true
-                            };
+                            ReportError(JSError.NumericMinimum, numericContext);
                         }
 
-                        GetNextToken();
-                        break;
+                        // create the constant wrapper from the value
+                        ast = new ConstantWrapper(doubleValue, PrimitiveType.Number, numericContext)
+                        {
+                            MayHaveIssues = mayHaveIssues
+                        };
                     }
+                    else
+                    {
+                        // if we went overflow or are not a number, then we will use the "Other"
+                        // primitive type so we don't try doing any numeric calcs with it. 
+                        if (double.IsInfinity(doubleValue))
+                        {
+                            // overflow
+                            // and if we ARE an overflow, report it
+                            ReportError(JSError.NumericOverflow, numericContext);
+                        }
+
+                        // regardless, we're going to create a special constant wrapper
+                        // that simply echos the input as-is
+                        ast = new ConstantWrapper(m_currentToken.Code, PrimitiveType.Other, numericContext)
+                        {
+                            MayHaveIssues = true
+                        };
+                    }
+
+                    GetNextToken();
+                    break;
+                }
 
                 case JSToken.True:
                     ast = new ConstantWrapper(true, PrimitiveType.Boolean, m_currentToken.Clone());
@@ -3841,17 +3853,17 @@ namespace Microsoft.Ajax.Utilities
 
                 case JSToken.ConditionalCompilationVariable:
                     ast = new ConstantWrapperPP(m_currentToken.Clone())
-                        {
-                            VarName = m_currentToken.Code,
-                            ForceComments = false
-                        };
+                    {
+                        VarName = m_currentToken.Code,
+                        ForceComments = false
+                    };
                     GetNextToken();
                     break;
 
-                // normally this token is not allowed on the left-hand side of an expression.
-                // BUT, this might be the start of a regular expression that begins with an equals sign!
-                // we need to test to see if we can parse a regular expression, and if not, THEN
-                // we can fail the parse.
+                    // normally this token is not allowed on the left-hand side of an expression.
+                    // BUT, this might be the start of a regular expression that begins with an equals sign!
+                    // we need to test to see if we can parse a regular expression, and if not, THEN
+                    // we can fail the parse.
                 case JSToken.DivideAssign:
                 case JSToken.Divide:
                     // could it be a regexp?
@@ -3876,148 +3888,149 @@ namespace Microsoft.Ajax.Utilities
 
                     goto default;
 
-                // expression
+                    // expression
                 case JSToken.LeftParenthesis:
+                {
+                    var leftParen = m_currentToken.Clone();
+                    GetNextToken();
+                    if (m_currentToken.Is(JSToken.For))
                     {
-                        var leftParen = m_currentToken.Clone();
-                        GetNextToken();
-                        if (m_currentToken.Is(JSToken.For))
+                        // generator comprehension in ES6 format
+                        ast = ParseComprehension(false, leftParen, null);
+                    }
+                    else
+                    {
+                        if (m_currentToken.Is(JSToken.RightParenthesis))
                         {
-                            // generator comprehension in ES6 format
-                            ast = ParseComprehension(false, leftParen, null);
+                            // shortcut the empty parenthetical grouping
+                            // normally not allowed; however this might be the (empty) parameter list
+                            // to an arrow function.
+                            // add the closing paren to the expression context
+                            ast = new GroupingOperator(leftParen);
+                            ast.UpdateWith(m_currentToken);
+                            GetNextToken();
                         }
-                        else
+                        else if (m_currentToken.Is(JSToken.RestSpread))
                         {
+                            // we have (...
+                            // parse an assignment expression, make it the operand of a unary with the rest.
+                            var restContext = m_currentToken.Clone();
+                            GetNextToken();
+                            ast = ParseExpression(true);
+                            if (ast != null)
+                            {
+                                ast = new UnaryOperator(restContext.CombineWith(ast.Context))
+                                {
+                                    OperatorContext = restContext,
+                                    OperatorToken = JSToken.RestSpread,
+                                    Operand = ast
+                                };
+                            }
+
+                            // now, we want to continue parsing if there is a comma
+                            if (m_currentToken.Is(JSToken.Comma))
+                            {
+                                ast = ParseExpression(ast, false, true, JSToken.None);
+                            }
+
                             if (m_currentToken.Is(JSToken.RightParenthesis))
                             {
-                                // shortcut the empty parenthetical grouping
-                                // normally not allowed; however this might be the (empty) parameter list
-                                // to an arrow function.
-                                // add the closing paren to the expression context
-                                ast = new GroupingOperator(leftParen);
+                                ast = new GroupingOperator(leftParen)
+                                {
+                                    Operand = ast
+                                };
                                 ast.UpdateWith(m_currentToken);
                                 GetNextToken();
                             }
-                            else if (m_currentToken.Is(JSToken.RestSpread))
+                            else
                             {
-                                // we have (...
-                                // parse an assignment expression, make it the operand of a unary with the rest.
-                                var restContext = m_currentToken.Clone();
-                                GetNextToken();
-                                ast = ParseExpression(true);
-                                if (ast != null)
-                                {
-                                    ast = new UnaryOperator(restContext.CombineWith(ast.Context))
-                                        {
-                                            OperatorContext = restContext,
-                                            OperatorToken = JSToken.RestSpread,
-                                            Operand = ast
-                                        };
-                                }
-
-                                // now, we want to continue parsing if there is a comma
-                                if (m_currentToken.Is(JSToken.Comma))
-                                {
-                                    ast = ParseExpression(ast, false, true, JSToken.None);
-                                }
-
-                                if (m_currentToken.Is(JSToken.RightParenthesis))
-                                {
-                                    ast = new GroupingOperator(leftParen)
-                                        {
-                                            Operand = ast
-                                        };
-                                    ast.UpdateWith(m_currentToken);
-                                    GetNextToken();
-                                }
-                                else
-                                {
-                                    ReportError(JSError.NoRightParenthesis);
-                                }
+                                ReportError(JSError.NoRightParenthesis);
+                            }
+                        }
+                        else
+                        {
+                            // parse an expression
+                            var operand = ParseExpression();
+                            if (m_currentToken.Is(JSToken.For))
+                            {
+                                // generator comprehension in Mozille format
+                                ast = ParseComprehension(false, leftParen, operand);
                             }
                             else
                             {
-                                // parse an expression
-                                var operand = ParseExpression();
-                                if (m_currentToken.Is(JSToken.For))
+                                ast = new GroupingOperator(leftParen)
                                 {
-                                    // generator comprehension in Mozille format
-                                    ast = ParseComprehension(false, leftParen, operand);
+                                    Operand = operand
+                                };
+                                ast.UpdateWith(operand.Context);
+
+                                if (m_currentToken.IsNot(JSToken.RightParenthesis))
+                                {
+                                    ReportError(JSError.NoRightParenthesis);
                                 }
                                 else
                                 {
-                                    ast = new GroupingOperator(leftParen)
-                                        {
-                                            Operand = operand
-                                        };
-                                    ast.UpdateWith(operand.Context);
-
-                                    if (m_currentToken.IsNot(JSToken.RightParenthesis))
-                                    {
-                                        ReportError(JSError.NoRightParenthesis);
-                                    }
-                                    else
-                                    {
-                                        // add the closing paren to the expression context
-                                        ast.UpdateWith(m_currentToken);
-                                        GetNextToken();
-                                    }
+                                    // add the closing paren to the expression context
+                                    ast.UpdateWith(m_currentToken);
+                                    GetNextToken();
                                 }
                             }
                         }
                     }
+                }
                     break;
 
-                // array initializer
+                    // array initializer
                 case JSToken.LeftBracket:
                     ast = ParseArrayLiteral(false);
                     break;
 
-                // object initializer
+                    // object initializer
                 case JSToken.LeftCurly:
                     ast = ParseObjectLiteral(false);
                     break;
 
-                // function expression
+                    // function expression
                 case JSToken.Function:
                     ast = ParseFunction(FunctionType.Expression, m_currentToken.Clone());
                     break;
 
-                // class expression
+                    // class expression
                 case JSToken.Class:
                     ast = ParseClassNode(ClassType.Expression);
                     break;
 
                 case JSToken.AspNetBlock:
                     ast = new AspNetBlockNode(m_currentToken.Clone())
-                        {
-                            AspNetBlockText = m_currentToken.Code
-                        };
+                    {
+                        AspNetBlockText = m_currentToken.Code
+                    };
                     GetNextToken();
                     break;
 
                 case JSToken.Yield:
+                {
+                    // TODO: not sure if this is the right place to hook for the ES6 YieldExpression semantics!
+                    if (ParsedVersion == ScriptVersion.EcmaScript6 ||
+                        m_settings.ScriptVersion == ScriptVersion.EcmaScript6)
                     {
-                        // TODO: not sure if this is the right place to hook for the ES6 YieldExpression semantics!
-                        if (ParsedVersion == ScriptVersion.EcmaScript6 || m_settings.ScriptVersion == ScriptVersion.EcmaScript6)
-                        {
-                            // we already KNOW we're ES6 code, so just parse this as a yield expression.
-                            // in fact, we SHOULD already know, since yield should only be used within a generator
-                            // function, which for ES6 code should have the "*" generator indicator, which when
-                            // parsed should have already set the ES6 flag.
-                            ast = ParseYieldExpression();
-                        }
-                        else
-                        {
-                            // we need to protect against non-ES6 code using "yield" as a variable name versus the
-                            // Mozilla yield syntax. We'll do that further upstream.
-                            ast = new Lookup(m_currentToken.Clone())
-                                {
-                                    Name = "yield"
-                                };
-                            GetNextToken();
-                        }
+                        // we already KNOW we're ES6 code, so just parse this as a yield expression.
+                        // in fact, we SHOULD already know, since yield should only be used within a generator
+                        // function, which for ES6 code should have the "*" generator indicator, which when
+                        // parsed should have already set the ES6 flag.
+                        ast = ParseYieldExpression();
                     }
+                    else
+                    {
+                        // we need to protect against non-ES6 code using "yield" as a variable name versus the
+                        // Mozilla yield syntax. We'll do that further upstream.
+                        ast = new Lookup(m_currentToken.Clone())
+                        {
+                            Name = "yield"
+                        };
+                        GetNextToken();
+                    }
+                }
                     break;
 
                 default:
@@ -4025,9 +4038,9 @@ namespace Microsoft.Ajax.Utilities
                     if (identifier != null)
                     {
                         ast = new Lookup(m_currentToken.Clone())
-                            {
-                                Name = identifier
-                            };
+                        {
+                            Name = identifier
+                        };
                         GetNextToken();
                     }
                     else
@@ -4113,9 +4126,9 @@ namespace Microsoft.Ajax.Utilities
 
                 // TODO: figure out how to get a context on just the literal part!
                 lookup = new Lookup(tagContext)
-                    {
-                        Name = literalName
-                    };
+                {
+                    Name = literalName
+                };
             }
 
             // if the token doesn't end with a terminator, then we'll need to parse replacement expressions
@@ -4147,10 +4160,10 @@ namespace Microsoft.Ajax.Utilities
                         {
                             text = m_scanner.StringLiteralValue;
                             var templateExpression = new TemplateLiteralExpression(expression.Context.Clone())
-                                {
-                                    Expression = expression,
-                                    Text = text
-                                };
+                            {
+                                Expression = expression,
+                                Text = text
+                            };
                             templateLiteral.UpdateWith(templateExpression.Context);
                             templateLiteral.Expressions.Append(templateExpression);
                             GetNextToken();
@@ -4162,8 +4175,7 @@ namespace Microsoft.Ajax.Utilities
                     {
                         ReportError(JSError.NoRightCurly);
                     }
-                }
-                while (isContinue);
+                } while (isContinue);
             }
 
             return templateLiteral;
@@ -4199,12 +4211,12 @@ namespace Microsoft.Ajax.Utilities
             }
 
             return new UnaryOperator(context)
-                {
-                    OperatorContext = operatorContext,
-                    OperatorToken = JSToken.Yield,
-                    Operand = expression,
-                    IsDelegator = isDelegator
-                };
+            {
+                OperatorContext = operatorContext,
+                OperatorToken = JSToken.Yield,
+                Operand = expression,
+                IsDelegator = isDelegator
+            };
         }
 
         private FunctionObject ParseArrowFunction(AstNode parameters)
@@ -4215,10 +4227,10 @@ namespace Microsoft.Ajax.Utilities
             ParsedVersion = ScriptVersion.EcmaScript6;
 
             var functionObject = new FunctionObject(parameters.Context.Clone())
-                {
-                    ParameterDeclarations = BindingTransform.ToParameters(parameters),
-                    FunctionType = FunctionType.ArrowFunction,
-                };
+            {
+                ParameterDeclarations = BindingTransform.ToParameters(parameters),
+                FunctionType = FunctionType.ArrowFunction,
+            };
             functionObject.UpdateWith(arrowContext);
             if (m_currentToken.Is(JSToken.LeftCurly))
             {
@@ -4227,7 +4239,7 @@ namespace Microsoft.Ajax.Utilities
             else
             {
                 // parse an assignment expression as a concise block
-                functionObject.Body = Block.ForceToBlock(ParseExpression(true));
+                functionObject.Body = AstNode.ForceToBlock(ParseExpression(true));
                 functionObject.Body.IsConcise = true;
             }
 
@@ -4267,7 +4279,8 @@ namespace Microsoft.Ajax.Utilities
                         // add ANOTHER missing value to make sure this last comma doesn't get left off.
                         // TECHNICALLY, that puts an extra item into the array for most modern browsers, but not ALL.
                         hasTrailingCommas = true;
-                        element = new ConstantWrapper(Missing.Value, PrimitiveType.Other, m_currentToken.FlattenToStart());
+                        element = new ConstantWrapper(Missing.Value, PrimitiveType.Other,
+                            m_currentToken.FlattenToStart());
 
                         // throw a cross-browser warning about trailing commas
                         commaContext.HandleError(JSError.ArrayLiteralTrailingComma);
@@ -4313,11 +4326,11 @@ namespace Microsoft.Ajax.Utilities
                     if (spreadContext != null)
                     {
                         element = new UnaryOperator(spreadContext.CombineWith(element.Context))
-                            {
-                                Operand = element,
-                                OperatorToken = JSToken.RestSpread,
-                                OperatorContext = spreadContext
-                            };
+                        {
+                            Operand = element,
+                            OperatorToken = JSToken.RestSpread,
+                            OperatorContext = spreadContext
+                        };
                     }
                 }
 
@@ -4333,8 +4346,7 @@ namespace Microsoft.Ajax.Utilities
                     commaContext = m_currentToken.Clone();
                     element.IfNotNull(e => e.TerminatingContext = commaContext);
                 }
-            }
-            while (m_currentToken.Is(JSToken.Comma));
+            } while (m_currentToken.Is(JSToken.Comma));
 
             if (m_currentToken.Is(JSToken.RightBracket))
             {
@@ -4347,10 +4359,10 @@ namespace Microsoft.Ajax.Utilities
             }
 
             return new ArrayLiteral(listCtx)
-                {
-                    Elements = list,
-                    MayHaveIssues = hasTrailingCommas
-                };
+            {
+                Elements = list,
+                MayHaveIssues = hasTrailingCommas
+            };
         }
 
         private ComprehensionNode ParseComprehension(bool isArray, Context openDelimiter, AstNode expression)
@@ -4375,8 +4387,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     ReportError(JSError.NoForOrIf);
                 }
-            }
-            while (m_currentToken.IsOne(JSToken.For, JSToken.If));
+            } while (m_currentToken.IsOne(JSToken.For, JSToken.If));
             context.UpdateWith(clauseList.Context);
 
             // if we didn't get an expression yet (and we shouldn't for ES6-spec comprehensions), 
@@ -4401,14 +4412,14 @@ namespace Microsoft.Ajax.Utilities
 
             ParsedVersion = ScriptVersion.EcmaScript6;
             return new ComprehensionNode(context)
-                {
-                    OpenDelimiter = openDelimiter,
-                    Expression = expression,
-                    Clauses = clauseList,
-                    CloseDelimiter = closeDelimiter,
-                    ComprehensionType = isArray ? ComprehensionType.Array : ComprehensionType.Generator,
-                    MozillaOrdering = isMozilla
-                };
+            {
+                OpenDelimiter = openDelimiter,
+                Expression = expression,
+                Clauses = clauseList,
+                CloseDelimiter = closeDelimiter,
+                ComprehensionType = isArray ? ComprehensionType.Array : ComprehensionType.Generator,
+                MozillaOrdering = isMozilla
+            };
         }
 
         private ComprehensionClause ParseComprehensionClause()
@@ -4480,32 +4491,29 @@ namespace Microsoft.Ajax.Utilities
             {
                 // for-clause
                 return new ComprehensionForClause(clauseContext)
-                    {
-                        OperatorContext = forOrIfContext,
-                        OpenContext = leftParen,
-                        Binding = binding,
-                        IsInOperation = isInOperation,
-                        OfContext = ofContext,
-                        Expression = expression,
-                        CloseContext = rightParen,
-                    };
+                {
+                    OperatorContext = forOrIfContext,
+                    OpenContext = leftParen,
+                    Binding = binding,
+                    IsInOperation = isInOperation,
+                    OfContext = ofContext,
+                    Expression = expression,
+                    CloseContext = rightParen,
+                };
             }
-            else //if (tokenContext.Is(JSToken.If))
+            // if-clause
+            return new ComprehensionIfClause(clauseContext)
             {
-                // if-clause
-                return new ComprehensionIfClause(clauseContext)
-                    {
-                        OperatorContext = forOrIfContext,
-                        OpenContext = leftParen,
-                        Condition = expression,
-                        CloseContext = rightParen,
-                    };
-            }
+                OperatorContext = forOrIfContext,
+                OpenContext = leftParen,
+                Condition = expression,
+                CloseContext = rightParen,
+            };
         }
 
         private ObjectLiteral ParseObjectLiteral(bool isBindingPattern)
         {
-            Context objCtx = m_currentToken.Clone();
+            var objCtx = m_currentToken.Clone();
             var propertyList = new AstNodeList(CurrentPositionContext);
 
             do
@@ -4518,8 +4526,7 @@ namespace Microsoft.Ajax.Utilities
                     var property = ParseObjectLiteralProperty(isBindingPattern);
                     propertyList.Append(property);
                 }
-            }
-            while (m_currentToken.Is(JSToken.Comma));
+            } while (m_currentToken.Is(JSToken.Comma));
 
             if (m_currentToken.Is(JSToken.RightCurly))
             {
@@ -4531,10 +4538,10 @@ namespace Microsoft.Ajax.Utilities
                 ReportError(JSError.NoRightCurly);
             }
 
-            return new ObjectLiteral(objCtx) { Properties = propertyList };
+            return new ObjectLiteral(objCtx) {Properties = propertyList};
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private ObjectLiteralProperty ParseObjectLiteralProperty(bool isBindingPattern)
         {
             ObjectLiteralProperty property = null;
@@ -4543,7 +4550,7 @@ namespace Microsoft.Ajax.Utilities
 
             // peek at the NEXT token so we can check if we have name followed by ':'
             var nextToken = PeekToken();
-            Context propertyContext = m_currentToken.Clone();
+            var propertyContext = m_currentToken.Clone();
             if (nextToken == JSToken.Colon)
             {
                 // regular field name followed by a colon
@@ -4587,7 +4594,7 @@ namespace Microsoft.Ajax.Utilities
             }
             else if (m_currentToken.IsOne(JSToken.Get, JSToken.Set))
             {
-                bool isGet = (m_currentToken.Is(JSToken.Get));
+                var isGet = (m_currentToken.Is(JSToken.Get));
                 var funcContext = m_currentToken.Clone();
                 var funcExpr = ParseFunction(isGet ? FunctionType.Getter : FunctionType.Setter, funcContext);
                 if (funcExpr != null)
@@ -4651,41 +4658,43 @@ namespace Microsoft.Ajax.Utilities
                 case JSToken.Get:
                 case JSToken.Set:
                     field = new ObjectLiteralField(m_scanner.Identifier, PrimitiveType.String, m_currentToken.Clone())
-                        {
-                            IsIdentifier = true
-                        };
+                    {
+                        IsIdentifier = true
+                    };
                     break;
 
                 case JSToken.StringLiteral:
-                    field = new ObjectLiteralField(m_scanner.StringLiteralValue, PrimitiveType.String, m_currentToken.Clone())
-                        {
-                            MayHaveIssues = m_scanner.LiteralHasIssues
-                        };
+                    field = new ObjectLiteralField(m_scanner.StringLiteralValue, PrimitiveType.String,
+                        m_currentToken.Clone())
+                    {
+                        MayHaveIssues = m_scanner.LiteralHasIssues
+                    };
                     break;
 
                 case JSToken.IntegerLiteral:
                 case JSToken.NumericLiteral:
+                {
+                    double doubleValue;
+                    if (ConvertNumericLiteralToDouble(m_currentToken.Code, (m_currentToken.Is(JSToken.IntegerLiteral)),
+                        out doubleValue))
                     {
-                        double doubleValue;
-                        if (ConvertNumericLiteralToDouble(m_currentToken.Code, (m_currentToken.Is(JSToken.IntegerLiteral)), out doubleValue))
-                        {
-                            // conversion worked fine
-                            field = new ObjectLiteralField(doubleValue, PrimitiveType.Number, m_currentToken.Clone());
-                        }
-                        else
-                        {
-                            // something went wrong and we're not sure the string representation in the source is 
-                            // going to convert to a numeric value well
-                            if (double.IsInfinity(doubleValue))
-                            {
-                                ReportError(JSError.NumericOverflow);
-                            }
-
-                            // use the source as the field name, not the numeric value
-                            field = new ObjectLiteralField(m_currentToken.Code, PrimitiveType.Other, m_currentToken.Clone());
-                        }
-                        break;
+                        // conversion worked fine
+                        field = new ObjectLiteralField(doubleValue, PrimitiveType.Number, m_currentToken.Clone());
                     }
+                    else
+                    {
+                        // something went wrong and we're not sure the string representation in the source is 
+                        // going to convert to a numeric value well
+                        if (double.IsInfinity(doubleValue))
+                        {
+                            ReportError(JSError.NumericOverflow);
+                        }
+
+                        // use the source as the field name, not the numeric value
+                        field = new ObjectLiteralField(m_currentToken.Code, PrimitiveType.Other, m_currentToken.Clone());
+                    }
+                    break;
+                }
 
                 default:
                     // NOT: identifier token, string, number, or getter/setter.
@@ -4723,11 +4732,8 @@ namespace Microsoft.Ajax.Utilities
                 // binding pattern
                 return ParseBinding();
             }
-            else
-            {
-                // parse a single expression
-                return ParseExpression(true);
-            }
+            // parse a single expression
+            return ParseExpression(true);
         }
 
         //---------------------------------------------------------------------------------------
@@ -4745,7 +4751,7 @@ namespace Microsoft.Ajax.Utilities
         //---------------------------------------------------------------------------------------
         private AstNode ParseMemberExpression(AstNode expression, List<Context> newContexts)
         {
-            for (; ; )
+            for (;;)
             {
                 switch (m_currentToken.Token)
                 {
@@ -4754,11 +4760,11 @@ namespace Microsoft.Ajax.Utilities
                         args = ParseExpressionList(JSToken.RightParenthesis);
 
                         expression = new CallNode(expression.Context.CombineWith(args.Context))
-                            {
-                                Function = expression,
-                                Arguments = args,
-                                InBrackets = false
-                            };
+                        {
+                            Function = expression,
+                            Arguments = args,
+                            InBrackets = false
+                        };
 
                         if (null != newContexts && newContexts.Count > 0)
                         {
@@ -4766,17 +4772,17 @@ namespace Microsoft.Ajax.Utilities
                             if (!(expression is CallNode))
                             {
                                 expression = new CallNode(newContexts[newContexts.Count - 1])
-                                    {
-                                        Function = expression,
-                                        Arguments = new AstNodeList(CurrentPositionContext)
-                                    };
+                                {
+                                    Function = expression,
+                                    Arguments = new AstNodeList(CurrentPositionContext)
+                                };
                             }
                             else
                             {
                                 expression.Context = newContexts[newContexts.Count - 1];
                             }
 
-                            ((CallNode)expression).IsConstructor = true;
+                            ((CallNode) expression).IsConstructor = true;
                             newContexts.RemoveAt(newContexts.Count - 1);
                         }
 
@@ -4797,18 +4803,18 @@ namespace Microsoft.Ajax.Utilities
                         GetNextToken();
                         args = new AstNodeList(CurrentPositionContext);
 
-                        AstNode accessor = ParseExpression();
+                        var accessor = ParseExpression();
                         if (accessor != null)
                         {
                             args.Append(accessor);
                         }
 
                         expression = new CallNode(expression.Context.CombineWith(m_currentToken.Clone()))
-                            {
-                                Function = expression,
-                                Arguments = args,
-                                InBrackets = true
-                            };
+                        {
+                            Function = expression,
+                            Arguments = args,
+                            InBrackets = true
+                        };
 
                         // there originally was code here in the ROTOR sources that checked the new context list and
                         // changed this member call to a constructor call, effectively combining the two. I believe they
@@ -4823,7 +4829,7 @@ namespace Microsoft.Ajax.Utilities
 
                         string name = null;
                         // we want the name context to start with the dot
-                        Context nameContext = m_currentToken.Clone();
+                        var nameContext = m_currentToken.Clone();
                         GetNextToken();
                         if (m_currentToken.IsNot(JSToken.Identifier))
                         {
@@ -4862,7 +4868,8 @@ namespace Microsoft.Ajax.Utilities
                         }
 
                         GetNextToken();
-                        expression = new Member(expression.IfNotNull(e => e.Context.CombineWith(nameContext), nameContext.Clone()))
+                        expression =
+                            new Member(expression.IfNotNull(e => e.Context.CombineWith(nameContext), nameContext.Clone()))
                             {
                                 Root = expression,
                                 Name = name,
@@ -4876,11 +4883,11 @@ namespace Microsoft.Ajax.Utilities
                             {
                                 (newContexts[newContexts.Count - 1]).UpdateWith(expression.Context);
                                 expression = new CallNode(newContexts[newContexts.Count - 1])
-                                    {
-                                        Function = expression,
-                                        Arguments = new AstNodeList(CurrentPositionContext)
-                                    };
-                                ((CallNode)expression).IsConstructor = true;
+                                {
+                                    Function = expression,
+                                    Arguments = new AstNodeList(CurrentPositionContext)
+                                };
+                                ((CallNode) expression).IsConstructor = true;
                                 newContexts.RemoveAt(newContexts.Count - 1);
                             }
                         }
@@ -4928,11 +4935,11 @@ namespace Microsoft.Ajax.Utilities
                     if (spreadContext != null)
                     {
                         item = new UnaryOperator(spreadContext.CombineWith(item.Context))
-                            {
-                                Operand = item,
-                                OperatorToken = JSToken.RestSpread,
-                                OperatorContext = spreadContext
-                            };
+                        {
+                            Operand = item,
+                            OperatorToken = JSToken.RestSpread,
+                            OperatorContext = spreadContext
+                        };
                     }
 
                     list.Append(item);
@@ -4942,8 +4949,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     item.IfNotNull(i => i.TerminatingContext = m_currentToken.Clone());
                 }
-            }
-            while (m_currentToken.Is(JSToken.Comma));
+            } while (m_currentToken.Is(JSToken.Comma));
 
             if (m_currentToken.Is(terminator))
             {
@@ -5069,12 +5075,12 @@ namespace Microsoft.Ajax.Utilities
                 case JSToken.UnsignedRightShiftAssign:
                     // regular binary operator
                     return new BinaryOperator(context)
-                        {
-                            Operand1 = operand1,
-                            Operand2 = operand2,
-                            OperatorContext = operatorContext,
-                            OperatorToken = operatorContext.Token
-                        };
+                    {
+                        Operand1 = operand1,
+                        Operand2 = operand2,
+                        OperatorContext = operatorContext,
+                        OperatorToken = operatorContext.Token
+                    };
 
                 case JSToken.Comma:
                     // use the special comma-operator class derived from binary operator.
@@ -5114,7 +5120,7 @@ namespace Microsoft.Ajax.Utilities
                             }
 
                             // parse the number as a hex integer, converted to a double
-                            doubleValue = (double)System.Convert.ToInt64(str, 16);
+                            doubleValue = System.Convert.ToInt64(str, 16);
                         }
                         else if (str[1] == 'o' || str[1] == 'O')
                         {
@@ -5126,7 +5132,7 @@ namespace Microsoft.Ajax.Utilities
                             }
 
                             // parse the number as an octal integer without the prefix, converted to a double
-                            doubleValue = (double)System.Convert.ToInt64(str.Substring(2), 8);
+                            doubleValue = System.Convert.ToInt64(str.Substring(2), 8);
                         }
                         else if (str[1] == 'b' || str[1] == 'B')
                         {
@@ -5138,7 +5144,7 @@ namespace Microsoft.Ajax.Utilities
                             }
 
                             // parse the number as a binary integer without the prefix, converted to a double
-                            doubleValue = (double)System.Convert.ToInt64(str.Substring(2), 2);
+                            doubleValue = System.Convert.ToInt64(str.Substring(2), 2);
                         }
                         else
                         {
@@ -5146,7 +5152,7 @@ namespace Microsoft.Ajax.Utilities
                             // and if it fails, just convert to decimal
                             try
                             {
-                                doubleValue = (double)System.Convert.ToInt64(str, 8);
+                                doubleValue = System.Convert.ToInt64(str, 8);
 
                                 // if we got here, we successfully converted it to octal.
                                 // now, octal literals are deprecated -- not all JS implementations will
@@ -5154,7 +5160,7 @@ namespace Microsoft.Ajax.Utilities
                                 // the decimal value, and if it's the same, then we'll just treat it
                                 // as a normal decimal value. Otherwise we'll throw a warning and treat it
                                 // as a special no-convert literal.
-                                double decimalValue = (double)System.Convert.ToInt64(str, 10);
+                                double decimalValue = System.Convert.ToInt64(str, 10);
                                 if (decimalValue != doubleValue)
                                 {
                                     // throw a warning!
@@ -5169,14 +5175,14 @@ namespace Microsoft.Ajax.Utilities
                             {
                                 // ignore the format exception and fall through to parsing
                                 // the value as a base-10 decimal value
-                                doubleValue = Convert.ToDouble(str, CultureInfo.InvariantCulture);
+                                doubleValue = System.Convert.ToDouble(str, CultureInfo.InvariantCulture);
                             }
                         }
                     }
                     else
                     {
                         // just parse the integer as a decimal value
-                        doubleValue = Convert.ToDouble(str, CultureInfo.InvariantCulture);
+                        doubleValue = System.Convert.ToDouble(str, CultureInfo.InvariantCulture);
                     }
 
                     // check for out-of-bounds integer values -- if the integer can't EXACTLY be represented
@@ -5189,7 +5195,7 @@ namespace Microsoft.Ajax.Utilities
                 else
                 {
                     // use the system to convert the string to a double
-                    doubleValue = Convert.ToDouble(str, CultureInfo.InvariantCulture);
+                    doubleValue = System.Convert.ToDouble(str, CultureInfo.InvariantCulture);
                 }
 
                 // if we got here, we should have an appropriate value in doubleValue
@@ -5199,9 +5205,9 @@ namespace Microsoft.Ajax.Utilities
             {
                 // overflow mean just return one of the infinity values
                 doubleValue = (str[0] == '-'
-                  ? Double.NegativeInfinity
-                  : Double.PositiveInfinity
-                  );
+                    ? Double.NegativeInfinity
+                    : Double.PositiveInfinity
+                    );
 
                 // and it wasn't "successful"
                 return false;
@@ -5265,7 +5271,8 @@ namespace Microsoft.Ajax.Utilities
             m_importantComments.Clear();
 
             var nextToken = m_scanner.ScanNextToken();
-            while (nextToken.IsOne(JSToken.WhiteSpace, JSToken.EndOfLine, JSToken.SingleLineComment, JSToken.MultipleLineComment, JSToken.PreprocessorDirective, JSToken.Error))
+            while (nextToken.IsOne(JSToken.WhiteSpace, JSToken.EndOfLine, JSToken.SingleLineComment,
+                JSToken.MultipleLineComment, JSToken.PreprocessorDirective, JSToken.Error))
             {
                 if (nextToken.Is(JSToken.EndOfLine))
                 {
@@ -5275,8 +5282,8 @@ namespace Microsoft.Ajax.Utilities
                 {
                     if (nextToken.HasCode
                         && ((nextToken.Code.Length > 2 && nextToken.Code[2] == '!')
-                        || (nextToken.Code.IndexOf("@preserve", StringComparison.OrdinalIgnoreCase) >= 0)
-                        || (nextToken.Code.IndexOf("@license", StringComparison.OrdinalIgnoreCase) >= 0)))
+                            || (nextToken.Code.IndexOf("@preserve", StringComparison.OrdinalIgnoreCase) >= 0)
+                            || (nextToken.Code.IndexOf("@license", StringComparison.OrdinalIgnoreCase) >= 0)))
                     {
                         // this is an important comment -- save it for later
                         m_importantComments.Add(nextToken.Clone());
@@ -5284,7 +5291,12 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 // if we are preprocess-only, then don't output any preprocessor directive tokens
-                EchoWriter.IfNotNull(w => { if (!Settings.PreprocessOnly || nextToken.Token != JSToken.PreprocessorDirective) w.Write(nextToken.Code); });
+                EchoWriter.IfNotNull(
+                    w =>
+                    {
+                        if (!Settings.PreprocessOnly || nextToken.Token != JSToken.PreprocessorDirective)
+                            w.Write(nextToken.Code);
+                    });
                 nextToken = m_scanner.ScanNextToken();
             }
 
@@ -5306,8 +5318,10 @@ namespace Microsoft.Ajax.Utilities
             // there are some tokens we really don't care about when we peek
             // for the next token
             while (peekToken.IsOne(JSToken.WhiteSpace, JSToken.EndOfLine, JSToken.Error, JSToken.SingleLineComment,
-                JSToken.MultipleLineComment, JSToken.PreprocessorDirective, JSToken.ConditionalCommentEnd, JSToken.ConditionalCommentStart,
-                JSToken.ConditionalCompilationElse, JSToken.ConditionalCompilationElseIf, JSToken.ConditionalCompilationEnd,
+                JSToken.MultipleLineComment, JSToken.PreprocessorDirective, JSToken.ConditionalCommentEnd,
+                JSToken.ConditionalCommentStart,
+                JSToken.ConditionalCompilationElse, JSToken.ConditionalCompilationElseIf,
+                JSToken.ConditionalCompilationEnd,
                 JSToken.ConditionalCompilationIf, JSToken.ConditionalCompilationOn, JSToken.ConditionalCompilationSet,
                 JSToken.ConditionalCompilationVariable, JSToken.ConditionalIf))
             {
@@ -5358,8 +5372,10 @@ namespace Microsoft.Ajax.Utilities
             // skip whitespace, but not linebreaks
             var lineBreak = false;
             while (peekToken.IsOne(JSToken.WhiteSpace, JSToken.EndOfLine, JSToken.Error, JSToken.SingleLineComment,
-                JSToken.MultipleLineComment, JSToken.PreprocessorDirective, JSToken.ConditionalCommentEnd, JSToken.ConditionalCommentStart,
-                JSToken.ConditionalCompilationElse, JSToken.ConditionalCompilationElseIf, JSToken.ConditionalCompilationEnd,
+                JSToken.MultipleLineComment, JSToken.PreprocessorDirective, JSToken.ConditionalCommentEnd,
+                JSToken.ConditionalCommentStart,
+                JSToken.ConditionalCompilationElse, JSToken.ConditionalCompilationElseIf,
+                JSToken.ConditionalCompilationEnd,
                 JSToken.ConditionalCompilationIf, JSToken.ConditionalCompilationOn, JSToken.ConditionalCompilationSet,
                 JSToken.ConditionalCompilationVariable, JSToken.ConditionalIf))
             {
@@ -5372,7 +5388,8 @@ namespace Microsoft.Ajax.Utilities
             }
 
             // if we have a string literal with no linebreaks in between, or an identifier, then we're good to go.
-            return (peekToken.Is(JSToken.StringLiteral) && !lineBreak) || peekToken.Is(JSToken.Identifier) || JSKeyword.CanBeIdentifier(peekToken.Token) != null;
+            return (peekToken.Is(JSToken.StringLiteral) && !lineBreak) || peekToken.Is(JSToken.Identifier) ||
+                   JSKeyword.CanBeIdentifier(peekToken.Token) != null;
         }
 
         #endregion
@@ -5449,16 +5466,17 @@ namespace Microsoft.Ajax.Utilities
 
     public sealed class UndefinedReference
     {
-        private Context m_context;
+        private readonly Context m_context;
 
-        private Lookup m_lookup;
+        private readonly Lookup m_lookup;
+
         public AstNode LookupNode
         {
             get { return m_lookup; }
         }
 
-        private string m_name;
-        private ReferenceType m_type;
+        private readonly string m_name;
+        private readonly ReferenceType m_type;
 
         public string Name
         {
@@ -5479,10 +5497,7 @@ namespace Microsoft.Ajax.Utilities
                     // one-based
                     return m_context.StartColumn + 1;
                 }
-                else
-                {
-                    return 0;
-                }
+                return 0;
             }
         }
 
@@ -5494,10 +5509,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     return m_context.StartLineNumber;
                 }
-                else
-                {
-                    return 0;
-                }
+                return 0;
             }
         }
 

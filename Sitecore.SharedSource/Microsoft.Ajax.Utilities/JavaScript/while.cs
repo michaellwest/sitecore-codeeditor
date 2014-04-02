@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class WhileNode : IterationStatement
     {
@@ -57,10 +57,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Condition, Body);
-            }
+            get { return EnumerateNonNullNodes(Condition, Body); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

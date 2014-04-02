@@ -14,11 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class DetachReferences : TreeVisitor
     {
@@ -33,7 +29,7 @@ namespace Microsoft.Ajax.Utilities
         {
             if (node != null)
             {
-                node.Accept(s_instance); 
+                node.Accept(s_instance);
             }
         }
 

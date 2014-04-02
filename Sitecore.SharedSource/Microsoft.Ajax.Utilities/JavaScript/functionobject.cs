@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class FunctionObject : AstNode
     {
@@ -83,7 +83,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 // if this is a declaration or a method, then it's not an expression. 
                 return FunctionType != FunctionType.Declaration
-                    && FunctionType != FunctionType.Method;
+                       && FunctionType != FunctionType.Method;
             }
         }
 
@@ -101,7 +101,9 @@ namespace Microsoft.Ajax.Utilities
             get
             {
                 // arow functions are assignment precedence, function expression are primary
-                return FunctionType == FunctionType.ArrowFunction ? OperatorPrecedence.Assignment : OperatorPrecedence.Primary;
+                return FunctionType == FunctionType.ArrowFunction
+                    ? OperatorPrecedence.Assignment
+                    : OperatorPrecedence.Primary;
             }
         }
 
@@ -160,14 +162,11 @@ namespace Microsoft.Ajax.Utilities
                             // referenced by a lookup in the global scope -- we're good to go.
                             return true;
                         }
-                        else
+                        var functionObject = referencingScope.Owner as FunctionObject;
+                        if (functionObject != null && functionObject.SafeIsReferenced(visited))
                         {
-                            var functionObject = referencingScope.Owner as FunctionObject;
-                            if (functionObject != null && functionObject.SafeIsReferenced(visited))
-                            {
-                                // as soon as we find one that's referenced, we stop
-                                return true;
-                            }
+                            // as soon as we find one that's referenced, we stop
+                            return true;
                         }
                     }
                 }
@@ -184,10 +183,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Binding, ParameterDeclarations, Body);
-            }
+            get { return EnumerateNonNullNodes(Binding, ParameterDeclarations, Body); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
@@ -197,18 +193,18 @@ namespace Microsoft.Ajax.Utilities
                 Binding = newNode as BindingIdentifier;
                 return true;
             }
-            else if (Body == oldNode)
+            if (Body == oldNode)
             {
                 Body = ForceToBlock(newNode);
                 return true;
             }
-            else if (ParameterDeclarations == oldNode)
+            if (ParameterDeclarations == oldNode)
             {
                 return (newNode as AstNodeList).IfNotNull(list =>
-                    {
-                        ParameterDeclarations = list;
-                        return true;
-                    });
+                {
+                    ParameterDeclarations = list;
+                    return true;
+                });
             }
 
             return false;

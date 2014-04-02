@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Field type enumeration
@@ -40,14 +40,14 @@ namespace Microsoft.Ajax.Utilities
 
     public class JSVariableField
     {
-        private ActivationObject m_owningScope; 
-        private HashSet<INameReference> m_referenceTable;
-        private HashSet<INameDeclaration> m_declarationTable;
+        private ActivationObject m_owningScope;
+        private readonly HashSet<INameReference> m_referenceTable;
+        private readonly HashSet<INameDeclaration> m_declarationTable;
 
-        private bool m_canCrunch;// = false;
+        private bool m_canCrunch; // = false;
         private bool m_isDeclared; //= false;
         private bool m_isGenerated;
-        private string m_crunchedName;// = null;
+        private string m_crunchedName; // = null;
 
         public Context OriginalContext { get; set; }
         public string Name { get; private set; }
@@ -66,7 +66,7 @@ namespace Microsoft.Ajax.Utilities
 
         public JSVariableField OuterField { get; set; }
 
-        public ActivationObject OwningScope 
+        public ActivationObject OwningScope
         {
             get
             {
@@ -88,11 +88,9 @@ namespace Microsoft.Ajax.Utilities
 
         public int RefCount
         {
-            get
-            {
-                return m_referenceTable.Count;
-            }
+            get { return m_referenceTable.Count; }
         }
+
         public ICollection<INameReference> References
         {
             get { return m_referenceTable; }
@@ -141,17 +139,14 @@ namespace Microsoft.Ajax.Utilities
 
         public bool IsLiteral
         {
-            get
-            {
-                return ((Attributes & FieldAttributes.Literal) != 0);
-            }
+            get { return ((Attributes & FieldAttributes.Literal) != 0); }
         }
 
         public bool CanCrunch
         {
             get { return m_canCrunch; }
-            set 
-            { 
+            set
+            {
                 m_canCrunch = value;
 
                 // if there is an outer field, we only want to propagate
@@ -168,8 +163,8 @@ namespace Microsoft.Ajax.Utilities
         public bool IsDeclared
         {
             get { return m_isDeclared; }
-            set 
-            { 
+            set
+            {
                 m_isDeclared = value;
                 if (OuterField != null)
                 {
@@ -272,7 +267,7 @@ namespace Microsoft.Ajax.Utilities
                     // ask the function object if it's referenced. 
                     return funcObj.IsReferenced;
                 }
-                else if (FieldValue is ClassNode)
+                if (FieldValue is ClassNode)
                 {
                     // classes are always referenced. For now.
                     return true;
@@ -420,7 +415,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override string ToString()
         {
-            string crunch = CrunchedName;
+            var crunch = CrunchedName;
             return string.IsNullOrEmpty(crunch) ? Name : crunch;
         }
 
@@ -445,7 +440,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 return true;
             }
-            else if (otherField == null)
+            if (otherField == null)
             {
                 return false;
             }

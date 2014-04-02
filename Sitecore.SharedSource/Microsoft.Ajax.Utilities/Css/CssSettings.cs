@@ -14,8 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css
 {
+
     #region public enums
 
     /// <summary>
@@ -102,7 +103,7 @@ namespace Microsoft.Ajax.Utilities
         {
             // create the new settings object and copy all the properties from
             // the current settings
-            var newSettings = new CssSettings()
+            var newSettings = new CssSettings
             {
                 AllowEmbeddedAspNetBlocks = this.AllowEmbeddedAspNetBlocks,
                 ColorNames = this.ColorNames,
@@ -139,34 +140,21 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// Gets or sets ColorNames setting. Default is Strict.
         /// </summary>
-        public CssColor ColorNames
-        {
-            get; set;
-        }
+        public CssColor ColorNames { get; set; }
 
         /// <summary>
         /// Gets or sets CommentMode setting. Default is Important.
         /// </summary>
-        public CssComment CommentMode
-        {
-            get; set;
-        }
+        public CssComment CommentMode { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to minify the javascript within expression functions. Deault is true.
         /// </summary>
-        public bool MinifyExpressions
-        {
-            get; set;
-        }
+        public bool MinifyExpressions { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating how to treat the input source. Default is FullStyleSheet.
         /// </summary>
-        public CssType CssType 
-        { 
-            get; 
-            set; 
-        }
+        public CssType CssType { get; set; }
     }
 }

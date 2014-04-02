@@ -16,11 +16,12 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class ConditionalCompilationComment : AstNode
     {
         private Block m_statements;
+
         public Block Statements
         {
             get { return m_statements; }
@@ -58,10 +59,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Statements);
-            }
+            get { return EnumerateNonNullNodes(Statements); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

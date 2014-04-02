@@ -14,11 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class ThisLiteral : Expression
     {
-
         public ThisLiteral(Context context)
             : base(context)
         {
@@ -35,7 +34,7 @@ namespace Microsoft.Ajax.Utilities
         public override bool IsEquivalentTo(AstNode otherNode)
         {
             var otherThis = otherNode as ThisLiteral;
-            
+
             // this really assume we are comparing this operators from the same object scope.
             // if you compare a this-literal from one function to a this-literal from another,
             // it will pop positive -- but it won't actually be equivalent!

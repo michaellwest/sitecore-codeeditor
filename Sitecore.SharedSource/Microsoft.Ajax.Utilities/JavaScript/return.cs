@@ -16,11 +16,12 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class ReturnNode : AstNode
     {
         private AstNode m_operand;
+
         public AstNode Operand
         {
             get { return m_operand; }
@@ -47,10 +48,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Operand);
-            }
+            get { return EnumerateNonNullNodes(Operand); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

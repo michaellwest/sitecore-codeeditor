@@ -17,7 +17,7 @@
 using System.ComponentModel;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// super-simple JSON parser/validator. Exposes a Validate method
@@ -27,32 +27,23 @@ namespace Microsoft.Ajax.Utilities
     /// </summary>
     public class JSON
     {
-        private string m_jsonText;
+        private readonly string m_jsonText;
         private int m_currentIndex;
-        private StringBuilder m_builder;
+        private readonly StringBuilder m_builder;
 
         private bool IsAtEnd
         {
-            get
-            {
-                return SkipSpace() == '\0';
-            }
+            get { return SkipSpace() == '\0'; }
         }
 
         private char Current
         {
-            get
-            {
-                return m_currentIndex < m_jsonText.Length ? m_jsonText[m_currentIndex] : '\0';
-            }
+            get { return m_currentIndex < m_jsonText.Length ? m_jsonText[m_currentIndex] : '\0'; }
         }
 
         private string Minified
         {
-            get
-            {
-                return m_builder.ToString();
-            }
+            get { return m_builder.ToString(); }
         }
 
         private JSON(string jsonText)
@@ -233,7 +224,8 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // if these are valid single-character escapes, then keep going
                     ch = Next();
-                    if (ch != '"' && ch != '/' && ch != '\\' && ch != 'b' && ch != 'f' && ch != 'n' && ch != 'r' && ch != 't')
+                    if (ch != '"' && ch != '/' && ch != '\\' && ch != 'b' && ch != 'f' && ch != 'n' && ch != 'r' &&
+                        ch != 't')
                     {
                         // unicode escape?
                         if (ch == 'u')

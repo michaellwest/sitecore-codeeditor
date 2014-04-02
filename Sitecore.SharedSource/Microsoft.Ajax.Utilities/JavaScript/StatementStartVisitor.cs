@@ -16,7 +16,7 @@
 
 using System.Diagnostics;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Determines if a node at the beginning of a statement needs parentheses around it
@@ -32,10 +32,6 @@ namespace Microsoft.Ajax.Utilities
         private bool m_isSafe;
 
         #endregion
-
-        public StatementStartVisitor()
-        {
-        }
 
         public bool IsSafe(AstNode node)
         {

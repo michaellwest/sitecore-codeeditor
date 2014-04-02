@@ -18,7 +18,7 @@
 //Used by the Parser to parse expressions
 //***************************************************************************************
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public enum OperatorPrecedence
     {
@@ -42,4 +42,3 @@ namespace Microsoft.Ajax.Utilities
         Highest
     }
 }
-

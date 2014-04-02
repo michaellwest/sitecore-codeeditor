@@ -17,7 +17,7 @@
 using System;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {
     /// <summary>
     /// JSEncoderFallback encodes invalid encoder characters as Unicode escapes:
@@ -39,7 +39,6 @@ namespace Microsoft.Ajax.Utilities
     public class JSEncoderFallback : EncoderFallback
     {
         // constructor
-        public JSEncoderFallback() { }
 
         /// <summary>
         /// return a fallback buffer for this encoding fallback
@@ -119,7 +118,7 @@ namespace Microsoft.Ajax.Utilities
             }
 
             // Go ahead and get our fallback
-            m_fallbackString = GetEncoding((int)charUnknown);
+            m_fallbackString = GetEncoding(charUnknown);
             m_position = 0;
 
             // return false if we have no string, indicating we didn't encode it
@@ -142,7 +141,7 @@ namespace Microsoft.Ajax.Utilities
             }
 
             // get the fallback string
-            m_fallbackString = GetEncoding((int)charUnknownHigh) + GetEncoding((int)charUnknownLow);
+            m_fallbackString = GetEncoding(charUnknownHigh) + GetEncoding(charUnknownLow);
             m_position = 0;
 
             // return false if we have no string, indicating we didn't encode it
@@ -159,10 +158,10 @@ namespace Microsoft.Ajax.Utilities
             // then we're done -- return a null character.
             // otherwise return the next character an increment the position for next time
             return (
-              m_position < m_fallbackString.Length
-              ? m_fallbackString[m_position++]
-              : (char)0
-              );
+                m_position < m_fallbackString.Length
+                    ? m_fallbackString[m_position++]
+                    : (char) 0
+                );
         }
 
         /// <summary>
@@ -172,7 +171,7 @@ namespace Microsoft.Ajax.Utilities
         public override bool MovePrevious()
         {
             // we'll return true if we aren't already at the front, false if we are
-            bool backedUp = (m_position > 0);
+            var backedUp = (m_position > 0);
             // if we're not already at the front...
             if (m_position > 0)
             {

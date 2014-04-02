@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class LogicalNot : TreeVisitor
     {
-        private AstNode m_expression;
+        private readonly AstNode m_expression;
         private bool m_measure;
         private int m_delta;
 
@@ -32,9 +32,11 @@ namespace Microsoft.Ajax.Utilities
         public LogicalNot(AstNode node, CodeSettings codeSettings)
         {
             m_expression = node;
-            
+
             MinifyBooleans = codeSettings.IfNotNull(settings => settings.MinifyCode
-                && settings.IsModificationAllowed(TreeModifications.BooleanLiteralsToNotOperators));
+                                                                &&
+                                                                settings.IsModificationAllowed(
+                                                                    TreeModifications.BooleanLiteralsToNotOperators));
         }
 
         public int Measure()
@@ -66,10 +68,10 @@ namespace Microsoft.Ajax.Utilities
             operand.Parent.ReplaceChild(
                 operand,
                 new UnaryOperator(operand.Context)
-                    {
-                        Operand = operand,
-                        OperatorToken = JSToken.LogicalNot
-                    });
+                {
+                    Operand = operand,
+                    OperatorToken = JSToken.LogicalNot
+                });
         }
 
         private void TypicalHandler(AstNode node)
@@ -141,17 +143,17 @@ namespace Microsoft.Ajax.Utilities
 
                 case JSToken.LessThan:
                 case JSToken.GreaterThan:
-                // these operators would add another character when turnbed into a not.
-                // for example, < becomes >=, etc
-                //++m_delta;
-                //break;
+                    // these operators would add another character when turnbed into a not.
+                    // for example, < becomes >=, etc
+                    //++m_delta;
+                    //break;
 
                 case JSToken.LessThanEqual:
                 case JSToken.GreaterThanEqual:
-                // these operators would subtract another character when turnbed into a not.
-                // for example, <= becomes >, etc
-                //--m_delta;
-                //break;
+                    // these operators would subtract another character when turnbed into a not.
+                    // for example, <= becomes >, etc
+                    //--m_delta;
+                    //break;
 
                 case JSToken.Assign:
                 case JSToken.PlusAssign:
@@ -248,20 +250,20 @@ namespace Microsoft.Ajax.Utilities
                     break;
 
                 case JSToken.LessThan:
-                //node.OperatorToken = JSToken.GreaterThanEqual;
-                //break;
+                    //node.OperatorToken = JSToken.GreaterThanEqual;
+                    //break;
 
                 case JSToken.GreaterThan:
-                //node.OperatorToken = JSToken.LessThanEqual;
-                //break;
+                    //node.OperatorToken = JSToken.LessThanEqual;
+                    //break;
 
                 case JSToken.LessThanEqual:
-                //node.OperatorToken = JSToken.GreaterThan;
-                //break;
+                    //node.OperatorToken = JSToken.GreaterThan;
+                    //break;
 
                 case JSToken.GreaterThanEqual:
-                //node.OperatorToken = JSToken.LessThan;
-                //break;
+                    //node.OperatorToken = JSToken.LessThan;
+                    //break;
 
                 case JSToken.Assign:
                 case JSToken.PlusAssign:
@@ -327,7 +329,9 @@ namespace Microsoft.Ajax.Utilities
                             node.Operand2.Accept(this);
                         }
                     }
-                    node.OperatorToken = node.OperatorToken == JSToken.LogicalAnd ? JSToken.LogicalOr : JSToken.LogicalAnd;
+                    node.OperatorToken = node.OperatorToken == JSToken.LogicalAnd
+                        ? JSToken.LogicalOr
+                        : JSToken.LogicalAnd;
                     break;
             }
         }
@@ -350,13 +354,13 @@ namespace Microsoft.Ajax.Utilities
                 // each branch and add them together to know how much the second would cost. If it's 
                 // greater than 3, then we just want to not the whole thing.
                 var notTrue = new LogicalNot(node.TrueExpression)
-                    {
-                        MinifyBooleans = this.MinifyBooleans
-                    };
+                {
+                    MinifyBooleans = this.MinifyBooleans
+                };
                 var notFalse = new LogicalNot(node.FalseExpression)
-                    {
-                        MinifyBooleans = this.MinifyBooleans
-                    };
+                {
+                    MinifyBooleans = this.MinifyBooleans
+                };
                 var costNottingBoth = notTrue.Measure() + notFalse.Measure();
 
                 if (m_measure)
@@ -499,7 +503,8 @@ namespace Microsoft.Ajax.Utilities
                         // removes the not operator character, but also might remove parens that we would
                         // no longer need.
                         --m_delta;
-                        if (node.Operand is BinaryOperator || node.Operand is Conditional || node.Operand is GroupingOperator)
+                        if (node.Operand is BinaryOperator || node.Operand is Conditional ||
+                            node.Operand is GroupingOperator)
                         {
                             // those operators are lesser-precedence than the logical-not coperator and would've
                             // added parens that we now don't need

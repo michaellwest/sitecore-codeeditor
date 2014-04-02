@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class Switch : AstNode
     {
@@ -65,10 +65,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Expression, Cases);
-            }
+            get { return EnumerateNonNullNodes(Expression, Cases); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
@@ -80,7 +77,7 @@ namespace Microsoft.Ajax.Utilities
             }
             if (Cases == oldNode)
             {
-                AstNodeList newList = newNode as AstNodeList;
+                var newList = newNode as AstNodeList;
                 if (newNode == null || newList != null)
                 {
                     // remove it

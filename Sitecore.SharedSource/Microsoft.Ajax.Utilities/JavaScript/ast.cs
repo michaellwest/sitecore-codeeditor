@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     internal enum EncloseBlockType
     {
@@ -52,12 +52,18 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// Gets a boolean flag indicating whether this node is an expression
         /// </summary>
-        public virtual bool IsExpression { get { return false; } }
+        public virtual bool IsExpression
+        {
+            get { return false; }
+        }
 
         /// <summary>
         /// Gets a boolean flag indicating whether this node is a constant expression
         /// </summary>
-        public virtual bool IsConstant { get { return false; } }
+        public virtual bool IsConstant
+        {
+            get { return false; }
+        }
 
         /// <summary>
         /// Gets or sets a flag indicating whether we have analyzed this statement and determined it
@@ -93,7 +99,7 @@ namespace Microsoft.Ajax.Utilities
         {
             get
             {
-                Lookup lookup = this as Lookup;
+                var lookup = this as Lookup;
                 return (lookup != null
                         && string.CompareOrdinal(lookup.Name, "window") == 0
                         && (lookup.VariableField == null || lookup.VariableField.FieldType == FieldType.Predefined));
@@ -122,10 +128,7 @@ namespace Microsoft.Ajax.Utilities
                 // if we don't have our own scope, ask the parent for theirs
                 return m_enclosingScope ?? (Parent == null ? null : Parent.EnclosingScope);
             }
-            set
-            {
-                m_enclosingScope = value;
-            }
+            set { m_enclosingScope = value; }
         }
 
         /// <summary>
@@ -259,7 +262,7 @@ namespace Microsoft.Ajax.Utilities
 
         internal static IEnumerable<AstNode> EnumerateNonNullNodes<T>(IList<T> nodes) where T : AstNode
         {
-            for (int ndx = 0; ndx < nodes.Count; ++ndx)
+            for (var ndx = 0; ndx < nodes.Count; ++ndx)
             {
                 if (nodes[ndx] != null)
                 {
@@ -268,9 +271,10 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        internal static IEnumerable<AstNode> EnumerateNonNullNodes(AstNode n1, AstNode n2 = null, AstNode n3 = null, AstNode n4 = null)
+        internal static IEnumerable<AstNode> EnumerateNonNullNodes(AstNode n1, AstNode n2 = null, AstNode n3 = null,
+            AstNode n4 = null)
         {
-            return EnumerateNonNullNodes(new[] { n1, n2, n3, n4 });
+            return EnumerateNonNullNodes(new[] {n1, n2, n3, n4});
         }
     }
 }

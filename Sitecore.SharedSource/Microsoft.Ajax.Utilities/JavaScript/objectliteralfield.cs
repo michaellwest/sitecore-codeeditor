@@ -16,7 +16,7 @@
 
 using System;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class ObjectLiteralField : ConstantWrapper, INameDeclaration
     {
@@ -39,10 +39,7 @@ namespace Microsoft.Ajax.Utilities
 
         public string Name
         {
-            get 
-            { 
-                return this.ToString(); 
-            }
+            get { return this.ToString(); }
         }
 
         public AstNode Initializer
@@ -57,10 +54,10 @@ namespace Microsoft.Ajax.Utilities
 
         public bool RenameNotAllowed
         {
-            get 
-            { 
+            get
+            {
                 // this represents an object property name, so we can't rename it
-                return true; 
+                return true;
             }
         }
 

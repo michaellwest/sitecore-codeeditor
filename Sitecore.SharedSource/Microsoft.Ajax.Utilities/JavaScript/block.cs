@@ -14,17 +14,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Block of statements
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public sealed class Block : AstNode, IEnumerable<AstNode>
     {
-        private List<AstNode> m_list;
+        private readonly List<AstNode> m_list;
 
         /// <summary>
         /// Gets a particular statement in the list of statements making up this block
@@ -110,10 +112,7 @@ namespace Microsoft.Ajax.Utilities
         /// </summary>
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(m_list);
-            }
+            get { return EnumerateNonNullNodes(m_list); }
         }
 
         public Block(Context context)
@@ -159,7 +158,7 @@ namespace Microsoft.Ajax.Utilities
         /// <returns>true if the replacement was a succeess; false otherwise</returns>
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
         {
-            for (int ndx = m_list.Count - 1; ndx >= 0; --ndx)
+            for (var ndx = m_list.Count - 1; ndx >= 0; --ndx)
             {
                 if (m_list[ndx] == oldNode)
                 {
@@ -179,7 +178,7 @@ namespace Microsoft.Ajax.Utilities
                     }
                     else
                     {
-                        Block newBlock = newNode as Block;
+                        var newBlock = newNode as Block;
                         if (newBlock != null)
                         {
                             // the new "statement" is a block. That means we need to insert all
@@ -249,7 +248,7 @@ namespace Microsoft.Ajax.Utilities
         {
             if (item != null)
             {
-                int index = m_list.IndexOf(after);
+                var index = m_list.IndexOf(after);
                 if (index >= 0)
                 {
                     if (this.IsConcise)
@@ -350,7 +349,7 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 m_list.InsertRange(index, newItems);
-                foreach (AstNode newItem in newItems)
+                foreach (var newItem in newItems)
                 {
                     newItem.Parent = this;
                 }
@@ -387,7 +386,7 @@ namespace Microsoft.Ajax.Utilities
             return m_list.GetEnumerator();
         }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return m_list.GetEnumerator();
         }

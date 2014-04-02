@@ -16,18 +16,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class ScriptSharpSourceMap : ISourceMap
     {
         private readonly XmlWriter m_writer;
         private string m_currentPackagePath;
         private string m_mapPath;
-        private Dictionary<string, int> m_sourceFileIndexMap = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> m_sourceFileIndexMap = new Dictionary<string, int>();
         private int currentIndex;
         private int m_lineOffset;
         private int m_columnOffset;
@@ -35,21 +36,13 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// Gets or sets an optional source root URI that will be added to the map object as the sourceRoot property if set
         /// </summary>
-        public string SourceRoot
-        {
-            get;
-            set;
-        }
+        public string SourceRoot { get; set; }
 
         /// <summary>
         /// Gets or sets a flag indicating whether or not to add a "safe" header to the map output file
         /// (not used by this implementation)
         /// </summary>
-        public bool SafeHeader
-        {
-            get;
-            set;
-        }
+        public bool SafeHeader { get; set; }
 
         public static string ImplementationName
         {
@@ -68,11 +61,11 @@ namespace Microsoft.Ajax.Utilities
                 throw new ArgumentNullException("writer");
             }
 
-            var settings = new XmlWriterSettings()
-                {
-                    CloseOutput = true,
-                    Indent = true
-                };
+            var settings = new XmlWriterSettings
+            {
+                CloseOutput = true,
+                Indent = true
+            };
             m_writer = XmlWriter.Create(writer, settings);
 
             m_writer.WriteStartDocument();
@@ -90,7 +83,8 @@ namespace Microsoft.Ajax.Utilities
             m_writer.WriteAttributeString("path", MakeRelative(sourcePath, m_mapPath) ?? string.Empty);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security.Cryptography", "CA5350:MD5CannotBeUsed", Justification="not using for encryption, just a checksum")]
+        [SuppressMessage("Microsoft.Security.Cryptography", "CA5350:MD5CannotBeUsed",
+            Justification = "not using for encryption, just a checksum")]
         public void EndPackage()
         {
             if (m_currentPackagePath.IsNullOrWhiteSpace())
@@ -101,11 +95,11 @@ namespace Microsoft.Ajax.Utilities
             // Compute and print the output script checksum and close the scriptFile element
             // the checksum can be used to determine whether the symbols map file is still valid
             // or if the script has been tempered with
-            using (FileStream stream = new FileStream(m_currentPackagePath, FileMode.Open))
+            using (var stream = new FileStream(m_currentPackagePath, FileMode.Open))
             {
-                using (MD5 md5 = MD5.Create())
+                using (var md5 = MD5.Create())
                 {
-                    byte[] checksum = md5.ComputeHash(stream);
+                    var checksum = md5.ComputeHash(stream);
 
                     m_writer.WriteStartElement("checksum");
                     m_writer.WriteAttributeString("value", BitConverter.ToString(checksum));
@@ -143,10 +137,11 @@ namespace Microsoft.Ajax.Utilities
 
         public object StartSymbol(AstNode node, int startLine, int startColumn)
         {
-            if (node != null 
+            if (node != null
                 && !node.Context.Document.IsGenerated)
             {
-                return JavaScriptSymbol.StartNew(node, startLine + m_lineOffset, startColumn + m_columnOffset, GetSourceFileIndex(node.Context.Document.FileContext));
+                return JavaScriptSymbol.StartNew(node, startLine + m_lineOffset, startColumn + m_columnOffset,
+                    GetSourceFileIndex(node.Context.Document.FileContext));
             }
 
             return null;
@@ -164,7 +159,7 @@ namespace Microsoft.Ajax.Utilities
             // AND this context isn't the same as the entire function context.
             // this should only be true for the function NAME segment.
             var functionObject = node as FunctionObject;
-            if (functionObject != null 
+            if (functionObject != null
                 && string.CompareOrdinal(name, functionObject.Binding.Name) == 0
                 && context != functionObject.Context)
             {
@@ -176,8 +171,9 @@ namespace Microsoft.Ajax.Utilities
                 // for this format we want to output a separate segment for. It used to be its own Lookup
                 // node child of the function object, so we need to create a fake node here, start a new 
                 // symbol from it, end the symbol, then write it.
-                var fakeLookup = new Lookup(context) { Name = name };
-                var nameSymbol = JavaScriptSymbol.StartNew(fakeLookup, startLine, startColumn, GetSourceFileIndex(functionObject.Context.Document.FileContext));
+                var fakeLookup = new Lookup(context) {Name = name};
+                var nameSymbol = JavaScriptSymbol.StartNew(fakeLookup, startLine, startColumn,
+                    GetSourceFileIndex(functionObject.Context.Document.FileContext));
 
                 // the name will never end on a different line -- it's a single unbreakable token. The length is just
                 // the length of the name, so add that number to the column start. And the parent context is the function
@@ -198,7 +194,7 @@ namespace Microsoft.Ajax.Utilities
             endLine += m_lineOffset;
             endColumn += m_columnOffset;
 
-            var javaScriptSymbol = (JavaScriptSymbol)symbol;
+            var javaScriptSymbol = (JavaScriptSymbol) symbol;
             javaScriptSymbol.End(endLine, endColumn, parentContext);
             javaScriptSymbol.WriteTo(m_writer);
         }
@@ -215,7 +211,7 @@ namespace Microsoft.Ajax.Utilities
             m_writer.WriteEndElement(); //scriptFiles
             m_writer.WriteStartElement("sourceFiles");
 
-            foreach (KeyValuePair<string, int> kvp in m_sourceFileIndexMap)
+            foreach (var kvp in m_sourceFileIndexMap)
             {
                 m_writer.WriteStartElement("sourceFile");
                 m_writer.WriteAttributeString("id", kvp.Value.ToStringInvariant());
@@ -282,7 +278,9 @@ namespace Microsoft.Ajax.Utilities
             private string m_symbolType;
             private string m_parentFunction;
 
-            private JavaScriptSymbol() { }
+            private JavaScriptSymbol()
+            {
+            }
 
             public static JavaScriptSymbol StartNew(AstNode node, int startLine, int startColumn, int sourceFileId)
             {

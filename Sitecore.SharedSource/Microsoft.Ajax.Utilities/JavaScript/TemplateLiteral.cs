@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class TemplateLiteral : Expression
     {
@@ -64,10 +64,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(m_function, m_expressions);
-            }
+            get { return EnumerateNonNullNodes(m_function, m_expressions); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

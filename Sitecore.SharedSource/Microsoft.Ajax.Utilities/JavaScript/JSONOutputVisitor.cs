@@ -16,24 +16,18 @@
 
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     /// <summary>
     /// output JSON-compatible code
     /// </summary>
     public class JSONOutputVisitor : IVisitor
     {
-        private TextWriter m_writer;
-        private CodeSettings m_settings;
+        private readonly TextWriter m_writer;
+        private readonly CodeSettings m_settings;
 
-        public bool IsValid
-        {
-            get;
-            private set;
-        }
+        public bool IsValid { get; private set; }
 
         private JSONOutputVisitor(TextWriter writer, CodeSettings settings)
         {
@@ -154,7 +148,7 @@ namespace Microsoft.Ajax.Utilities
                 switch (node.PrimitiveType)
                 {
                     case PrimitiveType.Boolean:
-                        m_writer.Write((bool)node.Value ? "true" : "false");
+                        m_writer.Write((bool) node.Value ? "true" : "false");
                         break;
 
                     case PrimitiveType.Null:
@@ -162,7 +156,7 @@ namespace Microsoft.Ajax.Utilities
                         break;
 
                     case PrimitiveType.Number:
-                        OutputNumber((double)node.Value, node.Context);
+                        OutputNumber((double) node.Value, node.Context);
                         break;
 
                     case PrimitiveType.String:
@@ -300,7 +294,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        #endregion 
+        #endregion
 
         #region unsupported nodes
 
@@ -674,7 +668,7 @@ namespace Microsoft.Ajax.Utilities
                         if (ch < ' ')
                         {
                             // other control characters must be escaped as \uXXXX
-                            m_writer.Write("\\u{0:x4}", (int)ch);
+                            m_writer.Write("\\u{0:x4}", (int) ch);
                         }
                         else
                         {
@@ -713,7 +707,7 @@ namespace Microsoft.Ajax.Utilities
                 // name, and we're pulling the GLOBAL properties. Might want to use properties
                 // on the Number object -- which, of course, assumes that Number doesn't
                 // resolve to a local variable...
-                string objectName = double.IsNaN(numericValue) ? "NaN" : "Infinity";
+                var objectName = double.IsNaN(numericValue) ? "NaN" : "Infinity";
 
                 // we're good to go -- just return the name because it will resolve to the
                 // global properties (make a special case for negative infinity)
@@ -724,7 +718,7 @@ namespace Microsoft.Ajax.Utilities
                 // special case zero because we don't need to go through all those
                 // gyrations to get a "0" -- and because negative zero is different
                 // than a positive zero
-                m_writer.Write(1 / numericValue < 0 ? "-0" : "0");
+                m_writer.Write(1/numericValue < 0 ? "-0" : "0");
             }
             else
             {
@@ -738,7 +732,7 @@ namespace Microsoft.Ajax.Utilities
             var match = CommonData.DecimalFormat.Match(number);
             if (match.Success)
             {
-                string mantissa = match.Result("${man}");
+                var mantissa = match.Result("${man}");
                 if (string.IsNullOrEmpty(match.Result("${exp}")))
                 {
                     if (string.IsNullOrEmpty(mantissa))
@@ -753,11 +747,11 @@ namespace Microsoft.Ajax.Utilities
                         {
                             // see if there are trailing zeros
                             // that we can use e-notation to make smaller
-                            int numZeros = match.Result("${zer}").Length;
+                            var numZeros = match.Result("${zer}").Length;
                             if (numZeros > 2)
                             {
                                 number = match.Result("${neg}") + match.Result("${sig}")
-                                    + 'e' + numZeros.ToString(CultureInfo.InvariantCulture);
+                                         + 'e' + numZeros.ToString(CultureInfo.InvariantCulture);
                             }
                         }
                     }
@@ -773,7 +767,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // there is an exponent, but no significant mantissa
                     number = match.Result("${neg}") + match.Result("${mag}")
-                        + "e" + match.Result("${eng}") + match.Result("${pow}");
+                             + "e" + match.Result("${eng}") + match.Result("${pow}");
                 }
                 else
                 {
@@ -782,19 +776,20 @@ namespace Microsoft.Ajax.Utilities
 
                     // get the integer value of the exponent
                     int exponent;
-                    if (int.TryParse(match.Result("${eng}") + match.Result("${pow}"), NumberStyles.Integer, CultureInfo.InvariantCulture, out exponent))
+                    if (int.TryParse(match.Result("${eng}") + match.Result("${pow}"), NumberStyles.Integer,
+                        CultureInfo.InvariantCulture, out exponent))
                     {
                         // slap the mantissa directly to the magnitude without a decimal point.
                         // we'll subtract the number of characters we just added to the magnitude from
                         // the exponent
                         number = match.Result("${neg}") + match.Result("${mag}") + mantissa
-                            + 'e' + (exponent - mantissa.Length).ToString(CultureInfo.InvariantCulture);
+                                 + 'e' + (exponent - mantissa.Length).ToString(CultureInfo.InvariantCulture);
                     }
                     else
                     {
                         // should n't get here, but it we do, go with what we have
                         number = match.Result("${neg}") + match.Result("${mag}") + '.' + mantissa
-                            + 'e' + match.Result("${eng}") + match.Result("${pow}");
+                                 + 'e' + match.Result("${eng}") + match.Result("${pow}");
                     }
                 }
             }

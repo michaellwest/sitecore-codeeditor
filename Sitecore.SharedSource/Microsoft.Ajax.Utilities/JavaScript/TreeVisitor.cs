@@ -14,12 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class TreeVisitor : IVisitor
     {
-        public TreeVisitor() { }
-
         #region IVisitor Members
 
         public virtual void Visit(ArrayLiteral node)
@@ -366,7 +364,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     node.Initializer.Accept(this);
                 }
-                
+
                 if (node.Condition != null)
                 {
                     node.Condition.Accept(this);

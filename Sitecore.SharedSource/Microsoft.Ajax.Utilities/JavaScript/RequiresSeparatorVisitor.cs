@@ -16,11 +16,11 @@
 
 using System.Diagnostics;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class RequiresSeparatorVisitor : IVisitor
     {
-        private CodeSettings m_settings;
+        private readonly CodeSettings m_settings;
 
         public bool DoesRequire { get; private set; }
 

@@ -16,9 +16,8 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     public sealed class Member : Expression
     {
         private AstNode m_root;
@@ -44,10 +43,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override OperatorPrecedence Precedence
         {
-            get
-            {
-                return OperatorPrecedence.FieldAccess;
-            }
+            get { return OperatorPrecedence.FieldAccess; }
         }
 
         public override void Accept(IVisitor visitor)
@@ -62,8 +58,8 @@ namespace Microsoft.Ajax.Utilities
         {
             var otherMember = otherNode as Member;
             return otherMember != null
-                && string.CompareOrdinal(this.Name, otherMember.Name) == 0
-                && this.Root.IsEquivalentTo(otherMember.Root);
+                   && string.CompareOrdinal(this.Name, otherMember.Name) == 0
+                   && this.Root.IsEquivalentTo(otherMember.Root);
         }
 
         internal override string GetFunctionGuess(AstNode target)
@@ -73,10 +69,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Root);
-            }
+            get { return EnumerateNonNullNodes(Root); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

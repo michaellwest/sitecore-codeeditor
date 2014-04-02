@@ -17,11 +17,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class ModuleScope : ActivationObject
     {
-        private Dictionary<string, JSVariableField> m_knownExports;
+        private readonly Dictionary<string, JSVariableField> m_knownExports;
 
         /// <summary>
         /// Gets or sets a flag to indicate whether this module exports a default expression

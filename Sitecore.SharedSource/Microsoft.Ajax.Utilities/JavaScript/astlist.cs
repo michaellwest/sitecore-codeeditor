@@ -15,15 +15,17 @@
 // limitations under the License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public sealed class AstNodeList : AstNode, IEnumerable<AstNode>
     {
-        private List<AstNode> m_list;
+        private readonly List<AstNode> m_list;
 
         public override Context TerminatingContext
         {
@@ -31,7 +33,8 @@ namespace Microsoft.Ajax.Utilities
             {
                 // if we have one, return it. If not, see if we are empty, and if not,
                 // return the last item's terminator
-                return base.TerminatingContext ?? (m_list.Count> 0 ? m_list[m_list.Count - 1].TerminatingContext : null);
+                return base.TerminatingContext ??
+                       (m_list.Count > 0 ? m_list[m_list.Count - 1].TerminatingContext : null);
             }
         }
 
@@ -63,13 +66,10 @@ namespace Microsoft.Ajax.Utilities
         {
             get { return m_list.Count; }
         }
-       
+
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(m_list);
-            }
+            get { return EnumerateNonNullNodes(m_list); }
         }
 
         public void ForEach<TItem>(Action<TItem> action) where TItem : AstNode
@@ -91,7 +91,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
         {
-            for (int ndx = 0; ndx < m_list.Count; ++ndx)
+            for (var ndx = 0; ndx < m_list.Count; ++ndx)
             {
                 if (m_list[ndx] == oldNode)
                 {
@@ -124,9 +124,9 @@ namespace Microsoft.Ajax.Utilities
         /// <returns></returns>
         public override bool IsEquivalentTo(AstNode otherNode)
         {
-            bool isEquivalent = false;
+            var isEquivalent = false;
 
-            AstNodeList otherList = otherNode as AstNodeList;
+            var otherList = otherNode as AstNodeList;
             if (otherList != null && m_list.Count == otherList.Count)
             {
                 // now assume it's true unless we come across an item that ISN'T
@@ -197,10 +197,7 @@ namespace Microsoft.Ajax.Utilities
 
         public AstNode this[int index]
         {
-            get
-            {
-                return m_list[index];
-            }
+            get { return m_list[index]; }
             set
             {
                 m_list[index].IfNotNull(n => n.Parent = (n.Parent == this) ? null : n.Parent);
@@ -220,8 +217,8 @@ namespace Microsoft.Ajax.Utilities
         {
             if (m_list.Count == 1)
             {
-                ConstantWrapper constantWrapper = m_list[0] as ConstantWrapper;
-                if (constantWrapper != null 
+                var constantWrapper = m_list[0] as ConstantWrapper;
+                if (constantWrapper != null
                     && string.CompareOrdinal(argumentValue, constantWrapper.Value.ToString()) == 0)
                 {
                     return true;
@@ -237,7 +234,7 @@ namespace Microsoft.Ajax.Utilities
                 string constantValue = null;
                 if (m_list.Count == 1)
                 {
-                    ConstantWrapper constantWrapper = m_list[0] as ConstantWrapper;
+                    var constantWrapper = m_list[0] as ConstantWrapper;
                     if (constantWrapper != null)
                     {
                         constantValue = constantWrapper.ToString();
@@ -272,11 +269,11 @@ namespace Microsoft.Ajax.Utilities
             if (m_list.Count > 0)
             {
                 // output the first one; then all subsequent, each prefaced with a comma
-                sb.Append(m_list[0].ToString());
+                sb.Append(m_list[0]);
                 for (var ndx = 1; ndx < m_list.Count; ++ndx)
                 {
                     sb.Append(" , ");
-                    sb.Append(m_list[ndx].ToString());
+                    sb.Append(m_list[ndx]);
                 }
             }
 
@@ -294,7 +291,7 @@ namespace Microsoft.Ajax.Utilities
 
         #region IEnumerable Members
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return m_list.GetEnumerator();
         }

@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public enum ScopeType
     {
@@ -37,7 +37,7 @@ namespace Microsoft.Ajax.Utilities
     {
         #region private fields
 
-        private bool m_useStrict;//= false;
+        private bool m_useStrict; //= false;
         private bool m_isKnownAtCompileTime;
 
         #endregion
@@ -60,10 +60,7 @@ namespace Microsoft.Ajax.Utilities
 
         public bool UseStrict
         {
-            get
-            {
-                return m_useStrict;
-            }
+            get { return m_useStrict; }
             set
             {
                 // can set it to true, but can't set it to false
@@ -84,8 +81,8 @@ namespace Microsoft.Ajax.Utilities
         public bool IsKnownAtCompileTime
         {
             get { return m_isKnownAtCompileTime; }
-            set 
-            { 
+            set
+            {
                 m_isKnownAtCompileTime = value;
                 if (!value && Settings.EvalTreatment == EvalTreatment.MakeAllSafe)
                 {
@@ -367,7 +364,9 @@ namespace Microsoft.Ajax.Utilities
                     var parentParent = nameDecl.Parent.IfNotNull(p => p.Parent);
                     LexicalDeclaration lexDeclaration;
                     field.InitializationOnly = parentParent is ConstStatement
-                        || ((lexDeclaration = parentParent as LexicalDeclaration) != null && lexDeclaration.StatementToken == JSToken.Const);
+                                               ||
+                                               ((lexDeclaration = parentParent as LexicalDeclaration) != null &&
+                                                lexDeclaration.StatementToken == JSToken.Const);
 
                     this.AddField(field);
                 }
@@ -405,7 +404,7 @@ namespace Microsoft.Ajax.Utilities
                 // if this is a field that was declared with an export statement, then we want to set the
                 // IsExported flag. Stop if we get to a block, because that means we aren't in an export
                 // statement.
-                var parent = (AstNode)nameDecl;
+                var parent = (AstNode) nameDecl;
                 while ((parent = parent.Parent) != null && !(parent is Block))
                 {
                     if (parent is ExportNode)
@@ -413,7 +412,7 @@ namespace Microsoft.Ajax.Utilities
                         field.IsExported = true;
                         break;
                     }
-                    else if (parent is ImportNode)
+                    if (parent is ImportNode)
                     {
                         // import fields cannot be assigned to.
                         field.InitializationOnly = true;
@@ -470,10 +469,10 @@ namespace Microsoft.Ajax.Utilities
                         UnreferencedVariableField(variableField);
                     }
                     else if (variableField.FieldType == FieldType.Local
-                        && variableField.RefCount == 1
-                        && this.IsKnownAtCompileTime
-                        && Settings.RemoveUnneededCode
-                        && Settings.IsModificationAllowed(TreeModifications.RemoveUnusedVariables))
+                             && variableField.RefCount == 1
+                             && this.IsKnownAtCompileTime
+                             && Settings.RemoveUnneededCode
+                             && Settings.IsModificationAllowed(TreeModifications.RemoveUnusedVariables))
                     {
                         SingleReferenceVariableField(variableField);
                     }
@@ -569,7 +568,7 @@ namespace Microsoft.Ajax.Utilities
                             throwWarning = false;
                         }
                         else if (Settings.RemoveUnneededCode
-                            && Settings.IsModificationAllowed(TreeModifications.RemoveUnusedVariables))
+                                 && Settings.IsModificationAllowed(TreeModifications.RemoveUnusedVariables))
                         {
                             variableField.Declarations.Remove(nameDeclaration);
 
@@ -675,9 +674,11 @@ namespace Microsoft.Ajax.Utilities
             // we only care about array and regular expressions with the global switch at this point.
             // if it's not one of those types, then go ahead and assume iterative reference doesn't matter.
             var regExp = initializer as RegExpLiteral;
-            if (initializer is ArrayLiteral 
+            if (initializer is ArrayLiteral
                 || initializer is ObjectLiteral
-                || (regExp != null && regExp.PatternSwitches != null && regExp.PatternSwitches.IndexOf("g", StringComparison.OrdinalIgnoreCase) >= 0))
+                ||
+                (regExp != null && regExp.PatternSwitches != null &&
+                 regExp.PatternSwitches.IndexOf("g", StringComparison.OrdinalIgnoreCase) >= 0))
             {
                 // get the parent block for the initializer. We'll use this as a stopping point in our loop.
                 var parentBlock = GetParentBlock(initializer);
@@ -727,7 +728,7 @@ namespace Microsoft.Ajax.Utilities
         /// <returns>first block node in the node tree</returns>
         private static Block GetParentBlock(AstNode node)
         {
-            while(node != null)
+            while (node != null)
             {
                 // see if the current node is a block, and if so, return it.
                 var block = node as Block;
@@ -761,11 +762,11 @@ namespace Microsoft.Ajax.Utilities
                         // don't rename outer fields (only actual fields), 
                         // and we're only concerned with global or local variables --
                         // those which are defined by the script (not predefined, not the arguments object)
-                        if (varField.OuterField == null 
+                        if (varField.OuterField == null
                             && (varField.FieldType != FieldType.Arguments && varField.FieldType != FieldType.Predefined))
                         {
                             // see if the name is in the parser's rename map
-                            string newName = Settings.GetNewName(varField.Name);
+                            var newName = Settings.GetNewName(varField.Name);
                             if (!string.IsNullOrEmpty(newName))
                             {
                                 // it is! Change the name of the field, but make sure we reset the CanCrunch flag
@@ -816,7 +817,7 @@ namespace Microsoft.Ajax.Utilities
         {
             // check all the variables defined within this scope.
             // we're looking for uncrunched generated fields.
-            foreach (JSVariableField variableField in NameTable.Values)
+            foreach (var variableField in NameTable.Values)
             {
                 if (variableField.IsGenerated
                     && variableField.CrunchedName == null)
@@ -831,7 +832,7 @@ namespace Microsoft.Ajax.Utilities
                     GenerateAvoidList(avoidTable, variableField.Name);
 
                     // now that we have our avoid list, create a crunch enumerator from it
-                    CrunchEnumerator crunchEnum = new CrunchEnumerator(avoidTable);
+                    var crunchEnum = new CrunchEnumerator(avoidTable);
 
                     // and use it to generate a new name
                     variableField.CrunchedName = crunchEnum.NextName();
@@ -839,7 +840,7 @@ namespace Microsoft.Ajax.Utilities
             }
 
             // recursively traverse through our children
-            foreach (ActivationObject scope in ChildScopes)
+            foreach (var scope in ChildScopes)
             {
                 if (!scope.Existing)
                 {
@@ -851,10 +852,10 @@ namespace Microsoft.Ajax.Utilities
         private bool GenerateAvoidList(HashSet<string> table, string name)
         {
             // our reference flag is based on what was passed to us
-            bool isReferenced = false;
+            var isReferenced = false;
 
             // depth first, so walk all the children
-            foreach (ActivationObject childScope in ChildScopes)
+            foreach (var childScope in ChildScopes)
             {
                 // if any child returns true, then it or one of its descendents
                 // reference this variable. So we reference it, too
@@ -908,7 +909,9 @@ namespace Microsoft.Ajax.Utilities
                         // (and therefore we CANNOT crunch it),
                         // then add it to the avoid list so we don't reuse that name
                         if (!field.CanCrunch || field.CrunchedName != null
-                            || (field.OuterField != null && !field.IsGenerated && field.OwningScope != null && !field.OwningScope.IsKnownAtCompileTime))
+                            ||
+                            (field.OuterField != null && !field.IsGenerated && field.OwningScope != null &&
+                             !field.OwningScope.IsKnownAtCompileTime))
                         {
                             avoidSet.Add(field.ToString());
                         }
@@ -923,7 +926,9 @@ namespace Microsoft.Ajax.Utilities
                         // we also always want to crunch "placeholder" fields.
                         if (localField.CanCrunch
                             && (localField.RefCount > 0 || localField.IsDeclared || localField.IsPlaceholder
-                            || !(Settings.RemoveFunctionExpressionNames && Settings.IsModificationAllowed(TreeModifications.RemoveFunctionExpressionNames))))
+                                ||
+                                !(Settings.RemoveFunctionExpressionNames &&
+                                  Settings.IsModificationAllowed(TreeModifications.RemoveFunctionExpressionNames))))
                         {
                             localField.CrunchedName = crunchEnum.NextName();
                         }
@@ -932,7 +937,7 @@ namespace Microsoft.Ajax.Utilities
             }
 
             // then traverse through our children
-            foreach (ActivationObject scope in ChildScopes)
+            foreach (var scope in ChildScopes)
             {
                 scope.AutoRenameFields();
             }
@@ -958,7 +963,7 @@ namespace Microsoft.Ajax.Utilities
                     // IF we aren't preserving function names, then we're good. BUT if we are, we're
                     // only good to go if this field doesn't represent a function object.
                     if ((Settings.LocalRenaming == LocalRenaming.CrunchAll
-                        || !variableField.Name.StartsWith("L_", StringComparison.Ordinal))
+                         || !variableField.Name.StartsWith("L_", StringComparison.Ordinal))
                         && !(Settings.PreserveFunctionNames && variableField.IsFunction))
                     {
                         list.Add(variableField);

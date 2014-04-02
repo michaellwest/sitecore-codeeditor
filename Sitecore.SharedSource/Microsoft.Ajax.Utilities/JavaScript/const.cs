@@ -14,7 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+using System.Diagnostics.CodeAnalysis;
+
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Old-style const-statement, pre-ES6, for those browsers that basically implemented
@@ -22,7 +24,7 @@ namespace Microsoft.Ajax.Utilities
     /// <see cref="CodeSettings.ConstStatementsMozilla" /> property to true to get these objects
     /// parsed, because we default to the ES6 behavior.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification="AST statement")]
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "AST statement")]
     public class ConstStatement : Declaration
     {
         public ConstStatement(Context context)

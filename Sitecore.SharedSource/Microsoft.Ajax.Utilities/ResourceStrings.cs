@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {
     public class ResourceStrings
     {
@@ -36,10 +36,7 @@ namespace Microsoft.Ajax.Utilities
 
                 return propertyValue;
             }
-            set
-            {
-                this.NameValuePairs[name] = value;
-            }
+            set { this.NameValuePairs[name] = value; }
         }
 
         public int Count

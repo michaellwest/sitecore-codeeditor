@@ -16,8 +16,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     internal class ReorderScopeVisitor : TreeVisitor
     {
@@ -40,13 +41,13 @@ namespace Microsoft.Ajax.Utilities
         private List<Var> m_varStatements;
 
         // whether we want to move var statements
-        private bool m_moveVarStatements;
+        private readonly bool m_moveVarStatements;
 
         // whether we want to move function declarations
-        private bool m_moveFunctionDecls;
+        private readonly bool m_moveFunctionDecls;
 
         // whether we want to combine adjacent var statements
-        private bool m_combineAdjacentVars;
+        private readonly bool m_combineAdjacentVars;
 
         // whether we are renaming locals
         //private bool m_localRenaming;
@@ -59,14 +60,16 @@ namespace Microsoft.Ajax.Utilities
         private int m_conditionalCommentLevel;
 
         // global scope
-        private GlobalScope m_globalScope;
+        private readonly GlobalScope m_globalScope;
 
         private ReorderScopeVisitor(JSParser parser)
         {
             // save the mods we care about
             var settings = parser.Settings;
-            m_moveVarStatements = settings.ReorderScopeDeclarations && settings.IsModificationAllowed(TreeModifications.CombineVarStatementsToTopOfScope);
-            m_moveFunctionDecls = settings.ReorderScopeDeclarations && settings.IsModificationAllowed(TreeModifications.MoveFunctionToTopOfScope);
+            m_moveVarStatements = settings.ReorderScopeDeclarations &&
+                                  settings.IsModificationAllowed(TreeModifications.CombineVarStatementsToTopOfScope);
+            m_moveFunctionDecls = settings.ReorderScopeDeclarations &&
+                                  settings.IsModificationAllowed(TreeModifications.MoveFunctionToTopOfScope);
             m_combineAdjacentVars = settings.IsModificationAllowed(TreeModifications.CombineVarStatements);
             //m_localRenaming = settings.LocalRenaming != LocalRenaming.KeepAll && settings.IsModificationAllowed(TreeModifications.LocalRenaming);
 
@@ -99,7 +102,7 @@ namespace Microsoft.Ajax.Utilities
                 // Make sure that we skip over any remaining comments and directive prologues.
                 // we do NOT want to insert anything between the start of the scope and any directive prologues.            
                 while (insertAt < block.Count
-                    && (block[insertAt] is DirectivePrologue || block[insertAt] is ImportantComment))
+                       && (block[insertAt] is DirectivePrologue || block[insertAt] is ImportantComment))
                 {
                     ++insertAt;
                 }
@@ -218,7 +221,7 @@ namespace Microsoft.Ajax.Utilities
             var forInParent = varStatement.Parent as ForIn;
             if (forInParent != null)
             {
-                insertAt = ReorderScopeVisitor.RelocateForInVar(block, insertAt, varStatement, forInParent);
+                insertAt = RelocateForInVar(block, insertAt, varStatement, forInParent);
             }
             else
             {
@@ -239,9 +242,9 @@ namespace Microsoft.Ajax.Utilities
                         block.RemoveAt(insertAt + 1);
                     }
                     else if (existingVar != null
-                        && (forNode = varStatement.Parent as ForNode) != null
-                        && forNode.Initializer == varStatement
-                        && forNode == block[insertAt + 1])
+                             && (forNode = varStatement.Parent as ForNode) != null
+                             && forNode.Initializer == varStatement
+                             && forNode == block[insertAt + 1])
                     {
                         // this var statement is the initializer of a for-statement, which is
                         // immediately after the var we would insert our vardecls into.
@@ -292,24 +295,24 @@ namespace Microsoft.Ajax.Utilities
                                         // so just create a copy of the vardecl for this location, using a reference
                                         // for the "binding"
                                         assignments.Add(new VariableDeclaration(varDecl.Context)
-                                            {
-                                                Binding = reference,
-                                                AssignContext = varDecl.AssignContext,
-                                                Initializer = initializer,
-                                                IsCCSpecialCase = true,
-                                                UseCCOn = varDecl.UseCCOn,
-                                                TerminatingContext = varDecl.TerminatingContext
-                                            });
+                                        {
+                                            Binding = reference,
+                                            AssignContext = varDecl.AssignContext,
+                                            Initializer = initializer,
+                                            IsCCSpecialCase = true,
+                                            UseCCOn = varDecl.UseCCOn,
+                                            TerminatingContext = varDecl.TerminatingContext
+                                        });
                                     }
                                     else
                                     {
                                         assignments.Add(new BinaryOperator(varDecl.Context)
-                                            {
-                                                Operand1 = reference,
-                                                Operand2 = initializer,
-                                                OperatorToken = JSToken.Assign,
-                                                OperatorContext = varDecl.AssignContext
-                                            });
+                                        {
+                                            Operand1 = reference,
+                                            Operand2 = initializer,
+                                            OperatorToken = JSToken.Assign,
+                                            OperatorContext = varDecl.AssignContext
+                                        });
                                     }
                                 }
 
@@ -324,26 +327,26 @@ namespace Microsoft.Ajax.Utilities
                                         if (first)
                                         {
                                             varStatement[ndx] = new VariableDeclaration(declName.Context)
+                                            {
+                                                Binding = new BindingIdentifier(declName.Context)
                                                 {
-                                                    Binding = new BindingIdentifier(declName.Context)
-                                                    {
-                                                        Name = declName.Name,
-                                                        VariableField = declName.VariableField
-                                                    }
-                                                };
+                                                    Name = declName.Name,
+                                                    VariableField = declName.VariableField
+                                                }
+                                            };
                                             first = false;
                                         }
                                         else
                                         {
                                             // otherwise we want to insert a new one at the current position + 1
                                             varStatement.InsertAt(++ndx, new VariableDeclaration(declName.Context)
+                                            {
+                                                Binding = new BindingIdentifier(declName.Context)
                                                 {
-                                                    Binding = new BindingIdentifier(declName.Context)
-                                                    {
-                                                        Name = declName.Name,
-                                                        VariableField = declName.VariableField
-                                                    }
-                                                });
+                                                    Name = declName.Name,
+                                                    VariableField = declName.VariableField
+                                                }
+                                            });
                                         }
                                     }
                                 }
@@ -358,7 +361,8 @@ namespace Microsoft.Ajax.Utilities
                                 var expression = assignments[0];
                                 for (var ndx = 1; ndx < assignments.Count; ++ndx)
                                 {
-                                    expression = CommaOperator.CombineWithComma(expression.Context.FlattenToStart(), expression, assignments[ndx]);
+                                    expression = CommaOperator.CombineWithComma(expression.Context.FlattenToStart(),
+                                        expression, assignments[ndx]);
                                 }
 
                                 // replace the var with the expression.
@@ -424,7 +428,7 @@ namespace Microsoft.Ajax.Utilities
                                     Binding = new BindingIdentifier(declName.Context)
                                     {
                                         Name = declName.Name,
-                                        VariableField = declName.VariableField 
+                                        VariableField = declName.VariableField
                                     }
                                 };
                                 first = false;
@@ -474,7 +478,7 @@ namespace Microsoft.Ajax.Utilities
             // Remove any empty statements as well.
             // We walk backwards because we could be adding any number of statements 
             // and we don't want to have to modify the counter.
-            for (int ndx = node.Count - 1; ndx >= 0; --ndx)
+            for (var ndx = node.Count - 1; ndx >= 0; --ndx)
             {
                 var nestedBlock = node[ndx] as Block;
                 if (nestedBlock != null)
@@ -506,7 +510,7 @@ namespace Microsoft.Ajax.Utilities
                     var previousComment = node[ndx - 1] as ConditionalCompilationComment;
                     if (previousComment != null)
                     {
-                        ConditionalCompilationComment thisComment = node[ndx] as ConditionalCompilationComment;
+                        var thisComment = node[ndx] as ConditionalCompilationComment;
                         if (thisComment != null)
                         {
                             // two adjacent conditional comments -- combine them into the first.
@@ -520,7 +524,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public override void Visit(Block node)
         {
             if (node != null)
@@ -541,7 +545,7 @@ namespace Microsoft.Ajax.Utilities
                     // walk BACKWARDS down the list because we'll be removing items when we encounter
                     // multiple vars, etc.
                     // we also don't need to check the first one, since there is nothing before it.
-                    for (int ndx = node.Count - 1; ndx > 0; --ndx)
+                    for (var ndx = node.Count - 1; ndx > 0; --ndx)
                     {
                         var previousDeclaration = node[ndx - 1] as Declaration;
                         if (previousDeclaration != null)
@@ -559,18 +563,20 @@ namespace Microsoft.Ajax.Utilities
                         {
                             // if this node and hte previous node are both export declaration statements of the same type...
                             var previousExport = node[ndx - 1] as ExportNode;
-                            if (previousExport != null && previousExport.Count == 1 && previousExport.ModuleName.IsNullOrWhiteSpace())
+                            if (previousExport != null && previousExport.Count == 1 &&
+                                previousExport.ModuleName.IsNullOrWhiteSpace())
                             {
                                 var declarationType = DeclarationType(previousExport[0]);
                                 if (declarationType != JSToken.None)
                                 {
                                     var thisExport = node[ndx] as ExportNode;
-                                    if (thisExport != null && thisExport.Count == 1 && thisExport.ModuleName.IsNullOrWhiteSpace()
+                                    if (thisExport != null && thisExport.Count == 1 &&
+                                        thisExport.ModuleName.IsNullOrWhiteSpace()
                                         && declarationType == DeclarationType(thisExport[0]))
                                     {
                                         // merge our specifiers into the previous declaration's specifiers
                                         // and remove this statement from the block
-                                        ((Declaration)previousExport[0]).Append(thisExport[0]);
+                                        ((Declaration) previousExport[0]).Append(thisExport[0]);
                                         node.RemoveAt(ndx);
                                     }
                                 }
@@ -692,9 +698,11 @@ namespace Microsoft.Ajax.Utilities
         {
             var exportNode = node as ExportNode;
             return (exportNode != null
-                && exportNode.ModuleName.IsNullOrWhiteSpace()
-                && exportNode.Count > 0
-                && exportNode[0] is ImportExportSpecifier) ? exportNode : null;
+                    && exportNode.ModuleName.IsNullOrWhiteSpace()
+                    && exportNode.Count > 0
+                    && exportNode[0] is ImportExportSpecifier)
+                ? exportNode
+                : null;
         }
 
         public override void Visit(ConditionalCompilationComment node)
@@ -898,7 +906,7 @@ namespace Microsoft.Ajax.Utilities
                                 ? OperatorPrecedence.LogicalOr
                                 : OperatorPrecedence.Assignment;
                         }
-                        
+
                         if (targetPrecedence <= node.Operand.Precedence)
                         {
                             // if the target precedence is less than or equal to the 
@@ -919,7 +927,7 @@ namespace Microsoft.Ajax.Utilities
                         node.Parent.ReplaceChild(node, node.Operand);
                     }
                 }
-                
+
                 // always recurse the operand
                 if (node.Operand != null)
                 {
@@ -943,7 +951,6 @@ namespace Microsoft.Ajax.Utilities
                     }
 
                     m_moduleDeclarations.Add(node);
-
                 }
             }
         }
@@ -954,7 +961,7 @@ namespace Microsoft.Ajax.Utilities
             if (node.PrimitiveType == PrimitiveType.String)
             {
                 // try splitting on commas and removing empty items
-                var sections = node.ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                var sections = node.ToString().Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var section in sections)
                 {
                     // valid hints are:
@@ -966,7 +973,9 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // make sure this is a "nomunge" hint. If it is, then the entire node is treated as a hint and
                         // will be removed from the AST.
-                        if (string.Compare(section.Substring(ndxColon + 1).Trim(), "nomunge", StringComparison.OrdinalIgnoreCase) == 0)
+                        if (
+                            string.Compare(section.Substring(ndxColon + 1).Trim(), "nomunge",
+                                StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             // it is.
                             isHint = true;

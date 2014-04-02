@@ -14,14 +14,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "AST statement")]
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "AST statement")]
     public abstract class Declaration : AstNode, IEnumerable<VariableDeclaration>
     {
-        private List<VariableDeclaration> m_list;
+        private readonly List<VariableDeclaration> m_list;
 
         public JSToken StatementToken { get; set; }
 
@@ -69,15 +71,12 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(m_list);
-            }
+            get { return EnumerateNonNullNodes(m_list); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
         {
-            for (int ndx = 0; ndx < m_list.Count; ++ndx)
+            for (var ndx = 0; ndx < m_list.Count; ++ndx)
             {
                 if (m_list[ndx] == oldNode)
                 {
@@ -90,7 +89,7 @@ namespace Microsoft.Ajax.Utilities
                     else
                     {
                         // if the new node isn't a variabledeclaration, ignore the call
-                        VariableDeclaration newDecl = newNode as VariableDeclaration;
+                        var newDecl = newNode as VariableDeclaration;
                         if (newNode == null || newDecl != null)
                         {
                             m_list[ndx].IfNotNull(n => n.Parent = (n.Parent == this) ? null : n.Parent);
@@ -131,7 +130,7 @@ namespace Microsoft.Ajax.Utilities
                 var otherVar = element as Declaration;
                 if (otherVar != null)
                 {
-                    for (int ndx = 0; ndx < otherVar.m_list.Count; ++ndx)
+                    for (var ndx = 0; ndx < otherVar.m_list.Count; ++ndx)
                     {
                         Append(otherVar.m_list[ndx]);
                     }
@@ -141,7 +140,7 @@ namespace Microsoft.Ajax.Utilities
 
         public void InsertAt(int index, AstNode element)
         {
-            VariableDeclaration decl = element as VariableDeclaration;
+            var decl = element as VariableDeclaration;
             if (decl != null)
             {
                 // first check the list for existing instances of this name.
@@ -163,7 +162,7 @@ namespace Microsoft.Ajax.Utilities
                 if (otherVar != null)
                 {
                     // walk the source backwards so they end up in the right order
-                    for (int ndx = otherVar.m_list.Count - 1; ndx >= 0; --ndx)
+                    for (var ndx = otherVar.m_list.Count - 1; ndx >= 0; --ndx)
                     {
                         InsertAt(index, otherVar.m_list[ndx]);
                     }
@@ -181,7 +180,7 @@ namespace Microsoft.Ajax.Utilities
             if (!testName.IsNullOrWhiteSpace())
             {
                 // walk backwards because we'll be removing items from the list
-                for (var ndx = m_list.Count - 1; ndx >= 0 ; --ndx)
+                for (var ndx = m_list.Count - 1; ndx >= 0; --ndx)
                 {
                     var varDecl = m_list[ndx];
 
@@ -287,7 +286,7 @@ namespace Microsoft.Ajax.Utilities
 
         #region IEnumerable Members
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return m_list.GetEnumerator();
         }

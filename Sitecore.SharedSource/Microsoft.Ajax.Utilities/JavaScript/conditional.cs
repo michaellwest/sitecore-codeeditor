@@ -16,9 +16,8 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     public sealed class Conditional : Expression
     {
         private AstNode m_condition;
@@ -68,10 +67,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override OperatorPrecedence Precedence
         {
-            get
-            {
-                return OperatorPrecedence.Conditional;
-            }
+            get { return OperatorPrecedence.Conditional; }
         }
 
         public void SwapBranches()
@@ -87,7 +83,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 // if the primitive type of both true and false expressions is the same, then
                 // we know the primitive type. Otherwise we do not.
-                PrimitiveType trueType = TrueExpression.FindPrimitiveType();
+                var trueType = TrueExpression.FindPrimitiveType();
                 if (trueType == FalseExpression.FindPrimitiveType())
                 {
                     return trueType;
@@ -102,17 +98,14 @@ namespace Microsoft.Ajax.Utilities
         {
             var otherConditional = otherNode as Conditional;
             return otherConditional != null
-                && Condition.IsEquivalentTo(otherConditional.Condition)
-                && TrueExpression.IsEquivalentTo(otherConditional.TrueExpression)
-                && FalseExpression.IsEquivalentTo(otherConditional.FalseExpression);
+                   && Condition.IsEquivalentTo(otherConditional.Condition)
+                   && TrueExpression.IsEquivalentTo(otherConditional.TrueExpression)
+                   && FalseExpression.IsEquivalentTo(otherConditional.FalseExpression);
         }
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Condition, TrueExpression, FalseExpression);
-            }
+            get { return EnumerateNonNullNodes(Condition, TrueExpression, FalseExpression); }
         }
 
         public override void Accept(IVisitor visitor)

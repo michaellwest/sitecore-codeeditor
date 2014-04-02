@@ -14,6 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+
 #if NET_20
 
 namespace System.Runtime.CompilerServices
@@ -33,13 +38,8 @@ namespace System.Runtime.CompilerServices
 
 #endif
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-
     public static class AjaxMinExtensions
     {
         public static string FormatInvariant(this string format, params object[] args)
@@ -140,7 +140,8 @@ namespace Microsoft.Ajax.Utilities
             return number.ToStringInvariant(null);
         }
 
-        public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> keySelector)
         {
             var hash = new HashSet<TKey>();
             return source.Where(p => hash.Add(keySelector(p)));
@@ -172,7 +173,8 @@ namespace Microsoft.Ajax.Utilities
             return obj == null ? default(TResult) : action(obj);
         }
 
-        public static TResult IfNotNull<TObject, TResult>(this TObject obj, Func<TObject, TResult> action, TResult defaultValue)
+        public static TResult IfNotNull<TObject, TResult>(this TObject obj, Func<TObject, TResult> action,
+            TResult defaultValue)
         {
             if (action == null)
             {

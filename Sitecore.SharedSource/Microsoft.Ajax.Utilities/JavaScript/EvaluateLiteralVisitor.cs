@@ -15,15 +15,16 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     internal class EvaluateLiteralVisitor : TreeVisitor
     {
-        private JSParser m_parser;
+        private readonly JSParser m_parser;
 
-        public EvaluateLiteralVisitor(JSParser parser) 
+        public EvaluateLiteralVisitor(JSParser parser)
         {
             m_parser = parser;
         }
@@ -48,11 +49,11 @@ namespace Microsoft.Ajax.Utilities
                 // remember that the parent of the argument won't be the call node -- it
                 // will be the ast node list representing the arguments, whose parent will
                 // be the node list. 
-                CallNode parentCall = (node.Parent is AstNodeList ? node.Parent.Parent as CallNode : null);
+                var parentCall = (node.Parent is AstNodeList ? node.Parent.Parent as CallNode : null);
                 if (parentCall != null && parentCall.InBrackets)
                 {
                     // get the newly-combined string
-                    string combinedString = newLiteral.ToString();
+                    var combinedString = newLiteral.ToString();
 
                     // see if this new string is the target of a replacement operation
                     string newName;
@@ -63,45 +64,45 @@ namespace Microsoft.Ajax.Utilities
                         // yes, it is. Now see if the new name is safe to be converted to a dot-operation.
                         if (m_parser.Settings.IsModificationAllowed(TreeModifications.BracketMemberToDotMember)
                             && JSScanner.IsSafeIdentifier(newName)
-                            && !JSScanner.IsKeyword(newName, (parentCall.EnclosingScope ?? m_parser.GlobalScope).UseStrict))
+                            &&
+                            !JSScanner.IsKeyword(newName, (parentCall.EnclosingScope ?? m_parser.GlobalScope).UseStrict))
                         {
                             // we want to replace the call with operator with a new member dot operation, and
                             // since we won't be analyzing it (we're past the analyze phase, we're going to need
                             // to use the new string value
-                            Member replacementMember = new Member(parentCall.Context)
-                                {
-                                    Root = parentCall.Function,
-                                    Name = newName,
-                                    NameContext = parentCall.Arguments[0].Context
-                                };
+                            var replacementMember = new Member(parentCall.Context)
+                            {
+                                Root = parentCall.Function,
+                                Name = newName,
+                                NameContext = parentCall.Arguments[0].Context
+                            };
                             parentCall.Parent.ReplaceChild(parentCall, replacementMember);
                             return true;
                         }
-                        else
-                        {
-                            // nope, can't be changed to a dot-operator for whatever reason.
-                            // just replace the value on this new literal. The old operation will
-                            // get replaced with this new literal
-                            newLiteral.Value = newName;
+                        // nope, can't be changed to a dot-operator for whatever reason.
+                        // just replace the value on this new literal. The old operation will
+                        // get replaced with this new literal
+                        newLiteral.Value = newName;
 
-                            // and make sure it's type is string
-                            newLiteral.PrimitiveType = PrimitiveType.String;
-                        }
+                        // and make sure it's type is string
+                        newLiteral.PrimitiveType = PrimitiveType.String;
                     }
                     else if (m_parser.Settings.IsModificationAllowed(TreeModifications.BracketMemberToDotMember))
                     {
                         // our parent is a call-bracket -- now we just need to see if the newly-combined
                         // string can be an identifier
-                        if (JSScanner.IsSafeIdentifier(combinedString) 
-                            && !JSScanner.IsKeyword(combinedString, (parentCall.EnclosingScope ?? m_parser.GlobalScope).UseStrict))
+                        if (JSScanner.IsSafeIdentifier(combinedString)
+                            &&
+                            !JSScanner.IsKeyword(combinedString,
+                                (parentCall.EnclosingScope ?? m_parser.GlobalScope).UseStrict))
                         {
                             // yes -- replace the parent call with a new member node using the newly-combined string
-                            Member replacementMember = new Member(parentCall.Context)
-                                {
-                                    Root = parentCall.Function,
-                                    Name = combinedString,
-                                    NameContext = parentCall.Arguments[0].Context
-                                };
+                            var replacementMember = new Member(parentCall.Context)
+                            {
+                                Root = parentCall.Function,
+                                Name = combinedString,
+                                NameContext = parentCall.Arguments[0].Context
+                            };
                             parentCall.Parent.ReplaceChild(parentCall, replacementMember);
                             return true;
                         }
@@ -184,7 +185,7 @@ namespace Microsoft.Ajax.Utilities
         /// </summary>
         /// <param name="left">left-side operand</param>
         /// <param name="right">right-side operand</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void EvalThisOperator(BinaryOperator node, ConstantWrapper left, ConstantWrapper right)
         {
             // we can evaluate these operators if we know both operands are literal
@@ -326,7 +327,7 @@ namespace Microsoft.Ajax.Utilities
 
             // and just for good measure.. revisit the node that's taking our place, since
             // we just changed a constant value. Assuming the other operand is a constant, too.
-            ConstantWrapper otherConstant = binaryOp.Operand1 as ConstantWrapper;
+            var otherConstant = binaryOp.Operand1 as ConstantWrapper;
             if (otherConstant != null)
             {
                 EvalThisOperator(binaryOp, otherConstant, newLiteral);
@@ -350,7 +351,7 @@ namespace Microsoft.Ajax.Utilities
 
             // and just for good measure.. revisit the node that's taking our place, since
             // we just changed a constant value. Assuming the other operand is a constant, too.
-            ConstantWrapper otherConstant = binaryOp.Operand2 as ConstantWrapper;
+            var otherConstant = binaryOp.Operand2 as ConstantWrapper;
             if (otherConstant != null)
             {
                 EvalThisOperator(binaryOp, newLiteral, otherConstant);
@@ -364,10 +365,11 @@ namespace Microsoft.Ajax.Utilities
         /// <param name="right">right operand</param>
         /// <param name="result">result</param>
         /// <returns>true if result not overflow or underflow; false if it is</returns>
-        private static bool NoMultiplicativeOverOrUnderFlow(ConstantWrapper left, ConstantWrapper right, ConstantWrapper result)
+        private static bool NoMultiplicativeOverOrUnderFlow(ConstantWrapper left, ConstantWrapper right,
+            ConstantWrapper result)
         {
             // check for overflow
-            bool okayToProceed = !result.IsInfinity;
+            var okayToProceed = !result.IsInfinity;
 
             // if we still might be good, check for possible underflow
             if (okayToProceed)
@@ -396,8 +398,9 @@ namespace Microsoft.Ajax.Utilities
         /// <param name="thisConstant">second constant</param>
         /// <param name="otherConstant">first constant</param>
         /// <param name="leftOperator">first operator</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private void EvalToTheLeft(BinaryOperator node, ConstantWrapper thisConstant, ConstantWrapper otherConstant, BinaryOperator leftOperator)
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        private void EvalToTheLeft(BinaryOperator node, ConstantWrapper thisConstant, ConstantWrapper otherConstant,
+            BinaryOperator leftOperator)
         {
             if (leftOperator.OperatorToken == JSToken.Plus && node.OperatorToken == JSToken.Plus)
             {
@@ -409,7 +412,7 @@ namespace Microsoft.Ajax.Utilities
                 if (otherConstant.IsStringLiteral)
                 {
                     // the other constant is a string -- so we can do the string concat and combine them
-                    ConstantWrapper newLiteral = StringConcat(otherConstant, thisConstant);
+                    var newLiteral = StringConcat(otherConstant, thisConstant);
                     if (newLiteral != null)
                     {
                         RotateFromLeft(node, leftOperator, newLiteral);
@@ -427,7 +430,7 @@ namespace Microsoft.Ajax.Utilities
                     if (!thisConstant.IsStringLiteral)
                     {
                         // two numeric operators. a-n1+n2 is the same as a-(n1-n2)
-                        ConstantWrapper newLiteral = Minus(otherConstant, thisConstant);
+                        var newLiteral = Minus(otherConstant, thisConstant);
                         if (newLiteral != null && NoOverflow(newLiteral))
                         {
                             // a-(-n) is numerically equivalent as a+n -- and takes fewer characters to represent.
@@ -439,7 +442,7 @@ namespace Microsoft.Ajax.Utilities
                         else
                         {
                             // if the left-left is a constant, then we can try combining with it
-                            ConstantWrapper leftLeft = leftOperator.Operand1 as ConstantWrapper;
+                            var leftLeft = leftOperator.Operand1 as ConstantWrapper;
                             if (leftLeft != null)
                             {
                                 EvalFarToTheLeft(node, thisConstant, leftLeft, leftOperator);
@@ -452,7 +455,7 @@ namespace Microsoft.Ajax.Utilities
                     // minus-minus. Both operations are numeric.
                     // (a-n1)-n2 => a-(n1+n2), so we can add the two constants and subtract from 
                     // the left-hand non-constant. 
-                    ConstantWrapper newLiteral = NumericAddition(otherConstant, thisConstant);
+                    var newLiteral = NumericAddition(otherConstant, thisConstant);
                     if (newLiteral != null && NoOverflow(newLiteral))
                     {
                         // make it the new right-hand literal for the left-hand operator
@@ -462,7 +465,7 @@ namespace Microsoft.Ajax.Utilities
                     else
                     {
                         // if the left-left is a constant, then we can try combining with it
-                        ConstantWrapper leftLeft = leftOperator.Operand1 as ConstantWrapper;
+                        var leftLeft = leftOperator.Operand1 as ConstantWrapper;
                         if (leftLeft != null)
                         {
                             EvalFarToTheLeft(node, thisConstant, leftLeft, leftOperator);
@@ -471,34 +474,35 @@ namespace Microsoft.Ajax.Utilities
                 }
             }
             else if (leftOperator.OperatorToken == node.OperatorToken
-                && (node.OperatorToken == JSToken.Multiply || node.OperatorToken == JSToken.Divide))
+                     && (node.OperatorToken == JSToken.Multiply || node.OperatorToken == JSToken.Divide))
             {
                 // either multiply-multiply or divide-divide
                 // either way, we use the other operand and the product of the two constants.
                 // if the product blows up to an infinte value, then don't combine them because that
                 // could change the way the program goes at runtime, depending on the unknown value.
-                ConstantWrapper newLiteral = Multiply(otherConstant, thisConstant);
+                var newLiteral = Multiply(otherConstant, thisConstant);
                 if (newLiteral != null && NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, newLiteral))
                 {
                     RotateFromLeft(node, leftOperator, newLiteral);
                 }
             }
             else if ((leftOperator.OperatorToken == JSToken.Multiply && node.OperatorToken == JSToken.Divide)
-                || (leftOperator.OperatorToken == JSToken.Divide && node.OperatorToken == JSToken.Multiply))
+                     || (leftOperator.OperatorToken == JSToken.Divide && node.OperatorToken == JSToken.Multiply))
             {
                 if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
                 {
                     // get the two division operators
-                    ConstantWrapper otherOverThis = Divide(otherConstant, thisConstant);
-                    ConstantWrapper thisOverOther = Divide(thisConstant, otherConstant);
+                    var otherOverThis = Divide(otherConstant, thisConstant);
+                    var thisOverOther = Divide(thisConstant, otherConstant);
 
                     // get the lengths
-                    int otherOverThisLength = otherOverThis != null ? NodeLength(otherOverThis) : int.MaxValue;
-                    int thisOverOtherLength = thisOverOther != null ? NodeLength(thisOverOther) : int.MaxValue;
+                    var otherOverThisLength = otherOverThis != null ? NodeLength(otherOverThis) : int.MaxValue;
+                    var thisOverOtherLength = thisOverOther != null ? NodeLength(thisOverOther) : int.MaxValue;
 
                     // we'll want to use whichever one is shorter, and whichever one does NOT involve an overflow 
                     // or possible underflow
-                    if (otherOverThis != null && NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, otherOverThis)
+                    if (otherOverThis != null &&
+                        NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, otherOverThis)
                         && (thisOverOther == null || otherOverThisLength < thisOverOtherLength))
                     {
                         // but only if it's smaller than the original expression
@@ -508,20 +512,25 @@ namespace Microsoft.Ajax.Utilities
                             RotateFromLeft(node, leftOperator, otherOverThis);
                         }
                     }
-                    else if (thisOverOther != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, thisOverOther))
+                    else if (thisOverOther != null &&
+                             NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, thisOverOther))
                     {
                         // but only if it's smaller than the original expression
                         if (thisOverOtherLength <= NodeLength(otherConstant) + NodeLength(thisConstant) + 1)
                         {
                             // opposite operator
-                            leftOperator.OperatorToken = leftOperator.OperatorToken == JSToken.Multiply ? JSToken.Divide : JSToken.Multiply;
+                            leftOperator.OperatorToken = leftOperator.OperatorToken == JSToken.Multiply
+                                ? JSToken.Divide
+                                : JSToken.Multiply;
                             RotateFromLeft(node, leftOperator, thisOverOther);
                         }
                     }
                 }
             }
             else if (node.OperatorToken == leftOperator.OperatorToken
-                && (node.OperatorToken == JSToken.BitwiseAnd || node.OperatorToken == JSToken.BitwiseOr || node.OperatorToken == JSToken.BitwiseXor))
+                     &&
+                     (node.OperatorToken == JSToken.BitwiseAnd || node.OperatorToken == JSToken.BitwiseOr ||
+                      node.OperatorToken == JSToken.BitwiseXor))
             {
                 // identical bitwise operators can be combined
                 ConstantWrapper newLiteral = null;
@@ -552,8 +561,9 @@ namespace Microsoft.Ajax.Utilities
         /// <param name="thisConstant">second constant</param>
         /// <param name="otherConstant">first constant</param>
         /// <param name="leftOperator">first operator</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private void EvalFarToTheLeft(BinaryOperator node, ConstantWrapper thisConstant, ConstantWrapper otherConstant, BinaryOperator leftOperator)
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        private void EvalFarToTheLeft(BinaryOperator node, ConstantWrapper thisConstant, ConstantWrapper otherConstant,
+            BinaryOperator leftOperator)
         {
             if (leftOperator.OperatorToken == JSToken.Minus)
             {
@@ -562,9 +572,10 @@ namespace Microsoft.Ajax.Utilities
                     // minus-plus
                     // the minus will be a numeric operator, but if this constant is a string, it will be a
                     // string concatenation and we can't combine it.
-                    if (thisConstant.PrimitiveType != PrimitiveType.String && thisConstant.PrimitiveType != PrimitiveType.Other)
+                    if (thisConstant.PrimitiveType != PrimitiveType.String &&
+                        thisConstant.PrimitiveType != PrimitiveType.Other)
                     {
-                        ConstantWrapper newLiteral = NumericAddition(otherConstant, thisConstant);
+                        var newLiteral = NumericAddition(otherConstant, thisConstant);
                         if (newLiteral != null && NoOverflow(newLiteral))
                         {
                             RotateFromRight(node, leftOperator, newLiteral);
@@ -574,7 +585,7 @@ namespace Microsoft.Ajax.Utilities
                 else if (node.OperatorToken == JSToken.Minus)
                 {
                     // minus-minus
-                    ConstantWrapper newLiteral = Minus(otherConstant, thisConstant);
+                    var newLiteral = Minus(otherConstant, thisConstant);
                     if (newLiteral != null && NoOverflow(newLiteral))
                     {
                         RotateFromRight(node, leftOperator, newLiteral);
@@ -585,7 +596,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 if (leftOperator.OperatorToken == JSToken.Multiply || leftOperator.OperatorToken == JSToken.Divide)
                 {
-                    ConstantWrapper newLiteral = Multiply(otherConstant, thisConstant);
+                    var newLiteral = Multiply(otherConstant, thisConstant);
                     if (newLiteral != null && NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, newLiteral))
                     {
                         RotateFromRight(node, leftOperator, newLiteral);
@@ -597,7 +608,7 @@ namespace Microsoft.Ajax.Utilities
                 if (leftOperator.OperatorToken == JSToken.Divide)
                 {
                     // divide-divide
-                    ConstantWrapper newLiteral = Divide(otherConstant, thisConstant);
+                    var newLiteral = Divide(otherConstant, thisConstant);
                     if (newLiteral != null && NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, newLiteral)
                         && NodeLength(newLiteral) <= NodeLength(thisConstant) + NodeLength(otherConstant) + 1)
                     {
@@ -607,13 +618,14 @@ namespace Microsoft.Ajax.Utilities
                 else if (leftOperator.OperatorToken == JSToken.Multiply)
                 {
                     // mult-divide
-                    ConstantWrapper otherOverThis = Divide(otherConstant, thisConstant);
-                    ConstantWrapper thisOverOther = Divide(thisConstant, otherConstant);
+                    var otherOverThis = Divide(otherConstant, thisConstant);
+                    var thisOverOther = Divide(thisConstant, otherConstant);
 
-                    int otherOverThisLength = otherOverThis != null ? NodeLength(otherOverThis) : int.MaxValue;
-                    int thisOverOtherLength = thisOverOther != null ? NodeLength(thisOverOther) : int.MaxValue;
+                    var otherOverThisLength = otherOverThis != null ? NodeLength(otherOverThis) : int.MaxValue;
+                    var thisOverOtherLength = thisOverOther != null ? NodeLength(thisOverOther) : int.MaxValue;
 
-                    if (otherOverThis != null && NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, otherOverThis)
+                    if (otherOverThis != null &&
+                        NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, otherOverThis)
                         && (thisOverOther == null || otherOverThisLength < thisOverOtherLength))
                     {
                         if (otherOverThisLength <= NodeLength(thisConstant) + NodeLength(otherConstant) + 1)
@@ -621,7 +633,8 @@ namespace Microsoft.Ajax.Utilities
                             RotateFromRight(node, leftOperator, otherOverThis);
                         }
                     }
-                    else if (thisOverOther != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, thisOverOther))
+                    else if (thisOverOther != null &&
+                             NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, thisOverOther))
                     {
                         if (thisOverOtherLength <= NodeLength(thisConstant) + NodeLength(otherConstant) + 1)
                         {
@@ -643,8 +656,9 @@ namespace Microsoft.Ajax.Utilities
         /// <param name="thisConstant">first constant</param>
         /// <param name="otherConstant">second constant</param>
         /// <param name="leftOperator">second operator</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private void EvalToTheRight(BinaryOperator node, ConstantWrapper thisConstant, ConstantWrapper otherConstant, BinaryOperator rightOperator)
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        private void EvalToTheRight(BinaryOperator node, ConstantWrapper thisConstant, ConstantWrapper otherConstant,
+            BinaryOperator rightOperator)
         {
             if (node.OperatorToken == JSToken.Plus)
             {
@@ -654,7 +668,7 @@ namespace Microsoft.Ajax.Utilities
                     // that generates a string. And since this is a plus-operator, then this operator will be a string-
                     // concat as well. So we can just combine the strings now and replace our node with the right-hand 
                     // operation
-                    ConstantWrapper newLiteral = StringConcat(thisConstant, otherConstant);
+                    var newLiteral = StringConcat(thisConstant, otherConstant);
                     if (newLiteral != null)
                     {
                         RotateFromRight(node, rightOperator, newLiteral);
@@ -665,14 +679,14 @@ namespace Microsoft.Ajax.Utilities
                     // plus-minus. Now, the minus operation happens first, and it will perform a numeric
                     // operation. The plus is NOT string, so that means it will also be a numeric operation
                     // and we can combine the operators numericly. 
-                    ConstantWrapper newLiteral = NumericAddition(thisConstant, otherConstant);
+                    var newLiteral = NumericAddition(thisConstant, otherConstant);
                     if (newLiteral != null && NoOverflow(newLiteral))
                     {
                         RotateFromRight(node, rightOperator, newLiteral);
                     }
                     else
                     {
-                        ConstantWrapper rightRight = rightOperator.Operand2 as ConstantWrapper;
+                        var rightRight = rightOperator.Operand2 as ConstantWrapper;
                         if (rightRight != null)
                         {
                             EvalFarToTheRight(node, thisConstant, rightRight, rightOperator);
@@ -685,7 +699,7 @@ namespace Microsoft.Ajax.Utilities
                 // minus-minus
                 // both operations are numeric, so we can combine the constant operands. However, we 
                 // can't combine them into a plus, so make sure we do the minus in the opposite direction
-                ConstantWrapper newLiteral = Minus(otherConstant, thisConstant);
+                var newLiteral = Minus(otherConstant, thisConstant);
                 if (newLiteral != null && NoOverflow(newLiteral))
                 {
                     rightOperator.SwapOperands();
@@ -693,7 +707,7 @@ namespace Microsoft.Ajax.Utilities
                 }
                 else
                 {
-                    ConstantWrapper rightRight = rightOperator.Operand2 as ConstantWrapper;
+                    var rightRight = rightOperator.Operand2 as ConstantWrapper;
                     if (rightRight != null)
                     {
                         EvalFarToTheRight(node, thisConstant, rightRight, rightOperator);
@@ -701,11 +715,12 @@ namespace Microsoft.Ajax.Utilities
                 }
             }
             else if (node.OperatorToken == JSToken.Multiply
-                && (rightOperator.OperatorToken == JSToken.Multiply || rightOperator.OperatorToken == JSToken.Divide))
+                     &&
+                     (rightOperator.OperatorToken == JSToken.Multiply || rightOperator.OperatorToken == JSToken.Divide))
             {
                 // multiply-divide or multiply-multiply
                 // multiply the operands and use the right-hand operator
-                ConstantWrapper newLiteral = Multiply(thisConstant, otherConstant);
+                var newLiteral = Multiply(thisConstant, otherConstant);
                 if (newLiteral != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, newLiteral))
                 {
                     RotateFromRight(node, rightOperator, newLiteral);
@@ -716,7 +731,7 @@ namespace Microsoft.Ajax.Utilities
                 if (rightOperator.OperatorToken == JSToken.Multiply)
                 {
                     // divide-multiply
-                    ConstantWrapper newLiteral = Divide(thisConstant, otherConstant);
+                    var newLiteral = Divide(thisConstant, otherConstant);
                     if (newLiteral != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, newLiteral)
                         && NodeLength(newLiteral) < NodeLength(thisConstant) + NodeLength(otherConstant) + 1)
                     {
@@ -730,15 +745,16 @@ namespace Microsoft.Ajax.Utilities
                 {
                     // divide-divide
                     // get constants for left/right and for right/left
-                    ConstantWrapper leftOverRight = Divide(thisConstant, otherConstant);
-                    ConstantWrapper rightOverLeft = Divide(otherConstant, thisConstant);
+                    var leftOverRight = Divide(thisConstant, otherConstant);
+                    var rightOverLeft = Divide(otherConstant, thisConstant);
 
                     // get the lengths of the resulting code
-                    int leftOverRightLength = leftOverRight != null ? NodeLength(leftOverRight) : int.MaxValue;
-                    int rightOverLeftLength = rightOverLeft != null ? NodeLength(rightOverLeft) : int.MaxValue;
+                    var leftOverRightLength = leftOverRight != null ? NodeLength(leftOverRight) : int.MaxValue;
+                    var rightOverLeftLength = rightOverLeft != null ? NodeLength(rightOverLeft) : int.MaxValue;
 
                     // try whichever is smaller
-                    if (leftOverRight != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, leftOverRight)
+                    if (leftOverRight != null &&
+                        NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, leftOverRight)
                         && (rightOverLeft == null || leftOverRightLength < rightOverLeftLength))
                     {
                         // use left-over-right. 
@@ -750,7 +766,8 @@ namespace Microsoft.Ajax.Utilities
                             RotateFromRight(node, rightOperator, leftOverRight);
                         }
                     }
-                    else if (rightOverLeft != null && NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, rightOverLeft))
+                    else if (rightOverLeft != null &&
+                             NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, rightOverLeft))
                     {
                         // but only if the resulting value is smaller than the original expression
                         if (rightOverLeftLength <= NodeLength(thisConstant) + NodeLength(otherConstant) + 1)
@@ -770,8 +787,9 @@ namespace Microsoft.Ajax.Utilities
         /// <param name="thisConstant">first constant</param>
         /// <param name="otherConstant">second constant</param>
         /// <param name="rightOperator">second operator</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private void EvalFarToTheRight(BinaryOperator node, ConstantWrapper thisConstant, ConstantWrapper otherConstant, BinaryOperator rightOperator)
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        private void EvalFarToTheRight(BinaryOperator node, ConstantWrapper thisConstant, ConstantWrapper otherConstant,
+            BinaryOperator rightOperator)
         {
             if (rightOperator.OperatorToken == JSToken.Minus)
             {
@@ -781,7 +799,7 @@ namespace Microsoft.Ajax.Utilities
                     // our constant cannot be a string, though
                     if (!thisConstant.IsStringLiteral)
                     {
-                        ConstantWrapper newLiteral = Minus(otherConstant, thisConstant);
+                        var newLiteral = Minus(otherConstant, thisConstant);
                         if (newLiteral != null && NoOverflow(newLiteral))
                         {
                             RotateFromLeft(node, rightOperator, newLiteral);
@@ -791,7 +809,7 @@ namespace Microsoft.Ajax.Utilities
                 else if (node.OperatorToken == JSToken.Minus)
                 {
                     // minus-minus
-                    ConstantWrapper newLiteral = NumericAddition(thisConstant, otherConstant);
+                    var newLiteral = NumericAddition(thisConstant, otherConstant);
                     if (newLiteral != null && NoOverflow(newLiteral))
                     {
                         // but we need to swap the left and right operands first
@@ -807,7 +825,7 @@ namespace Microsoft.Ajax.Utilities
                 if (rightOperator.OperatorToken == JSToken.Multiply)
                 {
                     // mult-mult
-                    ConstantWrapper newLiteral = Multiply(thisConstant, otherConstant);
+                    var newLiteral = Multiply(thisConstant, otherConstant);
                     if (newLiteral != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, newLiteral))
                     {
                         RotateFromLeft(node, rightOperator, newLiteral);
@@ -816,13 +834,14 @@ namespace Microsoft.Ajax.Utilities
                 else if (rightOperator.OperatorToken == JSToken.Divide)
                 {
                     // mult-divide
-                    ConstantWrapper otherOverThis = Divide(otherConstant, thisConstant);
-                    ConstantWrapper thisOverOther = Divide(thisConstant, otherConstant);
+                    var otherOverThis = Divide(otherConstant, thisConstant);
+                    var thisOverOther = Divide(thisConstant, otherConstant);
 
-                    int otherOverThisLength = otherOverThis != null ? NodeLength(otherOverThis) : int.MaxValue;
-                    int thisOverOtherLength = thisOverOther != null ? NodeLength(thisOverOther) : int.MaxValue;
+                    var otherOverThisLength = otherOverThis != null ? NodeLength(otherOverThis) : int.MaxValue;
+                    var thisOverOtherLength = thisOverOther != null ? NodeLength(thisOverOther) : int.MaxValue;
 
-                    if (otherOverThis != null && NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, otherOverThis)
+                    if (otherOverThis != null &&
+                        NoMultiplicativeOverOrUnderFlow(otherConstant, thisConstant, otherOverThis)
                         && (thisOverOther == null || otherOverThisLength < thisOverOtherLength))
                     {
                         if (otherOverThisLength <= NodeLength(thisConstant) + NodeLength(otherConstant) + 1)
@@ -831,7 +850,8 @@ namespace Microsoft.Ajax.Utilities
                             RotateFromLeft(node, rightOperator, otherOverThis);
                         }
                     }
-                    else if (thisOverOther != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, thisOverOther))
+                    else if (thisOverOther != null &&
+                             NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, thisOverOther))
                     {
                         if (thisOverOtherLength <= NodeLength(thisConstant) + NodeLength(otherConstant) + 1)
                         {
@@ -848,7 +868,7 @@ namespace Microsoft.Ajax.Utilities
                 if (rightOperator.OperatorToken == JSToken.Multiply)
                 {
                     // divide-mult
-                    ConstantWrapper newLiteral = Divide(thisConstant, otherConstant);
+                    var newLiteral = Divide(thisConstant, otherConstant);
                     if (newLiteral != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, newLiteral)
                         && NodeLength(newLiteral) <= NodeLength(thisConstant) + NodeLength(otherConstant) + 1)
                     {
@@ -863,7 +883,7 @@ namespace Microsoft.Ajax.Utilities
                 else if (rightOperator.OperatorToken == JSToken.Divide)
                 {
                     // divide-divide
-                    ConstantWrapper newLiteral = Multiply(thisConstant, otherConstant);
+                    var newLiteral = Multiply(thisConstant, otherConstant);
                     if (newLiteral != null && NoMultiplicativeOverOrUnderFlow(thisConstant, otherConstant, newLiteral))
                     {
                         // but we need to swap the left and right operands first
@@ -889,9 +909,9 @@ namespace Microsoft.Ajax.Utilities
             {
                 try
                 {
-                    double leftValue = left.ToNumber();
-                    double rightValue = right.ToNumber();
-                    double result = leftValue * rightValue;
+                    var leftValue = left.ToNumber();
+                    var rightValue = right.ToNumber();
+                    var result = leftValue*rightValue;
 
                     if (ConstantWrapper.NumberIsOkayToCombine(result))
                     {
@@ -901,11 +921,13 @@ namespace Microsoft.Ajax.Utilities
                     {
                         if (!left.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(leftValue))
                         {
-                            left.Parent.ReplaceChild(left, new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
+                            left.Parent.ReplaceChild(left,
+                                new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
                         }
                         if (!right.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(rightValue))
                         {
-                            right.Parent.ReplaceChild(right, new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
+                            right.Parent.ReplaceChild(right,
+                                new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
                         }
                     }
                 }
@@ -928,9 +950,9 @@ namespace Microsoft.Ajax.Utilities
             {
                 try
                 {
-                    double leftValue = left.ToNumber();
-                    double rightValue = right.ToNumber();
-                    double result = leftValue / rightValue;
+                    var leftValue = left.ToNumber();
+                    var rightValue = right.ToNumber();
+                    var result = leftValue/rightValue;
 
                     if (ConstantWrapper.NumberIsOkayToCombine(result))
                     {
@@ -940,11 +962,13 @@ namespace Microsoft.Ajax.Utilities
                     {
                         if (!left.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(leftValue))
                         {
-                            left.Parent.ReplaceChild(left, new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
+                            left.Parent.ReplaceChild(left,
+                                new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
                         }
                         if (!right.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(rightValue))
                         {
-                            right.Parent.ReplaceChild(right, new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
+                            right.Parent.ReplaceChild(right,
+                                new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
                         }
                     }
                 }
@@ -967,9 +991,9 @@ namespace Microsoft.Ajax.Utilities
             {
                 try
                 {
-                    double leftValue = left.ToNumber();
-                    double rightValue = right.ToNumber();
-                    double result = leftValue % rightValue;
+                    var leftValue = left.ToNumber();
+                    var rightValue = right.ToNumber();
+                    var result = leftValue%rightValue;
 
                     if (ConstantWrapper.NumberIsOkayToCombine(result))
                     {
@@ -979,11 +1003,13 @@ namespace Microsoft.Ajax.Utilities
                     {
                         if (!left.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(leftValue))
                         {
-                            left.Parent.ReplaceChild(left, new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
+                            left.Parent.ReplaceChild(left,
+                                new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
                         }
                         if (!right.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(rightValue))
                         {
-                            right.Parent.ReplaceChild(right, new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
+                            right.Parent.ReplaceChild(right,
+                                new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
                         }
                     }
                 }
@@ -1023,9 +1049,9 @@ namespace Microsoft.Ajax.Utilities
             {
                 try
                 {
-                    double leftValue = left.ToNumber();
-                    double rightValue = right.ToNumber();
-                    double result = leftValue + rightValue;
+                    var leftValue = left.ToNumber();
+                    var rightValue = right.ToNumber();
+                    var result = leftValue + rightValue;
 
                     if (ConstantWrapper.NumberIsOkayToCombine(result))
                     {
@@ -1035,11 +1061,13 @@ namespace Microsoft.Ajax.Utilities
                     {
                         if (!left.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(leftValue))
                         {
-                            left.Parent.ReplaceChild(left, new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
+                            left.Parent.ReplaceChild(left,
+                                new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
                         }
                         if (!right.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(rightValue))
                         {
-                            right.Parent.ReplaceChild(right, new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
+                            right.Parent.ReplaceChild(right,
+                                new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
                         }
                     }
                 }
@@ -1075,7 +1103,8 @@ namespace Microsoft.Ajax.Utilities
                     // NaN, +Infinity and -Infinity are also acceptable
                     if (left.IsOkayToCombine && right.IsOkayToCombine)
                     {
-                        newLiteral = new ConstantWrapper(left.ToString() + right.ToString(), PrimitiveType.String, left.Context.FlattenToStart());
+                        newLiteral = new ConstantWrapper(left.ToString() + right.ToString(), PrimitiveType.String,
+                            left.Context.FlattenToStart());
                     }
                 }
             }
@@ -1092,9 +1121,9 @@ namespace Microsoft.Ajax.Utilities
             {
                 try
                 {
-                    double leftValue = left.ToNumber();
-                    double rightValue = right.ToNumber();
-                    double result = leftValue - rightValue;
+                    var leftValue = left.ToNumber();
+                    var rightValue = right.ToNumber();
+                    var result = leftValue - rightValue;
 
                     if (ConstantWrapper.NumberIsOkayToCombine(result))
                     {
@@ -1104,11 +1133,13 @@ namespace Microsoft.Ajax.Utilities
                     {
                         if (!left.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(leftValue))
                         {
-                            left.Parent.ReplaceChild(left, new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
+                            left.Parent.ReplaceChild(left,
+                                new ConstantWrapper(leftValue, PrimitiveType.Number, left.Context));
                         }
                         if (!right.IsNumericLiteral && ConstantWrapper.NumberIsOkayToCombine(rightValue))
                         {
-                            right.Parent.ReplaceChild(right, new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
+                            right.Parent.ReplaceChild(right,
+                                new ConstantWrapper(rightValue, PrimitiveType.Number, right.Context));
                         }
                     }
                 }
@@ -1131,13 +1162,13 @@ namespace Microsoft.Ajax.Utilities
                 try
                 {
                     // left-hand value is a 32-bit signed integer
-                    Int32 lvalue = left.ToInt32();
+                    var lvalue = left.ToInt32();
 
                     // mask only the bottom 5 bits of the right-hand value
-                    int rvalue = (int)(right.ToUInt32() & 0x1F);
+                    var rvalue = (int) (right.ToUInt32() & 0x1F);
 
                     // convert the result to a double
-                    double result = Convert.ToDouble(lvalue << rvalue);
+                    var result = System.Convert.ToDouble(lvalue << rvalue);
                     newLiteral = new ConstantWrapper(result, PrimitiveType.Number, left.Context.FlattenToStart());
                 }
                 catch (InvalidCastException)
@@ -1158,13 +1189,13 @@ namespace Microsoft.Ajax.Utilities
                 try
                 {
                     // left-hand value is a 32-bit signed integer
-                    Int32 lvalue = left.ToInt32();
+                    var lvalue = left.ToInt32();
 
                     // mask only the bottom 5 bits of the right-hand value
-                    int rvalue = (int)(right.ToUInt32() & 0x1F);
+                    var rvalue = (int) (right.ToUInt32() & 0x1F);
 
                     // convert the result to a double
-                    double result = Convert.ToDouble(lvalue >> rvalue);
+                    var result = System.Convert.ToDouble(lvalue >> rvalue);
                     newLiteral = new ConstantWrapper(result, PrimitiveType.Number, left.Context.FlattenToStart());
                 }
                 catch (InvalidCastException)
@@ -1186,13 +1217,13 @@ namespace Microsoft.Ajax.Utilities
                 try
                 {
                     // left-hand value is a 32-bit signed integer
-                    UInt32 lvalue = left.ToUInt32();
+                    var lvalue = left.ToUInt32();
 
                     // mask only the bottom 5 bits of the right-hand value
-                    int rvalue = (int)(right.ToUInt32() & 0x1F);
+                    var rvalue = (int) (right.ToUInt32() & 0x1F);
 
                     // convert the result to a double
-                    double result = Convert.ToDouble(lvalue >> rvalue);
+                    var result = System.Convert.ToDouble(lvalue >> rvalue);
                     newLiteral = new ConstantWrapper(result, PrimitiveType.Number, left.Context.FlattenToStart());
                 }
                 catch (InvalidCastException)
@@ -1216,7 +1247,8 @@ namespace Microsoft.Ajax.Utilities
                     if (left.IsOkayToCombine && right.IsOkayToCombine)
                     {
                         // do a straight ordinal comparison of the strings
-                        newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) < 0, PrimitiveType.Boolean, left.Context.FlattenToStart());
+                        newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) < 0,
+                            PrimitiveType.Boolean, left.Context.FlattenToStart());
                     }
                 }
                 else
@@ -1226,7 +1258,8 @@ namespace Microsoft.Ajax.Utilities
                         // either one or both are NOT a string -- numeric comparison
                         if (left.IsOkayToCombine && right.IsOkayToCombine)
                         {
-                            newLiteral = new ConstantWrapper(left.ToNumber() < right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                            newLiteral = new ConstantWrapper(left.ToNumber() < right.ToNumber(), PrimitiveType.Boolean,
+                                left.Context.FlattenToStart());
                         }
                     }
                     catch (InvalidCastException)
@@ -1250,7 +1283,8 @@ namespace Microsoft.Ajax.Utilities
                     if (left.IsOkayToCombine && right.IsOkayToCombine)
                     {
                         // do a straight ordinal comparison of the strings
-                        newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) <= 0, PrimitiveType.Boolean, left.Context.FlattenToStart());
+                        newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) <= 0,
+                            PrimitiveType.Boolean, left.Context.FlattenToStart());
                     }
                 }
                 else
@@ -1260,7 +1294,8 @@ namespace Microsoft.Ajax.Utilities
                         // either one or both are NOT a string -- numeric comparison
                         if (left.IsOkayToCombine && right.IsOkayToCombine)
                         {
-                            newLiteral = new ConstantWrapper(left.ToNumber() <= right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                            newLiteral = new ConstantWrapper(left.ToNumber() <= right.ToNumber(), PrimitiveType.Boolean,
+                                left.Context.FlattenToStart());
                         }
                     }
                     catch (InvalidCastException)
@@ -1285,7 +1320,8 @@ namespace Microsoft.Ajax.Utilities
                     if (left.IsOkayToCombine && right.IsOkayToCombine)
                     {
                         // do a straight ordinal comparison of the strings
-                        newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) > 0, PrimitiveType.Boolean, left.Context.FlattenToStart());
+                        newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) > 0,
+                            PrimitiveType.Boolean, left.Context.FlattenToStart());
                     }
                 }
                 else
@@ -1295,7 +1331,8 @@ namespace Microsoft.Ajax.Utilities
                         // either one or both are NOT a string -- numeric comparison
                         if (left.IsOkayToCombine && right.IsOkayToCombine)
                         {
-                            newLiteral = new ConstantWrapper(left.ToNumber() > right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                            newLiteral = new ConstantWrapper(left.ToNumber() > right.ToNumber(), PrimitiveType.Boolean,
+                                left.Context.FlattenToStart());
                         }
                     }
                     catch (InvalidCastException)
@@ -1320,7 +1357,8 @@ namespace Microsoft.Ajax.Utilities
                     if (left.IsOkayToCombine && right.IsOkayToCombine)
                     {
                         // do a straight ordinal comparison of the strings
-                        newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) >= 0, PrimitiveType.Boolean, left.Context.FlattenToStart());
+                        newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) >= 0,
+                            PrimitiveType.Boolean, left.Context.FlattenToStart());
                     }
                 }
                 else
@@ -1330,7 +1368,8 @@ namespace Microsoft.Ajax.Utilities
                         // either one or both are NOT a string -- numeric comparison
                         if (left.IsOkayToCombine && right.IsOkayToCombine)
                         {
-                            newLiteral = new ConstantWrapper(left.ToNumber() >= right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                            newLiteral = new ConstantWrapper(left.ToNumber() >= right.ToNumber(), PrimitiveType.Boolean,
+                                left.Context.FlattenToStart());
                         }
                     }
                     catch (InvalidCastException)
@@ -1350,7 +1389,7 @@ namespace Microsoft.Ajax.Utilities
 
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
-                PrimitiveType leftType = left.PrimitiveType;
+                var leftType = left.PrimitiveType;
                 if (leftType == right.PrimitiveType)
                 {
                     // the values are the same type
@@ -1363,14 +1402,17 @@ namespace Microsoft.Ajax.Utilities
 
                         case PrimitiveType.Boolean:
                             // compare boolean values
-                            newLiteral = new ConstantWrapper(left.ToBoolean() == right.ToBoolean(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                            newLiteral = new ConstantWrapper(left.ToBoolean() == right.ToBoolean(),
+                                PrimitiveType.Boolean, left.Context.FlattenToStart());
                             break;
 
                         case PrimitiveType.String:
                             // compare string ordinally
                             if (left.IsOkayToCombine && right.IsOkayToCombine)
                             {
-                                newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) == 0, PrimitiveType.Boolean, left.Context.FlattenToStart());
+                                newLiteral =
+                                    new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) == 0,
+                                        PrimitiveType.Boolean, left.Context.FlattenToStart());
                             }
                             break;
 
@@ -1382,7 +1424,8 @@ namespace Microsoft.Ajax.Utilities
                                 // and NaN is always unequal to everything else, including itself.
                                 if (left.IsOkayToCombine && right.IsOkayToCombine)
                                 {
-                                    newLiteral = new ConstantWrapper(left.ToNumber() == right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                                    newLiteral = new ConstantWrapper(left.ToNumber() == right.ToNumber(),
+                                        PrimitiveType.Boolean, left.Context.FlattenToStart());
                                 }
                             }
                             catch (InvalidCastException)
@@ -1400,7 +1443,8 @@ namespace Microsoft.Ajax.Utilities
                         // numeric comparison
                         // +0 and -0 are treated as "equal" in C#, so we don't need to test them separately.
                         // and NaN is always unequal to everything else, including itself.
-                        newLiteral = new ConstantWrapper(left.ToNumber() == right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                        newLiteral = new ConstantWrapper(left.ToNumber() == right.ToNumber(), PrimitiveType.Boolean,
+                            left.Context.FlattenToStart());
                     }
                     catch (InvalidCastException)
                     {
@@ -1419,7 +1463,7 @@ namespace Microsoft.Ajax.Utilities
 
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
-                PrimitiveType leftType = left.PrimitiveType;
+                var leftType = left.PrimitiveType;
                 if (leftType == right.PrimitiveType)
                 {
                     // the values are the same type
@@ -1432,14 +1476,17 @@ namespace Microsoft.Ajax.Utilities
 
                         case PrimitiveType.Boolean:
                             // compare boolean values
-                            newLiteral = new ConstantWrapper(left.ToBoolean() != right.ToBoolean(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                            newLiteral = new ConstantWrapper(left.ToBoolean() != right.ToBoolean(),
+                                PrimitiveType.Boolean, left.Context.FlattenToStart());
                             break;
 
                         case PrimitiveType.String:
                             // compare string ordinally
                             if (left.IsOkayToCombine && right.IsOkayToCombine)
                             {
-                                newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) != 0, PrimitiveType.Boolean, left.Context.FlattenToStart());
+                                newLiteral =
+                                    new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) != 0,
+                                        PrimitiveType.Boolean, left.Context.FlattenToStart());
                             }
                             break;
 
@@ -1451,7 +1498,8 @@ namespace Microsoft.Ajax.Utilities
                                 // and NaN is always unequal to everything else, including itself.
                                 if (left.IsOkayToCombine && right.IsOkayToCombine)
                                 {
-                                    newLiteral = new ConstantWrapper(left.ToNumber() != right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                                    newLiteral = new ConstantWrapper(left.ToNumber() != right.ToNumber(),
+                                        PrimitiveType.Boolean, left.Context.FlattenToStart());
                                 }
                             }
                             catch (InvalidCastException)
@@ -1469,7 +1517,8 @@ namespace Microsoft.Ajax.Utilities
                         // numeric comparison
                         // +0 and -0 are treated as "equal" in C#, so we don't need to test them separately.
                         // and NaN is always unequal to everything else, including itself.
-                        newLiteral = new ConstantWrapper(left.ToNumber() != right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                        newLiteral = new ConstantWrapper(left.ToNumber() != right.ToNumber(), PrimitiveType.Boolean,
+                            left.Context.FlattenToStart());
                     }
                     catch (InvalidCastException)
                     {
@@ -1488,7 +1537,7 @@ namespace Microsoft.Ajax.Utilities
 
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
-                PrimitiveType leftType = left.PrimitiveType;
+                var leftType = left.PrimitiveType;
                 if (leftType == right.PrimitiveType)
                 {
                     // the values are the same type
@@ -1501,14 +1550,17 @@ namespace Microsoft.Ajax.Utilities
 
                         case PrimitiveType.Boolean:
                             // compare boolean values
-                            newLiteral = new ConstantWrapper(left.ToBoolean() == right.ToBoolean(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                            newLiteral = new ConstantWrapper(left.ToBoolean() == right.ToBoolean(),
+                                PrimitiveType.Boolean, left.Context.FlattenToStart());
                             break;
 
                         case PrimitiveType.String:
                             // compare string ordinally
                             if (left.IsOkayToCombine && right.IsOkayToCombine)
                             {
-                                newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) == 0, PrimitiveType.Boolean, left.Context.FlattenToStart());
+                                newLiteral =
+                                    new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) == 0,
+                                        PrimitiveType.Boolean, left.Context.FlattenToStart());
                             }
                             break;
 
@@ -1520,7 +1572,8 @@ namespace Microsoft.Ajax.Utilities
                                 // and NaN is always unequal to everything else, including itself.
                                 if (left.IsOkayToCombine && right.IsOkayToCombine)
                                 {
-                                    newLiteral = new ConstantWrapper(left.ToNumber() == right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                                    newLiteral = new ConstantWrapper(left.ToNumber() == right.ToNumber(),
+                                        PrimitiveType.Boolean, left.Context.FlattenToStart());
                                 }
                             }
                             catch (InvalidCastException)
@@ -1547,7 +1600,7 @@ namespace Microsoft.Ajax.Utilities
 
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
-                PrimitiveType leftType = left.PrimitiveType;
+                var leftType = left.PrimitiveType;
                 if (leftType == right.PrimitiveType)
                 {
                     // the values are the same type
@@ -1560,14 +1613,17 @@ namespace Microsoft.Ajax.Utilities
 
                         case PrimitiveType.Boolean:
                             // compare boolean values
-                            newLiteral = new ConstantWrapper(left.ToBoolean() != right.ToBoolean(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                            newLiteral = new ConstantWrapper(left.ToBoolean() != right.ToBoolean(),
+                                PrimitiveType.Boolean, left.Context.FlattenToStart());
                             break;
 
                         case PrimitiveType.String:
                             // compare string ordinally
                             if (left.IsOkayToCombine && right.IsOkayToCombine)
                             {
-                                newLiteral = new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) != 0, PrimitiveType.Boolean, left.Context.FlattenToStart());
+                                newLiteral =
+                                    new ConstantWrapper(string.CompareOrdinal(left.ToString(), right.ToString()) != 0,
+                                        PrimitiveType.Boolean, left.Context.FlattenToStart());
                             }
                             break;
 
@@ -1579,7 +1635,8 @@ namespace Microsoft.Ajax.Utilities
                                 // and NaN is always unequal to everything else, including itself.
                                 if (left.IsOkayToCombine && right.IsOkayToCombine)
                                 {
-                                    newLiteral = new ConstantWrapper(left.ToNumber() != right.ToNumber(), PrimitiveType.Boolean, left.Context.FlattenToStart());
+                                    newLiteral = new ConstantWrapper(left.ToNumber() != right.ToNumber(),
+                                        PrimitiveType.Boolean, left.Context.FlattenToStart());
                                 }
                             }
                             catch (InvalidCastException)
@@ -1608,9 +1665,10 @@ namespace Microsoft.Ajax.Utilities
             {
                 try
                 {
-                    Int32 lValue = left.ToInt32();
-                    Int32 rValue = right.ToInt32();
-                    newLiteral = new ConstantWrapper(Convert.ToDouble(lValue & rValue), PrimitiveType.Number, left.Context.FlattenToStart());
+                    var lValue = left.ToInt32();
+                    var rValue = right.ToInt32();
+                    newLiteral = new ConstantWrapper(System.Convert.ToDouble(lValue & rValue), PrimitiveType.Number,
+                        left.Context.FlattenToStart());
                 }
                 catch (InvalidCastException)
                 {
@@ -1630,9 +1688,10 @@ namespace Microsoft.Ajax.Utilities
             {
                 try
                 {
-                    Int32 lValue = left.ToInt32();
-                    Int32 rValue = right.ToInt32();
-                    newLiteral = new ConstantWrapper(Convert.ToDouble(lValue | rValue), PrimitiveType.Number, left.Context.FlattenToStart());
+                    var lValue = left.ToInt32();
+                    var rValue = right.ToInt32();
+                    newLiteral = new ConstantWrapper(System.Convert.ToDouble(lValue | rValue), PrimitiveType.Number,
+                        left.Context.FlattenToStart());
                 }
                 catch (InvalidCastException)
                 {
@@ -1652,9 +1711,10 @@ namespace Microsoft.Ajax.Utilities
             {
                 try
                 {
-                    Int32 lValue = left.ToInt32();
-                    Int32 rValue = right.ToInt32();
-                    newLiteral = new ConstantWrapper(Convert.ToDouble(lValue ^ rValue), PrimitiveType.Number, left.Context.FlattenToStart());
+                    var lValue = left.ToInt32();
+                    var rValue = right.ToInt32();
+                    newLiteral = new ConstantWrapper(System.Convert.ToDouble(lValue ^ rValue), PrimitiveType.Number,
+                        left.Context.FlattenToStart());
                 }
                 catch (InvalidCastException)
                 {
@@ -1741,7 +1801,7 @@ namespace Microsoft.Ajax.Utilities
                 // the element is a constant wrapper (we wouldn't get this far if it wasn't),
                 // but we've overloaded the virtual ToString method on ConstantWrappers to convert the
                 // constant value to a string value.
-                sb.Append(arrayLiteral.Elements[ndx].ToString());
+                sb.Append(arrayLiteral.Elements[ndx]);
             }
 
             return sb.ToString();
@@ -1782,7 +1842,6 @@ namespace Microsoft.Ajax.Utilities
                             list.RemoveAt(ndx);
                         }
                     }
-
                 }
 
                 // then normally recurse whatever is left over
@@ -1806,7 +1865,7 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void DoBinaryOperator(BinaryOperator node)
         {
             if (m_parser.Settings.EvalLiteralExpressions)
@@ -1831,19 +1890,22 @@ namespace Microsoft.Ajax.Utilities
                                 {
                                     // they are not the same type -- replace with a boolean and bail
                                     ReplaceNodeWithLiteral(
-                                        node, 
-                                        new ConstantWrapper(node.OperatorToken == JSToken.StrictEqual ? false : true, PrimitiveType.Boolean, node.Context));
+                                        node,
+                                        new ConstantWrapper(node.OperatorToken == JSToken.StrictEqual ? false : true,
+                                            PrimitiveType.Boolean, node.Context));
                                     return;
                                 }
 
                                 // they are the same type -- we can change the operator to simple equality/not equality
-                                node.OperatorToken = node.OperatorToken == JSToken.StrictEqual ? JSToken.Equal : JSToken.NotEqual;
+                                node.OperatorToken = node.OperatorToken == JSToken.StrictEqual
+                                    ? JSToken.Equal
+                                    : JSToken.NotEqual;
                             }
                         }
                     }
 
                     // see if the left operand is a literal number, boolean, string, or null
-                    ConstantWrapper left = node.Operand1 as ConstantWrapper;
+                    var left = node.Operand1 as ConstantWrapper;
                     if (left != null)
                     {
                         if (node.OperatorToken == JSToken.Comma)
@@ -1851,7 +1913,7 @@ namespace Microsoft.Ajax.Utilities
                             // the comma operator evaluates the left, then evaluates the right and returns it.
                             // but if the left is a literal, evaluating it doesn't DO anything, so we can replace the
                             // entire operation with the right-hand operand
-                            ConstantWrapper rightConstant = node.Operand2 as ConstantWrapper;
+                            var rightConstant = node.Operand2 as ConstantWrapper;
                             if (rightConstant != null)
                             {
                                 // we'll replace the operator with the right-hand operand, BUT it's a constant, too.
@@ -1914,7 +1976,7 @@ namespace Microsoft.Ajax.Utilities
                         else
                         {
                             // see if the right operand is a literal number, boolean, string, or null
-                            ConstantWrapper right = node.Operand2 as ConstantWrapper;
+                            var right = node.Operand2 as ConstantWrapper;
                             if (right != null)
                             {
                                 // then they are both constants and we can evaluate the operation
@@ -1923,10 +1985,10 @@ namespace Microsoft.Ajax.Utilities
                             else
                             {
                                 // see if the right is a binary operator that can be combined with ours
-                                BinaryOperator rightBinary = node.Operand2 as BinaryOperator;
+                                var rightBinary = node.Operand2 as BinaryOperator;
                                 if (rightBinary != null)
                                 {
-                                    ConstantWrapper rightLeft = rightBinary.Operand1 as ConstantWrapper;
+                                    var rightLeft = rightBinary.Operand1 as ConstantWrapper;
                                     if (rightLeft != null)
                                     {
                                         // eval our left and the right-hand binary's left and put the combined operation as
@@ -1935,7 +1997,7 @@ namespace Microsoft.Ajax.Utilities
                                     }
                                     else
                                     {
-                                        ConstantWrapper rightRight = rightBinary.Operand2 as ConstantWrapper;
+                                        var rightRight = rightBinary.Operand2 as ConstantWrapper;
                                         if (rightRight != null)
                                         {
                                             EvalFarToTheRight(node, left, rightRight, rightBinary);
@@ -1948,42 +2010,45 @@ namespace Microsoft.Ajax.Utilities
                     else
                     {
                         // left is not a constantwrapper. See if the right is
-                        ConstantWrapper right = node.Operand2 as ConstantWrapper;
+                        var right = node.Operand2 as ConstantWrapper;
                         if (right != null)
                         {
                             // the right is a constant. See if the the left is a binary operator...
-                            BinaryOperator leftBinary = node.Operand1 as BinaryOperator;
+                            var leftBinary = node.Operand1 as BinaryOperator;
                             if (leftBinary != null)
                             {
                                 // ...with a constant on the right, and the operators can be combined
-                                ConstantWrapper leftRight = leftBinary.Operand2 as ConstantWrapper;
+                                var leftRight = leftBinary.Operand2 as ConstantWrapper;
                                 if (leftRight != null)
                                 {
                                     EvalToTheLeft(node, right, leftRight, leftBinary);
                                 }
                                 else
                                 {
-                                    ConstantWrapper leftLeft = leftBinary.Operand1 as ConstantWrapper;
+                                    var leftLeft = leftBinary.Operand1 as ConstantWrapper;
                                     if (leftLeft != null)
                                     {
                                         EvalFarToTheLeft(node, right, leftLeft, leftBinary);
                                     }
                                 }
                             }
-                            else if (m_parser.Settings.IsModificationAllowed(TreeModifications.SimplifyStringToNumericConversion))
+                            else if (
+                                m_parser.Settings.IsModificationAllowed(
+                                    TreeModifications.SimplifyStringToNumericConversion))
                             {
                                 // see if it's a lookup and this is a minus operation and the constant is a zero
-                                Lookup lookup = node.Operand1 as Lookup;
-                                if (lookup != null && node.OperatorToken == JSToken.Minus && right.IsIntegerLiteral && right.ToNumber() == 0)
+                                var lookup = node.Operand1 as Lookup;
+                                if (lookup != null && node.OperatorToken == JSToken.Minus && right.IsIntegerLiteral &&
+                                    right.ToNumber() == 0)
                                 {
                                     // okay, so we have "lookup - 0"
                                     // this is done frequently to force a value to be numeric. 
                                     // There is an easier way: apply the unary + operator to it. 
                                     var unary = new UnaryOperator(node.Context)
-                                        {
-                                            Operand = lookup,
-                                            OperatorToken = JSToken.Plus
-                                        };
+                                    {
+                                        Operand = lookup,
+                                        OperatorToken = JSToken.Plus
+                                    };
                                     ReplaceNodeCheckParens(node, unary);
                                 }
                             }
@@ -2018,7 +2083,8 @@ namespace Microsoft.Ajax.Utilities
                             {
                                 // it is -- make sure the separator is either not specified or is a constant
                                 ConstantWrapper separator = null;
-                                if (node.Arguments.Count == 0 || (separator = node.Arguments[0] as ConstantWrapper) != null)
+                                if (node.Arguments.Count == 0 ||
+                                    (separator = node.Arguments[0] as ConstantWrapper) != null)
                                 {
                                     // and the array literal must contain only constant items
                                     if (OnlyHasConstantItems(arrayLiteral))
@@ -2029,7 +2095,7 @@ namespace Microsoft.Ajax.Utilities
                                         if (combinedJoin.Length + 2 < NodeLength(node))
                                         {
                                             // transform: [c,c,c].join(s) => "cscsc"
-                                            ReplaceNodeWithLiteral(node, 
+                                            ReplaceNodeWithLiteral(node,
                                                 new ConstantWrapper(combinedJoin, PrimitiveType.String, node.Context));
                                         }
                                     }
@@ -2058,14 +2124,15 @@ namespace Microsoft.Ajax.Utilities
             {
                 // if the condition is a literal, evaluating the condition doesn't do anything, AND
                 // we know now whether it's true or not.
-                ConstantWrapper literalCondition = node.Condition as ConstantWrapper;
+                var literalCondition = node.Condition as ConstantWrapper;
                 if (literalCondition != null)
                 {
                     try
                     {
                         // if the boolean represenation of the literal is true, we can replace the condition operator
                         // with the true expression; otherwise we can replace it with the false expression
-                        ReplaceNodeCheckParens(node, literalCondition.ToBoolean() ? node.TrueExpression : node.FalseExpression);
+                        ReplaceNodeCheckParens(node,
+                            literalCondition.ToBoolean() ? node.TrueExpression : node.FalseExpression);
                     }
                     catch (InvalidCastException)
                     {
@@ -2091,7 +2158,7 @@ namespace Microsoft.Ajax.Utilities
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
                 // if the if-condition is a constant, we can eliminate one of the two branches
-                ConstantWrapper constantCondition = node.Condition as ConstantWrapper;
+                var constantCondition = node.Condition as ConstantWrapper;
                 if (constantCondition != null)
                 {
                     // instead, replace the condition with a 1 if it's always true or a 0 if it's always false
@@ -2100,7 +2167,8 @@ namespace Microsoft.Ajax.Utilities
                         try
                         {
                             node.Condition =
-                                new ConstantWrapper(constantCondition.ToBoolean() ? 1 : 0, PrimitiveType.Number, node.Condition.Context);
+                                new ConstantWrapper(constantCondition.ToBoolean() ? 1 : 0, PrimitiveType.Number,
+                                    node.Condition.Context);
                         }
                         catch (InvalidCastException)
                         {
@@ -2127,7 +2195,7 @@ namespace Microsoft.Ajax.Utilities
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
                 // if the if-condition is a constant, we can eliminate one of the two branches
-                ConstantWrapper constantCondition = node.Condition as ConstantWrapper;
+                var constantCondition = node.Condition as ConstantWrapper;
                 if (constantCondition != null)
                 {
                     // instead, replace the condition with a 1 if it's always true or a 0 if it's always false
@@ -2136,7 +2204,8 @@ namespace Microsoft.Ajax.Utilities
                         try
                         {
                             node.Condition =
-                                new ConstantWrapper(constantCondition.ToBoolean() ? 1 : 0, PrimitiveType.Number, node.Condition.Context);
+                                new ConstantWrapper(constantCondition.ToBoolean() ? 1 : 0, PrimitiveType.Number,
+                                    node.Condition.Context);
                         }
                         catch (InvalidCastException)
                         {
@@ -2163,7 +2232,7 @@ namespace Microsoft.Ajax.Utilities
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
                 // if the condition is a constant, we can simplify things
-                ConstantWrapper constantCondition = node.Condition as ConstantWrapper;
+                var constantCondition = node.Condition as ConstantWrapper;
                 if (constantCondition != null && constantCondition.IsNotOneOrPositiveZero)
                 {
                     try
@@ -2171,7 +2240,8 @@ namespace Microsoft.Ajax.Utilities
                         // the condition is a constant, so it is always either true or false
                         // we can replace the condition with a one or a zero -- only one byte
                         node.Condition =
-                            new ConstantWrapper(constantCondition.ToBoolean() ? 1 : 0, PrimitiveType.Number, node.Condition.Context);
+                            new ConstantWrapper(constantCondition.ToBoolean() ? 1 : 0, PrimitiveType.Number,
+                                node.Condition.Context);
                     }
                     catch (InvalidCastException)
                     {
@@ -2196,7 +2266,7 @@ namespace Microsoft.Ajax.Utilities
         {
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
-                ConstantWrapper constantCondition = node.Condition as ConstantWrapper;
+                var constantCondition = node.Condition as ConstantWrapper;
                 if (constantCondition != null)
                 {
                     try
@@ -2238,7 +2308,7 @@ namespace Microsoft.Ajax.Utilities
             if (m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
                 // if the if-condition is a constant, we can eliminate one of the two branches
-                ConstantWrapper constantCondition = node.Condition as ConstantWrapper;
+                var constantCondition = node.Condition as ConstantWrapper;
                 if (constantCondition != null)
                 {
                     // instead, replace the condition with a 1 if it's always true or a 0 if it's always false
@@ -2247,7 +2317,8 @@ namespace Microsoft.Ajax.Utilities
                         try
                         {
                             node.Condition =
-                                new ConstantWrapper(constantCondition.ToBoolean() ? 1 : 0, PrimitiveType.Number, node.Condition.Context);
+                                new ConstantWrapper(constantCondition.ToBoolean() ? 1 : 0, PrimitiveType.Number,
+                                    node.Condition.Context);
                         }
                         catch (InvalidCastException)
                         {
@@ -2277,7 +2348,8 @@ namespace Microsoft.Ajax.Utilities
                     {
                         if (constantWrapper.PrimitiveType == PrimitiveType.String && !constantWrapper.MayHaveIssues)
                         {
-                            length = new ConstantWrapper(constantWrapper.ToString().Length, PrimitiveType.Number, node.Context);
+                            length = new ConstantWrapper(constantWrapper.ToString().Length, PrimitiveType.Number,
+                                node.Context);
                         }
                     }
                     else if ((arrayLiteral = node.Root as ArrayLiteral) != null && !arrayLiteral.MayHaveIssues)
@@ -2310,14 +2382,14 @@ namespace Microsoft.Ajax.Utilities
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void DoUnaryNode(UnaryOperator node)
         {
             if (!node.OperatorInConditionalCompilationComment
                 && m_parser.Settings.IsModificationAllowed(TreeModifications.EvaluateNumericExpressions))
             {
                 var literalOperand = node.Operand as ConstantWrapper;
-                switch(node.OperatorToken)
+                switch (node.OperatorToken)
                 {
                     case JSToken.Void:
                         // see if our operand is a ConstantWrapper
@@ -2362,12 +2434,14 @@ namespace Microsoft.Ajax.Utilities
 
                             if (!string.IsNullOrEmpty(typeName))
                             {
-                                ReplaceNodeWithLiteral(node, new ConstantWrapper(typeName, PrimitiveType.String, node.Context));
+                                ReplaceNodeWithLiteral(node,
+                                    new ConstantWrapper(typeName, PrimitiveType.String, node.Context));
                             }
                         }
                         else if (node.Operand is ObjectLiteral)
                         {
-                            ReplaceNodeWithLiteral(node, new ConstantWrapper("object", PrimitiveType.String, node.Context));
+                            ReplaceNodeWithLiteral(node,
+                                new ConstantWrapper("object", PrimitiveType.String, node.Context));
                         }
                         break;
 
@@ -2377,7 +2451,8 @@ namespace Microsoft.Ajax.Utilities
                             try
                             {
                                 // replace with a constant representing operand.ToNumber,
-                                ReplaceNodeWithLiteral(node, new ConstantWrapper(literalOperand.ToNumber(), PrimitiveType.Number, node.Context));
+                                ReplaceNodeWithLiteral(node,
+                                    new ConstantWrapper(literalOperand.ToNumber(), PrimitiveType.Number, node.Context));
                             }
                             catch (InvalidCastException)
                             {
@@ -2393,7 +2468,8 @@ namespace Microsoft.Ajax.Utilities
                             try
                             {
                                 // replace with a constant representing the negative of operand.ToNumber
-                                ReplaceNodeWithLiteral(node, new ConstantWrapper(-literalOperand.ToNumber(), PrimitiveType.Number, node.Context));
+                                ReplaceNodeWithLiteral(node,
+                                    new ConstantWrapper(-literalOperand.ToNumber(), PrimitiveType.Number, node.Context));
                             }
                             catch (InvalidCastException)
                             {
@@ -2409,7 +2485,9 @@ namespace Microsoft.Ajax.Utilities
                             try
                             {
                                 // replace with a constant representing the bitwise-not of operant.ToInt32
-                                ReplaceNodeWithLiteral(node, new ConstantWrapper(Convert.ToDouble(~literalOperand.ToInt32()), PrimitiveType.Number, node.Context));
+                                ReplaceNodeWithLiteral(node,
+                                    new ConstantWrapper(System.Convert.ToDouble(~literalOperand.ToInt32()),
+                                        PrimitiveType.Number, node.Context));
                             }
                             catch (InvalidCastException)
                             {
@@ -2425,7 +2503,8 @@ namespace Microsoft.Ajax.Utilities
                             // replace with a constant representing the opposite of operand.ToBoolean
                             try
                             {
-                                ReplaceNodeWithLiteral(node, new ConstantWrapper(!literalOperand.ToBoolean(), PrimitiveType.Boolean, node.Context));
+                                ReplaceNodeWithLiteral(node,
+                                    new ConstantWrapper(!literalOperand.ToBoolean(), PrimitiveType.Boolean, node.Context));
                             }
                             catch (InvalidCastException)
                             {
@@ -2460,7 +2539,7 @@ namespace Microsoft.Ajax.Utilities
                     // but we'd need to make sure var'd variables and declared functions are properly handled.
                     try
                     {
-                        bool isTrue = constantCondition.ToBoolean();
+                        var isTrue = constantCondition.ToBoolean();
                         if (isTrue)
                         {
                             // the condition is always true, so we should change it to 1
@@ -2479,7 +2558,7 @@ namespace Microsoft.Ajax.Utilities
                                     var parentBlock = node.Parent as Block;
                                     if (parentBlock != null)
                                     {
-                                        int whileIndex = parentBlock.IndexOf(node);
+                                        var whileIndex = parentBlock.IndexOf(node);
                                         if (whileIndex > 0)
                                         {
                                             var previousVar = parentBlock[whileIndex - 1] as Var;
@@ -2494,10 +2573,10 @@ namespace Microsoft.Ajax.Utilities
 
                                 // create the for using our body and replace ourselves with it
                                 var forNode = new ForNode(node.Context)
-                                    {
-                                        Initializer = initializer,
-                                        Body = node.Body
-                                    };
+                                {
+                                    Initializer = initializer,
+                                    Body = node.Body
+                                };
                                 node.Parent.ReplaceChild(node, forNode);
                             }
                             else

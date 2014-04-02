@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class ParameterDeclaration : AstNode
     {
@@ -41,7 +41,7 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         // Gets or sets the binding node
         /// </summary>
-        public AstNode Binding 
+        public AstNode Binding
         {
             get { return m_binding; }
             set
@@ -60,7 +60,7 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// Gets or sets the optional default value for the parameter
         /// </summary>
-        public AstNode Initializer 
+        public AstNode Initializer
         {
             get { return m_initializer; }
             set
@@ -77,7 +77,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 // the entire parameter is referenced if ANY of the binding declarations 
                 // within it have a reference
-                foreach(var nameDecl in BindingsVisitor.Bindings(this))
+                foreach (var nameDecl in BindingsVisitor.Bindings(this))
                 {
                     // if there is no variable field (although there SHOULD be), then let's
                     // just assume it's referenced.
@@ -112,10 +112,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Binding, Initializer);
-            }
+            get { return EnumerateNonNullNodes(Binding, Initializer); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
@@ -125,7 +122,7 @@ namespace Microsoft.Ajax.Utilities
                 Binding = newNode;
                 return true;
             }
-            else if (Initializer == oldNode)
+            if (Initializer == oldNode)
             {
                 Initializer = newNode;
                 return true;

@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Initializer used in bindings
@@ -75,10 +75,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Binding, Initializer);
-            }
+            get { return EnumerateNonNullNodes(Binding, Initializer); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

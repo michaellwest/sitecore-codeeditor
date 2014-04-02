@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public enum ClassType
     {
@@ -91,10 +91,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override bool IsDeclaration
         {
-            get
-            {
-                return ClassType == ClassType.Declaration;
-            }
+            get { return ClassType == ClassType.Declaration; }
         }
 
         public ClassNode(Context context)
@@ -112,10 +109,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(m_binding, m_heritage, m_elements);
-            }
+            get { return EnumerateNonNullNodes(m_binding, m_heritage, m_elements); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

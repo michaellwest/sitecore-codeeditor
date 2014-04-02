@@ -14,26 +14,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities 
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-    
     public sealed class Missing
     {
-      // singleton implementation
-      private static readonly Missing s_instance = new Missing();
-      public static Missing Value
-      {
-        get
-        {
-          return s_instance;
-        }
-      }
-    
-      private Missing(){}
+        // singleton implementation
+        private static readonly Missing s_instance = new Missing();
 
-      public override string ToString()
-      {
-        return string.Empty;
-      }
+        public static Missing Value
+        {
+            get { return s_instance; }
+        }
+
+        private Missing()
+        {
+        }
+
+        public override string ToString()
+        {
+            return string.Empty;
+        }
     }
 }

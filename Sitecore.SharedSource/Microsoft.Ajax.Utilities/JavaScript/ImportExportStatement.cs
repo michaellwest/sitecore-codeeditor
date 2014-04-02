@@ -14,15 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public abstract class ImportExportStatement : AstNode, IEnumerable<AstNode>, IModuleReference
     {
-        private List<AstNode> m_list;
+        private readonly List<AstNode> m_list;
 
         public Context KeywordContext { get; set; }
 
@@ -60,15 +62,12 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(m_list);
-            }
+            get { return EnumerateNonNullNodes(m_list); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)
         {
-            for (int ndx = 0; ndx < m_list.Count; ++ndx)
+            for (var ndx = 0; ndx < m_list.Count; ++ndx)
             {
                 if (m_list[ndx] == oldNode)
                 {
@@ -145,10 +144,7 @@ namespace Microsoft.Ajax.Utilities
 
         public AstNode this[int index]
         {
-            get
-            {
-                return m_list[index];
-            }
+            get { return m_list[index]; }
             set
             {
                 m_list[index].IfNotNull(n => n.Parent = (n.Parent == this) ? null : n.Parent);
@@ -170,11 +166,11 @@ namespace Microsoft.Ajax.Utilities
             if (m_list.Count > 0)
             {
                 // output the first one; then all subsequent, each prefaced with a comma
-                sb.Append(m_list[0].ToString());
+                sb.Append(m_list[0]);
                 for (var ndx = 1; ndx < m_list.Count; ++ndx)
                 {
                     sb.Append(" , ");
-                    sb.Append(m_list[ndx].ToString());
+                    sb.Append(m_list[ndx]);
                 }
             }
 
@@ -192,7 +188,7 @@ namespace Microsoft.Ajax.Utilities
 
         #region IEnumerable Members
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return m_list.GetEnumerator();
         }

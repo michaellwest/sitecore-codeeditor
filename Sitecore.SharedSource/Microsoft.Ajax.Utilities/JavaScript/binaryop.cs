@@ -16,15 +16,14 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     public class BinaryOperator : Expression
     {
         private AstNode m_operand1;
         private AstNode m_operand2;
 
-        public AstNode Operand1 
+        public AstNode Operand1
         {
             get { return m_operand1; }
             set
@@ -34,8 +33,8 @@ namespace Microsoft.Ajax.Utilities
                 m_operand1.IfNotNull(n => n.Parent = this);
             }
         }
-        
-        public AstNode Operand2 
+
+        public AstNode Operand2
         {
             get { return m_operand2; }
             set
@@ -65,7 +64,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override OperatorPrecedence Precedence
         {
-            get 
+            get
             {
                 switch (OperatorToken)
                 {
@@ -222,10 +221,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Operand1, Operand2);
-            }
+            get { return EnumerateNonNullNodes(Operand1, Operand2); }
         }
 
         public override void Accept(IVisitor visitor)
@@ -278,7 +274,7 @@ namespace Microsoft.Ajax.Utilities
             // swap the operands -- we don't need to go through ReplaceChild or the
             // property setters because we don't need to change the Parent pointers 
             // or anything like that.
-            AstNode temp = m_operand1;
+            var temp = m_operand1;
             m_operand1 = m_operand2;
             m_operand2 = temp;
         }
@@ -289,16 +285,16 @@ namespace Microsoft.Ajax.Utilities
             // both operands are also equivalent
             var otherBinary = otherNode as BinaryOperator;
             return otherBinary != null
-                && OperatorToken == otherBinary.OperatorToken
-                && Operand1.IsEquivalentTo(otherBinary.Operand1)
-                && Operand2.IsEquivalentTo(otherBinary.Operand2);
+                   && OperatorToken == otherBinary.OperatorToken
+                   && Operand1.IsEquivalentTo(otherBinary.Operand1)
+                   && Operand2.IsEquivalentTo(otherBinary.Operand2);
         }
 
         public bool IsAssign
         {
             get
             {
-                switch(OperatorToken)
+                switch (OperatorToken)
                 {
                     case JSToken.Assign:
                     case JSToken.PlusAssign:
@@ -344,17 +340,14 @@ namespace Microsoft.Ajax.Utilities
 
         public override bool IsConstant
         {
-            get
-            {
-                return Operand1.IfNotNull(o => o.IsConstant) && Operand2.IfNotNull(o => o.IsConstant);
-            }
+            get { return Operand1.IfNotNull(o => o.IsConstant) && Operand2.IfNotNull(o => o.IsConstant); }
         }
 
         public override string ToString()
         {
             return (Operand1 == null ? "<null>" : Operand1.ToString())
-                + ' ' + OutputVisitor.OperatorString(OperatorToken) + ' '
-                + (Operand2 == null ? "<null>" : Operand2.ToString());
+                   + ' ' + OutputVisitor.OperatorString(OperatorToken) + ' '
+                   + (Operand2 == null ? "<null>" : Operand2.ToString());
         }
     }
 }

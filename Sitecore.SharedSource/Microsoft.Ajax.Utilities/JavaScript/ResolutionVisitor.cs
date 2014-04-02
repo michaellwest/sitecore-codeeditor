@@ -17,14 +17,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Traverse the tree to build up scope lexically-declared names, var-declared names,
     /// and lookups, then resolve everything.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public class ResolutionVisitor : IVisitor
     {
         #region private fields
@@ -39,16 +40,16 @@ namespace Microsoft.Ajax.Utilities
         private int m_withDepth;
 
         /// <summary>stack to maintain the current lexical scope as we traverse the tree</summary>
-        private Stack<ActivationObject> m_lexicalStack;
+        private readonly Stack<ActivationObject> m_lexicalStack;
 
         /// <summary>stack to maintain the current variable scope as we traverse the tree</summary>
-        private Stack<ActivationObject> m_variableStack;
+        private readonly Stack<ActivationObject> m_variableStack;
 
         /// <summary>code setings</summary>
-        private CodeSettings m_settings;
+        private readonly CodeSettings m_settings;
 
         /// <summary>language version of the script</summary>
-        private ScriptVersion m_scriptVersion;
+        private readonly ScriptVersion m_scriptVersion;
 
         #endregion
 
@@ -57,28 +58,19 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>Current lexical scope</summary>
         private ActivationObject CurrentLexicalScope
         {
-            get
-            {
-                return m_lexicalStack.Peek();
-            }
+            get { return m_lexicalStack.Peek(); }
         }
 
         /// <summary>current variable scope</summary>
         private ActivationObject CurrentVariableScope
         {
-            get
-            {
-                return m_variableStack.Peek();
-            }
+            get { return m_variableStack.Peek(); }
         }
 
         /// <summary>retrieve the next order index</summary>
         private long NextOrderIndex
         {
-            get
-            {
-                return m_isUnreachable ? 0 : ++m_orderIndex;
-            }
+            get { return m_isUnreachable ? 0 : ++m_orderIndex; }
         }
 
         #endregion
@@ -188,8 +180,7 @@ namespace Microsoft.Ajax.Utilities
             {
                 varField.FieldType = FieldType.Global;
                 varField = varField.OuterField;
-            }
-            while (varField != null);
+            } while (varField != null);
         }
 
         private static void ResolveLookup(ActivationObject scope, Lookup lookup, CodeSettings settings)
@@ -257,7 +248,7 @@ namespace Microsoft.Ajax.Utilities
                 }
             }
             else if (settings.EvalTreatment != EvalTreatment.Ignore
-                && lookup.Name.Length == 4 && string.CompareOrdinal(lookup.Name, "eval") == 0)
+                     && lookup.Name.Length == 4 && string.CompareOrdinal(lookup.Name, "eval") == 0)
             {
                 // it's an eval -- but are we calling it?
                 // TODO: what if we are assigning it to a variable? Should we track that variable and see if we call it?
@@ -290,7 +281,7 @@ namespace Microsoft.Ajax.Utilities
                     // throw an error for known built-in template tags.
                     // the only one I know of is safehtml - might want to have a hastable or
                     // something of known types once we know more.
-                    var knownTags = new[] { "safehtml" };
+                    var knownTags = new[] {"safehtml"};
                     var foundMatch = false;
                     foreach (var knownTag in knownTags)
                     {
@@ -317,7 +308,8 @@ namespace Microsoft.Ajax.Utilities
                     // see if this is a function or a variable.
                     var callNode = lookup.Parent as CallNode;
                     var isFunction = callNode != null && callNode.Function == lookup;
-                    lookup.Context.HandleError((isFunction ? JSError.UndeclaredFunction : JSError.UndeclaredVariable), false);
+                    lookup.Context.HandleError((isFunction ? JSError.UndeclaredFunction : JSError.UndeclaredVariable),
+                        false);
                 }
             }
         }
@@ -493,9 +485,9 @@ namespace Microsoft.Ajax.Utilities
         private static bool IsBindingIdentifierWithName(VariableDeclaration varDecl, string name)
         {
             var bindingIdentifier = varDecl == null ? null : varDecl.Binding as BindingIdentifier;
-            return bindingIdentifier != null 
-                && bindingIdentifier.Name.Length == name.Length 
-                && string.CompareOrdinal(bindingIdentifier.Name, name) == 0;
+            return bindingIdentifier != null
+                   && bindingIdentifier.Name.Length == name.Length
+                   && string.CompareOrdinal(bindingIdentifier.Name, name) == 0;
         }
 
         private static void AddDeclaredNames(AstNode node, ICollection<INameDeclaration> collection)
@@ -711,12 +703,12 @@ namespace Microsoft.Ajax.Utilities
                 // create a new block scope for the class elements
                 // don't add the class name to it - let references go to the outer scope
                 node.Scope = new BlockScope(CurrentLexicalScope, m_settings, ScopeType.Class)
-                    {
-                        Owner = node,
-                        IsInWithScope = m_withDepth > 0,
-                        UseStrict = true, // class bodies are always strict
-                        ScopeName = bindingIdentifier == null ? null : bindingIdentifier.Name.IfNullOrWhiteSpace(null)
-                    };
+                {
+                    Owner = node,
+                    IsInWithScope = m_withDepth > 0,
+                    UseStrict = true, // class bodies are always strict
+                    ScopeName = bindingIdentifier == null ? null : bindingIdentifier.Name.IfNullOrWhiteSpace(null)
+                };
                 if (node.Binding != null)
                 {
                     if (node.ClassType == ClassType.Declaration)
@@ -751,10 +743,10 @@ namespace Microsoft.Ajax.Utilities
             if (node != null)
             {
                 node.BlockScope = new BlockScope(CurrentLexicalScope, m_settings, ScopeType.Lexical)
-                    {
-                        Owner = node,
-                        IsInWithScope = m_withDepth > 0
-                    };
+                {
+                    Owner = node,
+                    IsInWithScope = m_withDepth > 0
+                };
                 m_lexicalStack.Push(node.BlockScope);
                 try
                 {
@@ -1020,11 +1012,6 @@ namespace Microsoft.Ajax.Utilities
                             moduleScope.IsNotComplete = true;
                         }
                     }
-                    else
-                    {
-                        // export {specifiers} from 'externalmodule'
-                        // TODO: add the specifiers to the exports of this module
-                    }
                 }
                 else
                 {
@@ -1113,10 +1100,10 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // create the scope on the block
                         node.BlockScope = new BlockScope(CurrentLexicalScope, m_settings, ScopeType.Lexical)
-                            {
-                                Owner = node,
-                                IsInWithScope = m_withDepth > 0
-                            };
+                        {
+                            Owner = node,
+                            IsInWithScope = m_withDepth > 0
+                        };
                         m_lexicalStack.Push(node.BlockScope);
                     }
                 }
@@ -1164,7 +1151,7 @@ namespace Microsoft.Ajax.Utilities
                 // create a function scope, assign it to the function object,
                 // and push it on the stack
                 var parentScope = CurrentLexicalScope;
-                if (node.FunctionType == FunctionType.Expression 
+                if (node.FunctionType == FunctionType.Expression
                     && node.Binding != null
                     && !node.Binding.Name.IsNullOrWhiteSpace())
                 {
@@ -1187,12 +1174,13 @@ namespace Microsoft.Ajax.Utilities
                 // the element node list for the class node
                 var isClassMethod = node.Parent == null ? false : node.Parent.Parent is ClassNode;
 
-                node.EnclosingScope = new FunctionScope(parentScope, node.FunctionType != FunctionType.Declaration, m_settings, node)
-                    {
-                        IsInWithScope = m_withDepth > 0,
-                        HasSuperBinding = isClassMethod,
-                        ScopeName = node.Binding == null ? null : node.Binding.Name.IfNullOrWhiteSpace(null)
-                    };
+                node.EnclosingScope = new FunctionScope(parentScope, node.FunctionType != FunctionType.Declaration,
+                    m_settings, node)
+                {
+                    IsInWithScope = m_withDepth > 0,
+                    HasSuperBinding = isClassMethod,
+                    ScopeName = node.Binding == null ? null : node.Binding.Name.IfNullOrWhiteSpace(null)
+                };
                 m_lexicalStack.Push(node.EnclosingScope);
                 m_variableStack.Push(node.EnclosingScope);
 
@@ -1225,7 +1213,7 @@ namespace Microsoft.Ajax.Utilities
                 // nothing to add to the var-decl list.
                 // but add the function name to the current lex-decl list
                 // IF it is a declaration and it has a name (and it SHOULD unless there was an error)
-                if (node.FunctionType == FunctionType.Declaration 
+                if (node.FunctionType == FunctionType.Declaration
                     && node.Binding != null
                     && !node.Binding.Name.IsNullOrWhiteSpace())
                 {
@@ -1239,7 +1227,8 @@ namespace Microsoft.Ajax.Utilities
                         // in ES5 code, so throw a warning and ghost this function in the outer variable scope 
                         // to make sure that we don't generate any naming collisions.
                         // UNLESS we know we are parsing ES6 code, in which case we're good to go.
-                        if (m_scriptVersion != ScriptVersion.EcmaScript6 && m_settings.ScriptVersion != ScriptVersion.EcmaScript6)
+                        if (m_scriptVersion != ScriptVersion.EcmaScript6 &&
+                            m_settings.ScriptVersion != ScriptVersion.EcmaScript6)
                         {
                             node.Context.HandleError(JSError.MisplacedFunctionDeclaration, false);
                             CurrentVariableScope.GhostedFunctions.Add(node);
@@ -1415,10 +1404,10 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // create a new block scope for the module elements
                         var moduleScope = new ModuleScope(node, CurrentLexicalScope, m_settings)
-                            {
-                                IsInWithScope = m_withDepth > 0,
-                                ScopeName = node.ModuleName.IfNullOrWhiteSpace(null)
-                            };
+                        {
+                            IsInWithScope = m_withDepth > 0,
+                            ScopeName = node.ModuleName.IfNullOrWhiteSpace(null)
+                        };
                         node.EnclosingScope = moduleScope;
 
                         // need to push the module scope on both lex and var stacks
@@ -1536,10 +1525,10 @@ namespace Microsoft.Ajax.Utilities
                 // the switch has its own block scope to use for all the blocks that are under
                 // its child switch-case nodes
                 node.BlockScope = new BlockScope(CurrentLexicalScope, m_settings, ScopeType.Block)
-                    {
-                        Owner = node,
-                        IsInWithScope = m_withDepth > 0
-                    };
+                {
+                    Owner = node,
+                    IsInWithScope = m_withDepth > 0
+                };
                 m_lexicalStack.Push(node.BlockScope);
 
                 try
@@ -1659,11 +1648,11 @@ namespace Microsoft.Ajax.Utilities
                     // create the catch-scope, add the catch parameter to it, and recurse the catch block.
                     // the block itself will push the scope onto the stack and pop it off, so we don't have to.
                     node.CatchBlock.EnclosingScope = new CatchScope(CurrentLexicalScope, m_settings)
-                        {
-                            Owner = node.CatchBlock,
-                            CatchParameter = node.CatchParameter,
-                            IsInWithScope = m_withDepth > 0
-                        };
+                    {
+                        Owner = node.CatchBlock,
+                        CatchParameter = node.CatchParameter,
+                        IsInWithScope = m_withDepth > 0
+                    };
                     AddDeclaredNames(node.CatchParameter, node.CatchBlock.EnclosingScope.LexicallyDeclaredNames);
                     node.CatchBlock.Accept(this);
                 }
@@ -1772,9 +1761,9 @@ namespace Microsoft.Ajax.Utilities
                     // create the with-scope and recurse the block.
                     // the block itself will push the scope onto the stack and pop it off, so we don't have to.
                     node.Body.EnclosingScope = new WithScope(CurrentLexicalScope, m_settings)
-                        {
-                            Owner = node
-                        };
+                    {
+                        Owner = node
+                    };
 
                     try
                     {

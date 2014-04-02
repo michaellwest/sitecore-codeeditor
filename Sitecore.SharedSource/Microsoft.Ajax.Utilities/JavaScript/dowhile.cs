@@ -16,14 +16,13 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     public sealed class DoWhile : IterationStatement
     {
         private AstNode m_condition;
 
-        public AstNode Condition 
+        public AstNode Condition
         {
             get { return m_condition; }
             set
@@ -51,10 +50,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Body, Condition);
-            }
+            get { return EnumerateNonNullNodes(Body, Condition); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

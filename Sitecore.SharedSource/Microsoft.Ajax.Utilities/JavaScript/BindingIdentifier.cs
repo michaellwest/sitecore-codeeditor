@@ -15,7 +15,7 @@
 // limitations under the License.
 
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     /// <summary>
     /// Simple Binding identifier node class. Represents a name that is declared in a binding (parameter, vardecl, catch, etc)
@@ -68,10 +68,7 @@ namespace Microsoft.Ajax.Utilities
         /// </summary>
         public bool WasRenamed
         {
-            get
-            {
-                return VariableField.IfNotNull(f => !f.CrunchedName.IsNullOrWhiteSpace());
-            }
+            get { return VariableField.IfNotNull(f => !f.CrunchedName.IsNullOrWhiteSpace()); }
         }
 
         public BindingIdentifier(Context context)
@@ -94,14 +91,11 @@ namespace Microsoft.Ajax.Utilities
             {
                 return bindingIdentifier.VariableField.IfNotNull(v => v == this.VariableField);
             }
-            else
+            // also check lookups
+            var lookup = otherNode as Lookup;
+            if (lookup != null)
             {
-                // also check lookups
-                var lookup = otherNode as Lookup;
-                if (lookup != null)
-                {
-                    return lookup.VariableField.IfNotNull(v => v == this.VariableField);
-                }
+                return lookup.VariableField.IfNotNull(v => v == this.VariableField);
             }
 
             return false;

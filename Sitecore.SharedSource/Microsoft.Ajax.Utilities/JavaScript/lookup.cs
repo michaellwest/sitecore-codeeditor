@@ -16,7 +16,7 @@
 
 using System;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public enum ReferenceType
     {
@@ -53,7 +53,8 @@ namespace Microsoft.Ajax.Utilities
                     // not a binary op -- but we might still be an "assignment" if we are an increment or decrement operator.
                     var unaryOp = Parent as UnaryOperator;
                     isAssign = unaryOp != null
-                        && (unaryOp.OperatorToken == JSToken.Increment || unaryOp.OperatorToken == JSToken.Decrement);
+                               &&
+                               (unaryOp.OperatorToken == JSToken.Increment || unaryOp.OperatorToken == JSToken.Decrement);
 
                     if (!isAssign)
                     {
@@ -82,7 +83,9 @@ namespace Microsoft.Ajax.Utilities
                     // the parent is a binary operator. If it is an assignment operator 
                     // (not including any of the op-assign which depend on an initial value)
                     // then the value we are assigning is the right-hand side of the = operator.
-                    value = binaryOp.OperatorToken == JSToken.Assign && binaryOp.Operand1 == this ? binaryOp.Operand2 : null;
+                    value = binaryOp.OperatorToken == JSToken.Assign && binaryOp.Operand1 == this
+                        ? binaryOp.Operand2
+                        : null;
                 }
 
                 return value;
@@ -102,10 +105,7 @@ namespace Microsoft.Ajax.Utilities
         /// </summary>
         public bool WasRenamed
         {
-            get
-            {
-                return VariableField.IfNotNull(f => !f.CrunchedName.IsNullOrWhiteSpace());
-            }
+            get { return VariableField.IfNotNull(f => !f.CrunchedName.IsNullOrWhiteSpace()); }
         }
 
         public Lookup(Context context)
@@ -132,11 +132,8 @@ namespace Microsoft.Ajax.Utilities
                     // the variable fields should be the same
                     return VariableField.IsSameField(otherLookup.VariableField);
                 }
-                else
-                {
-                    // otherwise the names should be identical
-                    return string.CompareOrdinal(Name, otherLookup.Name) == 0;
-                }
+                // otherwise the names should be identical
+                return string.CompareOrdinal(Name, otherLookup.Name) == 0;
             }
 
             // if we get here, we're not equivalent

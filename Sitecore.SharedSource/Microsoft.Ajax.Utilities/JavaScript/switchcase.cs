@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class SwitchCase : AstNode
     {
@@ -67,10 +67,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(CaseValue, Statements);
-            }
+            get { return EnumerateNonNullNodes(CaseValue, Statements); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

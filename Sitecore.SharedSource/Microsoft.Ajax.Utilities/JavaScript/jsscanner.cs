@@ -16,11 +16,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public enum UpdateHint
     {
@@ -47,7 +48,7 @@ namespace Microsoft.Ajax.Utilities
 
         private int m_endPos;
 
-        private StringBuilder m_identifier;
+        private readonly StringBuilder m_identifier;
         private bool m_literalIssues;
 
         // a list of strings that we can add new ones to or clear
@@ -107,27 +108,42 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// Gets the current line of the input file
         /// </summary>
-        public int CurrentLine { get { return m_currentLine; } }
+        public int CurrentLine
+        {
+            get { return m_currentLine; }
+        }
 
         /// <summary>
         /// Gets whether we have passed the end of the input source
         /// </summary>
-        public bool IsEndOfFile { get { return m_currentPosition >= m_endPos; } }
+        public bool IsEndOfFile
+        {
+            get { return m_currentPosition >= m_endPos; }
+        }
 
         /// <summary>
         /// Gets the position within the source of the start of the current line
         /// </summary>
-        public int StartLinePosition { get { return m_startLinePosition; } }
+        public int StartLinePosition
+        {
+            get { return m_startLinePosition; }
+        }
 
         /// <summary>
         /// Gets whether the scanned literal has potential cross-browser issues
         /// </summary>
-        public bool LiteralHasIssues { get { return m_literalIssues; } }
+        public bool LiteralHasIssues
+        {
+            get { return m_literalIssues; }
+        }
 
         /// <summary>
         /// Gets the current decoded string literal value
         /// </summary>
-        public string StringLiteralValue { get { return m_decodedString; } }
+        public string StringLiteralValue
+        {
+            get { return m_decodedString; }
+        }
 
         /// <summary>
         /// Gets the current decoded identifier string
@@ -156,10 +172,7 @@ namespace Microsoft.Ajax.Utilities
 
         private bool IsAtEndOfLine
         {
-            get
-            {
-                return IsEndLineOrEOF(GetChar(m_currentPosition), 0);
-            }
+            get { return IsEndLineOrEOF(GetChar(m_currentPosition), 0); }
         }
 
         #endregion
@@ -184,9 +197,9 @@ namespace Microsoft.Ajax.Utilities
             // create a new empty context. By default the constructor will make the context
             // represent the entire document, but we want to start it off at just the beginning of it.
             m_currentToken = new Context(sourceContext)
-                {
-                    EndPosition = 0
-                };
+            {
+                EndPosition = 0
+            };
             m_currentLine = 1;
 
             // just hold on to these values so we don't have to keep dereferencing them
@@ -262,7 +275,7 @@ namespace Microsoft.Ajax.Utilities
                 // add an entry for each unique, valid name passed to us.
                 foreach (var nameValuePair in defines)
                 {
-                    if (JSScanner.IsValidIdentifier(nameValuePair.Key) && !m_defines.ContainsKey(nameValuePair.Key))
+                    if (IsValidIdentifier(nameValuePair.Key) && !m_defines.ContainsKey(nameValuePair.Key))
                     {
                         m_defines.Add(nameValuePair.Key, nameValuePair.Value);
                     }
@@ -279,8 +292,9 @@ namespace Microsoft.Ajax.Utilities
         /// main method for the scanner; scans the next token from the input stream.
         /// </summary>
         /// <returns>next token from the input</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"), 
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode", Justification = "big case statement")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"),
+         SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode",
+             Justification = "big case statement")]
         public Context ScanNextToken()
         {
             var token = JSToken.None;
@@ -294,7 +308,7 @@ namespace Microsoft.Ajax.Utilities
 
             // our case switch should be pretty efficient -- it's 9-13 and 32-126. Thsose are the most common characters 
             // we will find in the code for the start of tokens.
-            char ch = GetChar(m_currentPosition);
+            var ch = GetChar(m_currentPosition);
             switch (ch)
             {
                 case '\n':
@@ -309,7 +323,7 @@ namespace Microsoft.Ajax.Utilities
                     // we are asking for raw tokens, and this is the start of a stretch of whitespace.
                     // advance to the end of the whitespace, and return that as the token
                     token = JSToken.WhiteSpace;
-                    while (JSScanner.IsBlankSpace(GetChar(++m_currentPosition)))
+                    while (IsBlankSpace(GetChar(++m_currentPosition)))
                     {
                         // increment handled by condition
                     }
@@ -629,10 +643,13 @@ namespace Microsoft.Ajax.Utilities
                     if ('=' == GetChar(m_currentPosition))
                     {
                         ++m_currentPosition;
-                        token = token == JSToken.GreaterThan ? JSToken.GreaterThanEqual
-                            : token == JSToken.RightShift ? JSToken.RightShiftAssign
-                            : token == JSToken.UnsignedRightShift ? JSToken.UnsignedRightShiftAssign
-                            : JSToken.Error;
+                        token = token == JSToken.GreaterThan
+                            ? JSToken.GreaterThanEqual
+                            : token == JSToken.RightShift
+                                ? JSToken.RightShiftAssign
+                                : token == JSToken.UnsignedRightShift
+                                    ? JSToken.UnsignedRightShiftAssign
+                                    : JSToken.Error;
                     }
                     break;
 
@@ -655,7 +672,7 @@ namespace Microsoft.Ajax.Utilities
                     // see if the @-sign is immediately followed by an identifier. If it is,
                     // we'll see which one so we can tell if it's a conditional-compilation statement
                     // need to make sure the context INCLUDES the @ sign
-                    int startPosition = ++m_currentPosition;
+                    var startPosition = ++m_currentPosition;
                     ScanIdentifier(false);
                     switch (m_currentPosition - startPosition)
                     {
@@ -1016,7 +1033,7 @@ namespace Microsoft.Ajax.Utilities
                         // we are asking for raw tokens, and this is the start of a stretch of whitespace.
                         // advance to the end of the whitespace, and return that as the token
                         token = JSToken.WhiteSpace;
-                        while (JSScanner.IsBlankSpace(GetChar(++m_currentPosition)))
+                        while (IsBlankSpace(GetChar(++m_currentPosition)))
                         {
                             // increment handled in condition
                         }
@@ -1042,7 +1059,7 @@ namespace Microsoft.Ajax.Utilities
 
         public Context UpdateToken(UpdateHint updateHint)
         {
-            if (updateHint == UpdateHint.RegularExpression 
+            if (updateHint == UpdateHint.RegularExpression
                 && (m_currentToken.IsOne(JSToken.Divide, JSToken.DivideAssign)))
             {
                 m_currentToken.Token = ScanRegExp();
@@ -1082,7 +1099,7 @@ namespace Microsoft.Ajax.Utilities
 
         public static bool IsKeyword(string name, bool strictMode)
         {
-            bool isKeyword = false;
+            var isKeyword = false;
 
             // get the index into the keywords array by taking the first letter of the string
             // and subtracting the character 'a' from it. Use a negative number if the string
@@ -1145,7 +1162,7 @@ namespace Microsoft.Ajax.Utilities
         /// <returns>true if a valid JavaScript identifier; otherwise false</returns>
         public static bool IsValidIdentifier(string name)
         {
-            bool isValid = false;
+            var isValid = false;
             if (name != null)
             {
                 var index = 0;
@@ -1194,7 +1211,7 @@ namespace Microsoft.Ajax.Utilities
             if (name != null && startIndex < name.Length)
             {
                 var index = startIndex;
-                char ch = name[index];
+                var ch = name[index];
                 if (ch == '\\')
                 {
                     // unescape the escape sequence(s)
@@ -1262,7 +1279,7 @@ namespace Microsoft.Ajax.Utilities
             if (name != null && startIndex < name.Length)
             {
                 var index = startIndex;
-                char ch = name[index];
+                var ch = name[index];
                 if (ch == '\\')
                 {
                     // unescape the escape sequence(s)
@@ -1310,25 +1327,22 @@ namespace Microsoft.Ajax.Utilities
             {
                 var letter = text[index];
                 if (length == 1 && (('a' <= letter && letter <= 'z')
-                    || ('A' <= letter && letter <= 'Z')
-                    || letter == '_'
-                    || letter == '$'
-                    || letter == '\ufffd'))
+                                    || ('A' <= letter && letter <= 'Z')
+                                    || letter == '_'
+                                    || letter == '$'
+                                    || letter == '\ufffd'))
                 {
                     return true;
                 }
-                else
+                switch (char.GetUnicodeCategory(text, index))
                 {
-                    switch (char.GetUnicodeCategory(text, index))
-                    {
-                        case UnicodeCategory.UppercaseLetter:
-                        case UnicodeCategory.LowercaseLetter:
-                        case UnicodeCategory.TitlecaseLetter:
-                        case UnicodeCategory.ModifierLetter:
-                        case UnicodeCategory.OtherLetter:
-                        case UnicodeCategory.LetterNumber:
-                            return true;
-                    }
+                    case UnicodeCategory.UppercaseLetter:
+                    case UnicodeCategory.LowercaseLetter:
+                    case UnicodeCategory.TitlecaseLetter:
+                    case UnicodeCategory.ModifierLetter:
+                    case UnicodeCategory.OtherLetter:
+                    case UnicodeCategory.LetterNumber:
+                        return true;
                 }
             }
 
@@ -1341,32 +1355,29 @@ namespace Microsoft.Ajax.Utilities
             {
                 var letter = text[index];
                 if (length == 1 && (('a' <= letter && letter <= 'z')
-                    || ('A' <= letter && letter <= 'Z')
-                    || ('0' <= letter && letter <= '9')
-                    || letter == '_'
-                    || letter == '$'
-                    || letter == '\u200c'
-                    || letter == '\u200d'
-                    || letter == '\ufffd'))
+                                    || ('A' <= letter && letter <= 'Z')
+                                    || ('0' <= letter && letter <= '9')
+                                    || letter == '_'
+                                    || letter == '$'
+                                    || letter == '\u200c'
+                                    || letter == '\u200d'
+                                    || letter == '\ufffd'))
                 {
                     return true;
                 }
-                else
+                switch (char.GetUnicodeCategory(text, index))
                 {
-                    switch (char.GetUnicodeCategory(text, index))
-                    {
-                        case UnicodeCategory.UppercaseLetter:
-                        case UnicodeCategory.LowercaseLetter:
-                        case UnicodeCategory.TitlecaseLetter:
-                        case UnicodeCategory.ModifierLetter:
-                        case UnicodeCategory.OtherLetter:
-                        case UnicodeCategory.LetterNumber:
-                        case UnicodeCategory.NonSpacingMark:
-                        case UnicodeCategory.SpacingCombiningMark:
-                        case UnicodeCategory.DecimalDigitNumber:
-                        case UnicodeCategory.ConnectorPunctuation:
-                            return true;
-                    }
+                    case UnicodeCategory.UppercaseLetter:
+                    case UnicodeCategory.LowercaseLetter:
+                    case UnicodeCategory.TitlecaseLetter:
+                    case UnicodeCategory.ModifierLetter:
+                    case UnicodeCategory.OtherLetter:
+                    case UnicodeCategory.LetterNumber:
+                    case UnicodeCategory.NonSpacingMark:
+                    case UnicodeCategory.SpacingCombiningMark:
+                    case UnicodeCategory.DecimalDigitNumber:
+                    case UnicodeCategory.ConnectorPunctuation:
+                        return true;
                 }
             }
 
@@ -1386,7 +1397,7 @@ namespace Microsoft.Ajax.Utilities
             // pull the first character from the string, which may be an escape character
             if (text != null)
             {
-                char ch = text[0];
+                var ch = text[0];
                 if (ch == '\\')
                 {
                     var index = 0;
@@ -1440,15 +1451,15 @@ namespace Microsoft.Ajax.Utilities
         // assumes all unicode characters in the string -- NO escape sequences
         public static bool IsSafeIdentifier(string name)
         {
-            bool isValid = false;
+            var isValid = false;
             if (!string.IsNullOrEmpty(name))
             {
                 if (IsSafeIdentifierStart(name[0]))
                 {
                     // loop through all the rest
-                    for (int ndx = 1; ndx < name.Length; ++ndx)
+                    for (var ndx = 1; ndx < name.Length; ++ndx)
                     {
-                        char ch = name[ndx];
+                        var ch = name[ndx];
                         if (!IsSafeIdentifierPart(ch))
                         {
                             // fail!
@@ -1505,7 +1516,7 @@ namespace Microsoft.Ajax.Utilities
         {
             if (GlobalDefine != null)
             {
-                GlobalDefine(this, new GlobalDefineEventArgs() { Name = name });
+                GlobalDefine(this, new GlobalDefineEventArgs {Name = name});
             }
         }
 
@@ -1513,7 +1524,7 @@ namespace Microsoft.Ajax.Utilities
         {
             if (NewModule != null)
             {
-                NewModule(this, new NewModuleEventArgs { Module = newModule });
+                NewModule(this, new NewModuleEventArgs {Module = newModule});
             }
         }
 
@@ -1583,14 +1594,14 @@ namespace Microsoft.Ajax.Utilities
         /// Scan an identifier starting at the current location, escaping any escape sequences
         /// </summary>
         /// <returns>token scanned</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private JSToken ScanIdentifier(bool possibleTemplateLiteral)
         {
             // scan start character
             var isValid = false;
             var runStart = m_currentPosition;
             var index = m_currentPosition;
-            char ch = GetChar(index);
+            var ch = GetChar(index);
             if (ch == '\\')
             {
                 // unescape the escape sequence(s)
@@ -1730,13 +1741,15 @@ namespace Microsoft.Ajax.Utilities
                 if (token == JSToken.Identifier)
                 {
                     // walk the keyword list to find a possible match
-                    token = keyword.GetKeyword(m_strSourceCode, m_currentToken.StartPosition, m_currentPosition - m_currentToken.StartPosition);
+                    token = keyword.GetKeyword(m_strSourceCode, m_currentToken.StartPosition,
+                        m_currentPosition - m_currentToken.StartPosition);
                 }
                 else if (token == JSToken.TemplateLiteral)
                 {
                     // wait a minute -- let's just make sure that lookup isn't a keyword
                     var ndxBackquote = m_strSourceCode.IndexOf('`', m_currentToken.StartPosition);
-                    var newToken = keyword.GetKeyword(m_strSourceCode, m_currentToken.StartPosition, ndxBackquote - m_currentToken.StartPosition);
+                    var newToken = keyword.GetKeyword(m_strSourceCode, m_currentToken.StartPosition,
+                        ndxBackquote - m_currentToken.StartPosition);
                     if (newToken != JSToken.Identifier)
                     {
                         // no, use the keyword token and back up to the opening backquote
@@ -1749,12 +1762,12 @@ namespace Microsoft.Ajax.Utilities
             return token;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private JSToken ScanNumber(char leadChar)
         {
-            bool noMoreDot = '.' == leadChar;
-            JSToken token = noMoreDot ? JSToken.NumericLiteral : JSToken.IntegerLiteral;
-            bool exponent = false;
+            var noMoreDot = '.' == leadChar;
+            var token = noMoreDot ? JSToken.NumericLiteral : JSToken.IntegerLiteral;
+            var exponent = false;
             char c;
             m_literalIssues = false;
 
@@ -1764,9 +1777,9 @@ namespace Microsoft.Ajax.Utilities
                 c = GetChar(m_currentPosition);
                 if ('x' == c || 'X' == c)
                 {
-                    if (JSScanner.IsHexDigit(GetChar(m_currentPosition + 1)))
+                    if (IsHexDigit(GetChar(m_currentPosition + 1)))
                     {
-                        while (JSScanner.IsHexDigit(GetChar(++m_currentPosition)))
+                        while (IsHexDigit(GetChar(++m_currentPosition)))
                         {
                             // empty
                         }
@@ -1774,7 +1787,7 @@ namespace Microsoft.Ajax.Utilities
 
                     return CheckForNumericBadEnding(token);
                 }
-                else if ('b' == c || 'B' == c)
+                if ('b' == c || 'B' == c)
                 {
                     // ES6 binary literal?
                     c = GetChar(m_currentPosition + 1);
@@ -1788,7 +1801,7 @@ namespace Microsoft.Ajax.Utilities
 
                     return CheckForNumericBadEnding(token);
                 }
-                else if ('o' == c || 'O' == c)
+                if ('o' == c || 'O' == c)
                 {
                     // ES6 octal literal?
                     c = GetChar(m_currentPosition + 1);
@@ -1802,7 +1815,7 @@ namespace Microsoft.Ajax.Utilities
 
                     return CheckForNumericBadEnding(token);
                 }
-                else if ('0' <= c && c <= '7')
+                if ('0' <= c && c <= '7')
                 {
                     // this is a zero followed by a digit between 0 and 7.
                     // This could be interpreted as an octal literal, which isn't strictly supported.
@@ -1830,7 +1843,7 @@ namespace Microsoft.Ajax.Utilities
                     HandleError(JSError.OctalLiteralsDeprecated);
                     return token;
                 }
-                else if (c != 'e' && c != 'E' && IsValidIdentifierStart(m_strSourceCode, m_currentPosition))
+                if (c != 'e' && c != 'E' && IsValidIdentifierStart(m_strSourceCode, m_currentPosition))
                 {
                     // invalid for an integer (in this case '0') the be followed by
                     // an identifier part. The 'e' is okay, though, because that will
@@ -1868,7 +1881,7 @@ namespace Microsoft.Ajax.Utilities
                     }
                     else if ('+' == c || '-' == c)
                     {
-                        char e = GetChar(m_currentPosition - 1);
+                        var e = GetChar(m_currentPosition - 1);
                         if ('e' != e && 'E' != e)
                         {
                             break;
@@ -1916,9 +1929,9 @@ namespace Microsoft.Ajax.Utilities
         {
             // save this information in case we need to restore the token
             // if we don't actually have a valid replacement here.
-            int startingPosition = m_currentPosition;
-            int startingLine = m_currentLine;
-            int startingLinePosition = m_startLinePosition;
+            var startingPosition = m_currentPosition;
+            var startingLine = m_currentLine;
+            var startingLinePosition = m_startLinePosition;
 
             // current position should be the character following the %.
             // We should have name(.name)*% at the current position for it to be a replacement token.
@@ -1949,7 +1962,7 @@ namespace Microsoft.Ajax.Utilities
                 }
             }
 
-            if (ch == '%' 
+            if (ch == '%'
                 && m_currentPosition > startingPosition + 1
                 && GetChar(m_currentPosition - 1) != '.')
             {
@@ -1970,12 +1983,12 @@ namespace Microsoft.Ajax.Utilities
         {
             // save this information in case we need to restore the token
             // because we don't actually have a regular expression here.
-            int startingPosition = m_currentPosition;
-            int startingLine = m_currentLine;
-            int startingLinePosition = m_startLinePosition;
+            var startingPosition = m_currentPosition;
+            var startingLine = m_currentLine;
+            var startingLinePosition = m_startLinePosition;
 
-            bool isEscape = false;
-            bool isInSet = false;
+            var isEscape = false;
+            var isInSet = false;
             char c;
             while (!IsEndLineOrEOF(c = GetChar(m_currentPosition++), 0))
             {
@@ -2038,7 +2051,7 @@ namespace Microsoft.Ajax.Utilities
             // loop until we find a > with a % before it (%>)
             while (!(this.GetChar(this.m_currentPosition - 1) == '%' &&
                      this.GetChar(this.m_currentPosition) == '>') ||
-                     IsEndOfFile)
+                   IsEndOfFile)
             {
                 this.m_currentPosition++;
             }
@@ -2097,7 +2110,7 @@ namespace Microsoft.Ajax.Utilities
                                 // and keep looping until we find it
                                 while (!(this.GetChar(this.m_currentPosition - 1) == '%' &&
                                          this.GetChar(this.m_currentPosition) == '>') ||
-                                         IsEndOfFile)
+                                       IsEndOfFile)
                                 {
                                     this.m_currentPosition++;
                                 }
@@ -2141,16 +2154,16 @@ namespace Microsoft.Ajax.Utilities
         //  On exit this.currentPos must be at the next char to scan after the string
         //  This method wiil report an error when the string is unterminated or for a bad escape sequence
         //--------------------------------------------------------------------------------------------------
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void ScanString(char delimiter)
         {
-            int start = ++m_currentPosition;
+            var start = ++m_currentPosition;
             m_decodedString = null;
             m_literalIssues = false;
             StringBuilder result = null;
 
             char ch;
-            while((ch = GetChar(m_currentPosition++)) != delimiter)
+            while ((ch = GetChar(m_currentPosition++)) != delimiter)
             {
                 if (ch != '\\')
                 {
@@ -2190,7 +2203,6 @@ namespace Microsoft.Ajax.Utilities
                             HandleError(JSError.UnterminatedString);
                             break;
                         }
-
                     }
 
                     if (AllowEmbeddedAspNetBlocks
@@ -2237,7 +2249,7 @@ namespace Microsoft.Ajax.Utilities
                             if (ScanHexSequence(m_currentPosition += 2, 'u', out lowSurrogate))
                             {
                                 // valid escape, so make sure the unescaped value is added to the result regardless.
-                                result.Append((char)lowSurrogate);
+                                result.Append((char) lowSurrogate);
                                 start = m_currentPosition;
 
                                 // now make sure it's in low-surrogate range
@@ -2291,12 +2303,12 @@ namespace Microsoft.Ajax.Utilities
                     }
 
                     // state variable to be reset
-                    bool seqOfThree = false;
+                    var seqOfThree = false;
 
                     ch = GetChar(m_currentPosition++);
                     switch (ch)
                     {
-                        // line terminator crap
+                            // line terminator crap
                         case '\r':
                             if ('\n' == GetChar(m_currentPosition))
                             {
@@ -2312,31 +2324,31 @@ namespace Microsoft.Ajax.Utilities
                             m_startLinePosition = m_currentPosition;
                             break;
 
-                        // classic single char escape sequences
+                            // classic single char escape sequences
                         case 'b':
-                            result.Append((char)8);
+                            result.Append((char) 8);
                             break;
 
                         case 't':
-                            result.Append((char)9);
+                            result.Append((char) 9);
                             break;
 
                         case 'n':
-                            result.Append((char)10);
+                            result.Append((char) 10);
                             break;
 
                         case 'v':
                             // \v inside strings can cause issues
                             m_literalIssues = true;
-                            result.Append((char)11);
+                            result.Append((char) 11);
                             break;
 
                         case 'f':
-                            result.Append((char)12);
+                            result.Append((char) 12);
                             break;
 
                         case 'r':
-                            result.Append((char)13);
+                            result.Append((char) 13);
                             break;
 
                         case '"':
@@ -2351,7 +2363,7 @@ namespace Microsoft.Ajax.Utilities
                             result.Append('\\');
                             break;
 
-                        // hexadecimal escape sequence /xHH, \uHHHH, or \u{H+}
+                            // hexadecimal escape sequence /xHH, \uHHHH, or \u{H+}
                         case 'u':
                         case 'x':
                             string unescaped;
@@ -2400,11 +2412,11 @@ namespace Microsoft.Ajax.Utilities
                                     if ('0' <= ch && ch <= '7')
                                     {
                                         esc |= ch - '0';
-                                        result.Append((char)esc);
+                                        result.Append((char) esc);
                                     }
                                     else
                                     {
-                                        result.Append((char)(esc >> 3));
+                                        result.Append((char) (esc >> 3));
 
                                         // do not skip over this char we have to read it back
                                         --m_currentPosition;
@@ -2413,18 +2425,18 @@ namespace Microsoft.Ajax.Utilities
                                 else
                                 {
                                     esc |= ch - '0';
-                                    result.Append((char)esc);
+                                    result.Append((char) esc);
                                 }
                             }
                             else
                             {
                                 if (seqOfThree)
                                 {
-                                    result.Append((char)(esc >> 6));
+                                    result.Append((char) (esc >> 6));
                                 }
                                 else
                                 {
-                                    result.Append((char)(esc >> 3));
+                                    result.Append((char) (esc >> 3));
                                 }
 
                                 // do not skip over this char we have to read it back
@@ -2462,8 +2474,9 @@ namespace Microsoft.Ajax.Utilities
             else
             {
                 // might be an unterminated string, so make sure that last character is the terminator
-                int numDelimiters = (GetChar(m_currentPosition - 1) == delimiter ? 2 : 1);
-                m_decodedString = m_strSourceCode.Substring(m_currentToken.StartPosition + 1, m_currentPosition - m_currentToken.StartPosition - numDelimiters);
+                var numDelimiters = (GetChar(m_currentPosition - 1) == delimiter ? 2 : 1);
+                m_decodedString = m_strSourceCode.Substring(m_currentToken.StartPosition + 1,
+                    m_currentPosition - m_currentToken.StartPosition - numDelimiters);
             }
         }
 
@@ -2491,45 +2504,42 @@ namespace Microsoft.Ajax.Utilities
                         // using the raw numeric values for the high and low surrogate pairs.
                         // (strings internally are UTF-16)
                         ++m_currentPosition;
-                        unescaped = new string(new[] { (char)numeric, ch });
+                        unescaped = new string(new[] {(char) numeric, ch});
                         return true;
                     }
-                    else
+                    if (ch == '\\')
                     {
-                        if (ch == '\\')
+                        if (GetChar(m_currentPosition + 1) == 'u')
                         {
-                            if (GetChar(m_currentPosition + 1) == 'u')
+                            // advance to the character AFTER the \u and recurse
+                            m_currentPosition += 2;
+                            int lowSurrogate;
+                            isValidHex = ScanHexSequence(m_currentPosition, hexType, out lowSurrogate);
+                            if (isValidHex)
                             {
-                                // advance to the character AFTER the \u and recurse
-                                m_currentPosition += 2;
-                                int lowSurrogate;
-                                isValidHex = ScanHexSequence(m_currentPosition, hexType, out lowSurrogate);
-                                if (isValidHex)
-                                {
-                                    // return a valid two-character string using the raw numeric values 
-                                    // for the high and low surrogate pairs. (strings internally are UTF-16)
-                                    unescaped = new string(new[] { (char)numeric, (char)lowSurrogate });
-                                    return true;
-                                }
+                                // return a valid two-character string using the raw numeric values 
+                                // for the high and low surrogate pairs. (strings internally are UTF-16)
+                                unescaped = new string(new[] {(char) numeric, (char) lowSurrogate});
+                                return true;
                             }
                         }
-
-                        // not a \u escape sequence
-                        // not valid to have a high surrogate that ISN'T followed by a low-surrogate!
-                        // throw the error, but return true
-                        HandleError(JSError.HighSurrogate);
-                        m_literalIssues = true;
-                        unescaped = new string((char)numeric, 1);
-                        return true;
                     }
+
+                    // not a \u escape sequence
+                    // not valid to have a high surrogate that ISN'T followed by a low-surrogate!
+                    // throw the error, but return true
+                    HandleError(JSError.HighSurrogate);
+                    m_literalIssues = true;
+                    unescaped = new string((char) numeric, 1);
+                    return true;
                 }
-                else if (0xdc00 <= numeric && numeric <= 0xdfff)
+                if (0xdc00 <= numeric && numeric <= 0xdfff)
                 {
                     // low surrogate -- shouldn't have one by itself!
                     // throw the error, but return true
                     HandleError(JSError.LowSurrogate);
                     m_literalIssues = true;
-                    unescaped = new string((char)numeric, 1);
+                    unescaped = new string((char) numeric, 1);
                     return true;
                 }
             }
@@ -2545,7 +2555,7 @@ namespace Microsoft.Ajax.Utilities
 
             // how many digits we parse depends on the type. x = 2 digits, u = 4 digits.
             // UNLESS this is a type 'u' followed by a left brace. Then it's between 1 and 6.
-            int digits = hexType == 'x' ? 2 : 4;
+            var digits = hexType == 'x' ? 2 : 4;
             if (hexType == 'u' && GetChar(m_currentPosition) == '{')
             {
                 ++m_currentPosition;
@@ -2590,7 +2600,7 @@ namespace Microsoft.Ajax.Utilities
             return isValidHex;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private JSToken ScanTemplateLiteral(char ch)
         {
             // save the start of the current run, INCLUDING the delimiter
@@ -2752,7 +2762,8 @@ namespace Microsoft.Ajax.Utilities
             }
             else
             {
-                m_decodedString = m_strSourceCode.Substring(m_currentToken.StartPosition, m_currentPosition - m_currentToken.StartPosition);
+                m_decodedString = m_strSourceCode.Substring(m_currentToken.StartPosition,
+                    m_currentPosition - m_currentToken.StartPosition);
             }
 
             return JSToken.TemplateLiteral;
@@ -2804,10 +2815,10 @@ namespace Microsoft.Ajax.Utilities
         {
             var c = GetChar(m_currentPosition);
             while (c != 0
-                && c != '\n'
-                && c != '\r'
-                && c != '\x2028'
-                && c != '\x2029')
+                   && c != '\n'
+                   && c != '\r'
+                   && c != '\x2028'
+                   && c != '\x2029')
             {
                 c = GetChar(++m_currentPosition);
             }
@@ -2828,8 +2839,8 @@ namespace Microsoft.Ajax.Utilities
                 m_startLinePosition = m_currentPosition;
             }
             else if (c == '\n'
-                || c == '\x2028'
-                || c == '\x2029')
+                     || c == '\x2028'
+                     || c == '\x2029')
             {
                 // skip over the single line-feed character
                 ++m_currentPosition;
@@ -2841,9 +2852,9 @@ namespace Microsoft.Ajax.Utilities
 
         private void SkipMultilineComment()
         {
-            for (; ; )
+            for (;;)
             {
-                char c = GetChar(m_currentPosition);
+                var c = GetChar(m_currentPosition);
                 while ('*' == c)
                 {
                     c = GetChar(++m_currentPosition);
@@ -2864,7 +2875,7 @@ namespace Microsoft.Ajax.Utilities
                     {
                         break;
                     }
-                    
+
                     if (IsLineTerminator(c, 1))
                     {
                         c = GetChar(++m_currentPosition);
@@ -2896,8 +2907,8 @@ namespace Microsoft.Ajax.Utilities
 
         private void SkipBlanks()
         {
-            char c = GetChar(m_currentPosition);
-            while (JSScanner.IsBlankSpace(c))
+            var c = GetChar(m_currentPosition);
+            while (IsBlankSpace(c))
             {
                 c = GetChar(++m_currentPosition);
             }
@@ -2907,7 +2918,7 @@ namespace Microsoft.Ajax.Utilities
 
         private bool CheckSubstring(int startIndex, string target)
         {
-            for (int ndx = 0; ndx < target.Length; ++ndx)
+            for (var ndx = 0; ndx < target.Length; ++ndx)
             {
                 if (target[ndx] != GetChar(startIndex + ndx))
                 {
@@ -2923,7 +2934,7 @@ namespace Microsoft.Ajax.Utilities
         private bool CheckCaseInsensitiveSubstring(string target)
         {
             var startIndex = m_currentPosition;
-            for (int ndx = 0; ndx < target.Length; ++ndx)
+            for (var ndx = 0; ndx < target.Length; ++ndx)
             {
                 if (target[ndx] != char.ToUpperInvariant(GetChar(startIndex + ndx)))
                 {
@@ -2943,7 +2954,7 @@ namespace Microsoft.Ajax.Utilities
             // digit or an identifier start character. So check for those cases and return an
             // invalid numeric literal if true.
             var isBad = false;
-            char ch = GetChar(m_currentPosition);
+            var ch = GetChar(m_currentPosition);
             if ('0' <= ch && ch <= '9')
             {
                 // we know that next character is invalid, so skip it and 
@@ -3033,7 +3044,7 @@ namespace Microsoft.Ajax.Utilities
 
                         // loop as long as we have characters and we haven't hit the }.
                         while (++index < text.Length
-                            && (ch = text[index]) != '}')
+                               && (ch = text[index]) != '}')
                         {
                             // if it's not a hex digit, bail.
                             if (!IsHexDigit(ch))
@@ -3054,16 +3065,16 @@ namespace Microsoft.Ajax.Utilities
                         }
                     }
                     else if (index + 5 < text.Length
-                        && IsHexDigit(text[index + 2])
-                        && IsHexDigit(text[index + 3])
-                        && IsHexDigit(text[index + 4])
-                        && IsHexDigit(text[index + 5]))
+                             && IsHexDigit(text[index + 2])
+                             && IsHexDigit(text[index + 3])
+                             && IsHexDigit(text[index + 4])
+                             && IsHexDigit(text[index + 5]))
                     {
                         // must be \uXXXX
                         value = GetHexValue(text[index + 2]) << 12
-                            | GetHexValue(text[index + 3]) << 8
-                            | GetHexValue(text[index + 4]) << 4
-                            | GetHexValue(text[index + 5]);
+                                | GetHexValue(text[index + 3]) << 8
+                                | GetHexValue(text[index + 4]) << 4
+                                | GetHexValue(text[index + 5]);
                         index += 6;
                     }
                     else
@@ -3081,7 +3092,7 @@ namespace Microsoft.Ajax.Utilities
         {
             // decode the first escape sequence
             var codePoint = DecodeOneUnicodeEscapeSequence(text, ref index);
-            
+
             // if this is a high-surrogate, try decoding a second escape sequence
             if (0xd800 <= codePoint && codePoint <= 0xdbff)
             {
@@ -3089,22 +3100,19 @@ namespace Microsoft.Ajax.Utilities
                 var lowSurrogate = DecodeOneUnicodeEscapeSequence(text, ref index);
                 if (0xdc00 <= lowSurrogate && lowSurrogate <= 0xdfff)
                 {
-                    return new string(new[] { (char)codePoint, (char)lowSurrogate });
+                    return new string(new[] {(char) codePoint, (char) lowSurrogate});
                 }
-                else
-                {
-                    // a high-surrogate NOT followed by a low-surrogate is invalid, 
-                    // but return it anyway after restoring our previous location
-                    index = savedIndex;
-                    return new string(new[] { (char)codePoint });
-                }
+                // a high-surrogate NOT followed by a low-surrogate is invalid, 
+                // but return it anyway after restoring our previous location
+                index = savedIndex;
+                return new string(new[] {(char) codePoint});
             }
-            else if (0xdc00 <= codePoint && codePoint <= 0xdfff)
+            if (0xdc00 <= codePoint && codePoint <= 0xdfff)
             {
                 // can't be a low-surrogate by itself, but return it anyway
-                return new string(new[] { (char)codePoint });
+                return new string(new[] {(char) codePoint});
             }
-            else if (codePoint < 0 || codePoint > 0x10ffff)
+            if (codePoint < 0 || codePoint > 0x10ffff)
             {
                 // codepoints less than zero or higher than U+10FFFF are invalid
                 return null;
@@ -3191,10 +3199,10 @@ namespace Microsoft.Ajax.Utilities
             var startPos = m_currentPosition;
 
             // see if the first character is a valid identifier start
-            if (JSScanner.IsValidIdentifierStart(m_strSourceCode, ref m_currentPosition))
+            if (IsValidIdentifierStart(m_strSourceCode, ref m_currentPosition))
             {
                 // it is -- keep going as long as we have valid part characters
-                while (JSScanner.IsValidIdentifierPart(m_strSourceCode, ref m_currentPosition))
+                while (IsValidIdentifierPart(m_strSourceCode, ref m_currentPosition))
                 {
                     // position is advanced in the condition
                 }
@@ -3245,10 +3253,10 @@ namespace Microsoft.Ajax.Utilities
 
             while (true)
             {
-                char c = GetChar(m_currentPosition++);
+                var c = GetChar(m_currentPosition++);
                 switch (c)
                 {
-                    // EOF
+                        // EOF
                     case '\0':
                         if (IsEndOfFile)
                         {
@@ -3266,14 +3274,14 @@ namespace Microsoft.Ajax.Utilities
                             contextError.EndLineNumber = endLineNum;
                             contextError.EndLinePosition = endLinePos;
                             contextError.HandleError(string.CompareOrdinal(endStrings[0], "#ENDDEBUG") == 0
-                                ? JSError.NoEndDebugDirective 
+                                ? JSError.NoEndDebugDirective
                                 : JSError.NoEndIfDirective);
                             throw new EndOfStreamException();
                         }
 
                         break;
 
-                    // line terminator crap
+                        // line terminator crap
                     case '\r':
                         if (GetChar(m_currentPosition) == '\n')
                         {
@@ -3296,7 +3304,7 @@ namespace Microsoft.Ajax.Utilities
                         m_startLinePosition = m_currentPosition;
                         break;
 
-                    // check for /// (and then followed by any one of the substrings passed to us)
+                        // check for /// (and then followed by any one of the substrings passed to us)
                     case '/':
                         if (CheckSubstring(m_currentPosition, "//"))
                         {
@@ -3355,33 +3363,33 @@ namespace Microsoft.Ajax.Utilities
             {
                 return ScanGlobalsDirective();
             }
-            else if (CheckCaseInsensitiveSubstring("#SOURCE"))
+            if (CheckCaseInsensitiveSubstring("#SOURCE"))
             {
                 return ScanSourceDirective();
             }
-            else if (UsePreprocessorDefines)
+            if (UsePreprocessorDefines)
             {
                 if (CheckCaseInsensitiveSubstring("#DEBUG"))
                 {
                     return ScanDebugDirective();
                 }
-                else if (CheckCaseInsensitiveSubstring("#IF"))
+                if (CheckCaseInsensitiveSubstring("#IF"))
                 {
                     return ScanIfDirective();
                 }
-                else if (CheckCaseInsensitiveSubstring("#ELSE") && m_ifDirectiveLevel > 0)
+                if (CheckCaseInsensitiveSubstring("#ELSE") && m_ifDirectiveLevel > 0)
                 {
                     return ScanElseDirective();
                 }
-                else if (CheckCaseInsensitiveSubstring("#ENDIF") && m_ifDirectiveLevel > 0)
+                if (CheckCaseInsensitiveSubstring("#ENDIF") && m_ifDirectiveLevel > 0)
                 {
                     return ScanEndIfDirective();
                 }
-                else if (CheckCaseInsensitiveSubstring("#DEFINE"))
+                if (CheckCaseInsensitiveSubstring("#DEFINE"))
                 {
                     return ScanDefineDirective();
                 }
-                else if (CheckCaseInsensitiveSubstring("#UNDEF"))
+                if (CheckCaseInsensitiveSubstring("#UNDEF"))
                 {
                     return ScanUndefineDirective();
                 }
@@ -3569,7 +3577,8 @@ namespace Microsoft.Ajax.Utilities
             return true;
         }
 
-        private Func<string,string,bool> CheckForOperator(SortedDictionary<string, Func<string,string,bool>> operators)
+        private Func<string, string, bool> CheckForOperator(
+            SortedDictionary<string, Func<string, string, bool>> operators)
         {
             // we need to make SURE we are checking the longer strings before we check the
             // shorter strings, because if the source is === and we check for ==, we'll pop positive
@@ -3617,7 +3626,7 @@ namespace Microsoft.Ajax.Utilities
                 if (!string.IsNullOrEmpty(identifier))
                 {
                     // see if we're assigning a value
-                    string value = string.Empty;
+                    var value = string.Empty;
                     SkipBlanks();
                     if (GetChar(m_currentPosition) == '=')
                     {
@@ -3770,7 +3779,7 @@ namespace Microsoft.Ajax.Utilities
             if (IsAssignmentOperator(assignOp))
             {
                 // get the delta from assign (=), which is the first assignment operator
-                int delta = assignOp - JSToken.Assign;
+                var delta = assignOp - JSToken.Assign;
 
                 // assign (=) will be zero -- we don't want to modify that one, so if
                 // the delta is GREATER than zero...
@@ -3787,12 +3796,14 @@ namespace Microsoft.Ajax.Utilities
 
         public static OperatorPrecedence GetOperatorPrecedence(Context op)
         {
-            return op == null || op.Token == JSToken.None ? OperatorPrecedence.None : JSScanner.s_OperatorsPrec[op.Token - JSToken.FirstBinaryOperator];
+            return op == null || op.Token == JSToken.None
+                ? OperatorPrecedence.None
+                : s_OperatorsPrec[op.Token - JSToken.FirstBinaryOperator];
         }
 
         private static OperatorPrecedence[] InitOperatorsPrec()
         {
-            OperatorPrecedence[] operatorsPrec = new OperatorPrecedence[JSToken.LastOperator - JSToken.FirstBinaryOperator + 1];
+            var operatorsPrec = new OperatorPrecedence[JSToken.LastOperator - JSToken.FirstBinaryOperator + 1];
 
             operatorsPrec[JSToken.Plus - JSToken.FirstBinaryOperator] = OperatorPrecedence.Additive;
             operatorsPrec[JSToken.Minus - JSToken.FirstBinaryOperator] = OperatorPrecedence.Additive;
@@ -3834,7 +3845,8 @@ namespace Microsoft.Ajax.Utilities
             operatorsPrec[JSToken.ModuloAssign - JSToken.FirstBinaryOperator] = OperatorPrecedence.Assignment;
             operatorsPrec[JSToken.LeftShiftAssign - JSToken.FirstBinaryOperator] = OperatorPrecedence.Assignment;
             operatorsPrec[JSToken.RightShiftAssign - JSToken.FirstBinaryOperator] = OperatorPrecedence.Assignment;
-            operatorsPrec[JSToken.UnsignedRightShiftAssign - JSToken.FirstBinaryOperator] = OperatorPrecedence.Assignment;
+            operatorsPrec[JSToken.UnsignedRightShiftAssign - JSToken.FirstBinaryOperator] =
+                OperatorPrecedence.Assignment;
 
             operatorsPrec[JSToken.ConditionalIf - JSToken.FirstBinaryOperator] = OperatorPrecedence.Conditional;
             operatorsPrec[JSToken.Colon - JSToken.FirstBinaryOperator] = OperatorPrecedence.Conditional;
@@ -3870,10 +3882,7 @@ namespace Microsoft.Ajax.Utilities
 
             public static PPOperators Instance
             {
-                get
-                {
-                    return Nested.Instance;
-                }
+                get { return Nested.Instance; }
             }
 
             private static class Nested
@@ -3957,7 +3966,7 @@ namespace Microsoft.Ajax.Utilities
             private static bool PPIsLessThan(string left, string right)
             {
                 // only numeric comparisons
-                bool isTrue = false;
+                var isTrue = false;
                 double leftNumeric, rightNumeric;
                 if (ConvertToNumeric(left, right, out leftNumeric, out rightNumeric))
                 {
@@ -3971,7 +3980,7 @@ namespace Microsoft.Ajax.Utilities
             private static bool PPIsGreaterThan(string left, string right)
             {
                 // only numeric comparisons
-                bool isTrue = false;
+                var isTrue = false;
                 double leftNumeric, rightNumeric;
                 if (ConvertToNumeric(left, right, out leftNumeric, out rightNumeric))
                 {
@@ -3985,7 +3994,7 @@ namespace Microsoft.Ajax.Utilities
             private static bool PPIsLessThanOrEqual(string left, string right)
             {
                 // only numeric comparisons
-                bool isTrue = false;
+                var isTrue = false;
                 double leftNumeric, rightNumeric;
                 if (ConvertToNumeric(left, right, out leftNumeric, out rightNumeric))
                 {
@@ -3999,7 +4008,7 @@ namespace Microsoft.Ajax.Utilities
             private static bool PPIsGreaterThanOrEqual(string left, string right)
             {
                 // only numeric comparisons
-                bool isTrue = false;
+                var isTrue = false;
                 double leftNumeric, rightNumeric;
                 if (ConvertToNumeric(left, right, out leftNumeric, out rightNumeric))
                 {
@@ -4022,11 +4031,12 @@ namespace Microsoft.Ajax.Utilities
             /// <param name="leftNumeric">first string converted to double</param>
             /// <param name="rightNumeric">second string converted to double</param>
             /// <returns>true if the conversion was successful; false otherwise</returns>
-            private static bool ConvertToNumeric(string left, string right, out double leftNumeric, out double rightNumeric)
+            private static bool ConvertToNumeric(string left, string right, out double leftNumeric,
+                out double rightNumeric)
             {
                 rightNumeric = default(double);
                 return double.TryParse(left, NumberStyles.Any, CultureInfo.InvariantCulture, out leftNumeric)
-                    && double.TryParse(right, NumberStyles.Any, CultureInfo.InvariantCulture, out rightNumeric);
+                       && double.TryParse(right, NumberStyles.Any, CultureInfo.InvariantCulture, out rightNumeric);
             }
 
             #endregion

@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public enum JSError
     {
@@ -65,7 +65,8 @@ namespace Microsoft.Ajax.Utilities
         NoRightBracketOrComma = 1194, // "Expected ',' or ']'"
         ExpressionExpected = 1195, // "Expected expression"
         UnexpectedSemicolon = 1196, // "Unexpected ';'"
-        TooManyTokensSkipped = 1197, // "Too many tokens have been skipped in the process of recovering from errors. The file may not be a JScript.NET file"
+        TooManyTokensSkipped = 1197,
+        // "Too many tokens have been skipped in the process of recovering from errors. The file may not be a JScript.NET file"
         SuspectAssignment = 1206, //"Did you intend to write an assignment here?"
         SuspectSemicolon = 1207, //"Did you intend to have an empty statement for this branch of the if statement?"
         ParameterListNotLast = 1240, //"A variable argument list must be the last argument
@@ -95,7 +96,8 @@ namespace Microsoft.Ajax.Utilities
         StrictModeFunctionName = 1291, // strict mode does not allow certain function names
         StrictModeDuplicateProperty = 1292, // strict mode does not allow duplicate property names
         StrictModeInvalidAssign = 1293, // strict mode does not allow assign operator to this variable
-        StrictModeInvalidPreOrPost = 1294, // strict mode does not allow prefix or postfix operators on certain references
+        StrictModeInvalidPreOrPost = 1294,
+        // strict mode does not allow prefix or postfix operators on certain references
         StrictModeInvalidDelete = 1295, // strict mode does not allow certain delete operands
         StrictModeArgumentName = 1296, // strict mode does not allow certain argument names
         DuplicateConstantDeclaration = 1297, // duplicate constant declaration

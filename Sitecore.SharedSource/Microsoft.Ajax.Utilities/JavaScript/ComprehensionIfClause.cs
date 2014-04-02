@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class ComprehensionIfClause : ComprehensionClause
     {
@@ -48,10 +48,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Condition);
-            }
+            get { return EnumerateNonNullNodes(Condition); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

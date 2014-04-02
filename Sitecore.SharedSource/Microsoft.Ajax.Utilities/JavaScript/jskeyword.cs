@@ -14,15 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
     internal sealed class JSKeyword
     {
-        private JSKeyword m_next;
-        private JSToken m_token;
-        private string m_name;
-        private int m_length;
+        private readonly JSKeyword m_next;
+        private readonly JSToken m_token;
+        private readonly string m_name;
+        private readonly int m_length;
 
         private JSKeyword(JSToken token, string name)
             : this(token, name, null)
@@ -55,31 +54,46 @@ namespace Microsoft.Ajax.Utilities
         {
             switch (keyword)
             {
-                // always allowed
-                case JSToken.Get: return "get";
-                case JSToken.Set: return "set";
-                case JSToken.Super: return "super";
+                    // always allowed
+                case JSToken.Get:
+                    return "get";
+                case JSToken.Set:
+                    return "set";
+                case JSToken.Super:
+                    return "super";
 
-                // what about EcmaScript 6? Does this become a reserved word?
-                case JSToken.Module: return "module";
+                    // what about EcmaScript 6? Does this become a reserved word?
+                case JSToken.Module:
+                    return "module";
 
-                // not in strict mode
-                case JSToken.Implements: return "implements";
-                case JSToken.Interface: return "interface";
-                case JSToken.Let: return "let";
-                case JSToken.Package: return "package";
-                case JSToken.Private: return "private";
-                case JSToken.Protected: return "protected";
-                case JSToken.Public: return "public";
-                case JSToken.Static: return "static";
-                case JSToken.Yield: return "yield";
+                    // not in strict mode
+                case JSToken.Implements:
+                    return "implements";
+                case JSToken.Interface:
+                    return "interface";
+                case JSToken.Let:
+                    return "let";
+                case JSToken.Package:
+                    return "package";
+                case JSToken.Private:
+                    return "private";
+                case JSToken.Protected:
+                    return "protected";
+                case JSToken.Public:
+                    return "public";
+                case JSToken.Static:
+                    return "static";
+                case JSToken.Yield:
+                    return "yield";
 
-                // apparently never allowed for Chrome, so we want to treat it
-                // differently, too
-                case JSToken.Native: return "native";
+                    // apparently never allowed for Chrome, so we want to treat it
+                    // differently, too
+                case JSToken.Native:
+                    return "native";
 
-                // no other tokens can be identifiers
-                default: return null;
+                    // no other tokens can be identifiers
+                default:
+                    return null;
             }
         }
 
@@ -98,7 +112,7 @@ namespace Microsoft.Ajax.Utilities
                         // found a match
                         return keyword.m_token;
                     }
-                    else if (comparison > 0)
+                    if (comparison > 0)
                     {
                         // because the list is in order, if we're past this guy, there's no match
                         return JSToken.Identifier;
@@ -122,7 +136,7 @@ namespace Microsoft.Ajax.Utilities
         // for equal length words, in alphabetical order
         internal static JSKeyword[] InitKeywords()
         {
-            JSKeyword[] keywords = new JSKeyword[26];
+            var keywords = new JSKeyword[26];
             // a
             // b
             keywords['b' - 'a'] = new JSKeyword(JSToken.Break, "break");
@@ -130,29 +144,29 @@ namespace Microsoft.Ajax.Utilities
             keywords['c' - 'a'] = new JSKeyword(JSToken.Case, "case",
                 new JSKeyword(JSToken.Catch, "catch",
                     new JSKeyword(JSToken.Class, "class",
-                        new JSKeyword(JSToken.Const, "const", 
+                        new JSKeyword(JSToken.Const, "const",
                             new JSKeyword(JSToken.Continue, "continue")))));
             // d
-            keywords['d' - 'a'] = new JSKeyword(JSToken.Do, "do", 
+            keywords['d' - 'a'] = new JSKeyword(JSToken.Do, "do",
                 new JSKeyword(JSToken.Delete, "delete",
-                    new JSKeyword(JSToken.Default, "default", 
+                    new JSKeyword(JSToken.Default, "default",
                         new JSKeyword(JSToken.Debugger, "debugger"))));
             // e
             keywords['e' - 'a'] = new JSKeyword(JSToken.Else, "else",
-                new JSKeyword(JSToken.Enum, "enum", 
-                    new JSKeyword(JSToken.Export, "export", 
+                new JSKeyword(JSToken.Enum, "enum",
+                    new JSKeyword(JSToken.Export, "export",
                         new JSKeyword(JSToken.Extends, "extends"))));
             // f
-            keywords['f' - 'a'] = new JSKeyword(JSToken.For, "for", 
-                new JSKeyword(JSToken.False, "false", 
+            keywords['f' - 'a'] = new JSKeyword(JSToken.For, "for",
+                new JSKeyword(JSToken.False, "false",
                     new JSKeyword(JSToken.Finally, "finally",
                         new JSKeyword(JSToken.Function, "function"))));
             // g
             keywords['g' - 'a'] = new JSKeyword(JSToken.Get, "get");
             // i
             keywords['i' - 'a'] = new JSKeyword(JSToken.If, "if",
-                new JSKeyword(JSToken.In, "in", 
-                    new JSKeyword(JSToken.Import, "import", 
+                new JSKeyword(JSToken.In, "in",
+                    new JSKeyword(JSToken.Import, "import",
                         new JSKeyword(JSToken.Interface, "interface",
                             new JSKeyword(JSToken.Implements, "implements",
                                 new JSKeyword(JSToken.InstanceOf, "instanceof"))))));
@@ -167,24 +181,24 @@ namespace Microsoft.Ajax.Utilities
             // p
             keywords['p' - 'a'] = new JSKeyword(JSToken.Public, "public",
                 new JSKeyword(JSToken.Package, "package",
-                    new JSKeyword(JSToken.Private, "private", 
+                    new JSKeyword(JSToken.Private, "private",
                         new JSKeyword(JSToken.Protected, "protected"))));
             // r
             keywords['r' - 'a'] = new JSKeyword(JSToken.Return, "return");
             // s
             keywords['s' - 'a'] = new JSKeyword(JSToken.Set, "set",
-                new JSKeyword(JSToken.Super, "super", 
+                new JSKeyword(JSToken.Super, "super",
                     new JSKeyword(JSToken.Static, "static",
                         new JSKeyword(JSToken.Switch, "switch"))));
             // t
-            keywords['t' - 'a'] = new JSKeyword(JSToken.Try, "try", 
+            keywords['t' - 'a'] = new JSKeyword(JSToken.Try, "try",
                 new JSKeyword(JSToken.This, "this",
-                    new JSKeyword(JSToken.True, "true", 
+                    new JSKeyword(JSToken.True, "true",
                         new JSKeyword(JSToken.Throw, "throw",
                             new JSKeyword(JSToken.TypeOf, "typeof")))));
             // u
             // v
-            keywords['v' - 'a'] = new JSKeyword(JSToken.Var, "var", 
+            keywords['v' - 'a'] = new JSKeyword(JSToken.Var, "var",
                 new JSKeyword(JSToken.Void, "void"));
             // w
             keywords['w' - 'a'] = new JSKeyword(JSToken.With, "with",

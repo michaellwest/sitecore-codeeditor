@@ -14,10 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
-{
-    using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
+{
     /// <summary>
     /// Helper class to hold common data elements
     /// </summary>
@@ -27,6 +27,7 @@ namespace Microsoft.Ajax.Utilities
         /// Regular expression to identifier replacement token syntax
         /// </summary>
         private static Regex s_replacementToken;
+
         public static Regex ReplacementToken
         {
             get
@@ -43,6 +44,7 @@ namespace Microsoft.Ajax.Utilities
         }
 
         private static Regex s_decimalFormat;
+
         public static Regex DecimalFormat
         {
             get

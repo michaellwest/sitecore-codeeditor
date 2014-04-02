@@ -14,15 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Text;
-    using System.Text.RegularExpressions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript;
 
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css
+{
     /// <summary>
     /// Parser takes Tokens and parses them into rules and statements
     /// </summary>
@@ -46,24 +48,19 @@ namespace Microsoft.Ajax.Utilities
         private bool m_outputNewLine = true;
 
         // set this to true to force a newline before any other output
-        private bool m_forceNewLine = false;
+        private bool m_forceNewLine;
 
-        public CssSettings Settings
-        {
-            get; set;
-        }
+        public CssSettings Settings { get; set; }
 
         private readonly HashSet<string> m_namespaces;
 
         public string FileContext { get; set; }
 
         private CodeSettings m_jsSettings;
+
         public CodeSettings JSSettings
         {
-            get
-            {
-                return m_jsSettings;
-            }
+            get { return m_jsSettings; }
             set
             {
                 if (value != null)
@@ -76,18 +73,18 @@ namespace Microsoft.Ajax.Utilities
                 }
                 else
                 {
-                    m_jsSettings = new CodeSettings()
-                        {
-                            KillSwitch = (long)TreeModifications.MinifyStringLiterals,
-                            SourceMode = JavaScriptSourceMode.Expression
-                        };
+                    m_jsSettings = new CodeSettings
+                    {
+                        KillSwitch = (long) TreeModifications.MinifyStringLiterals,
+                        SourceMode = JavaScriptSourceMode.Expression
+                    };
                 }
             }
         }
 
         #endregion
 
-        private static Regex s_vendorSpecific = new Regex(
+        private static readonly Regex s_vendorSpecific = new Regex(
             @"^(\-(?<vendor>[^\-]+)\-)?(?<root>.+)$",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -100,12 +97,11 @@ namespace Microsoft.Ajax.Utilities
         //private static Regex s_regexComments = new Regex(
         //    @"/\*([^*]|(\*+[^*/]))*\*+/",
         //    RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-
         /// <summary>
         /// regular expression for matching first comment hack
         /// This is the MacIE ignore bug: /*(anything or nothing inside)\*/.../*(anything or nothing inside)*/
         /// </summary>
-        private static Regex s_regexHack1 = new Regex(
+        private static readonly Regex s_regexHack1 = new Regex(
             @"/\*([^*]|(\*+[^*/]))*\**\\\*/(?<inner>.*?)/\*([^*]|(\*+[^*/]))*\*+/",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -114,7 +110,7 @@ namespace Microsoft.Ajax.Utilities
         /// Hide from everything EXCEPT Netscape 4 and Opera 5
         /// Format: /*/*//*/.../*(anything or nothing inside)*/
         /// </summary>
-        private static Regex s_regexHack2 = new Regex(
+        private static readonly Regex s_regexHack2 = new Regex(
             @"/\*/\*//\*/(?<inner>.*?)/\*([^*]|(\*+[^*/]))*\*+/",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -123,7 +119,7 @@ namespace Microsoft.Ajax.Utilities
         /// Hide from Netscape 4
         /// Format: /*/*/.../*(anything or nothing inside)*/
         /// </summary>
-        private static Regex s_regexHack3 = new Regex(
+        private static readonly Regex s_regexHack3 = new Regex(
             @"/\*/\*/(?<inner>.*?)/\*([^*]|(\*+[^*/]))*\*+/",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -136,7 +132,7 @@ namespace Microsoft.Ajax.Utilities
         /// by a simple comment, followed by optional space, followed by a colon.
         /// Does not match the simple word, the space or the colon (just the comment) 
         /// </summary>
-        private static Regex s_regexHack4 = new Regex(
+        private static readonly Regex s_regexHack4 = new Regex(
             @"(?<=\w\s+)/\*([^*]|(\*+[^*/]))*\*+/\s*(?=:)",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -149,7 +145,7 @@ namespace Microsoft.Ajax.Utilities
         /// by a colon, followed by optional whitespace, followed by a simple comment.
         /// Does not match initial word or the colon, just the comment.
         /// </summary>
-        private static Regex s_regexHack5 = new Regex(
+        private static readonly Regex s_regexHack5 = new Regex(
             @"(?<=[\w/]\s*:)\s*/\*([^*]|(\*+[^*/]))*\*+/",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -164,7 +160,7 @@ namespace Microsoft.Ajax.Utilities
         /// word character followed by a simple comment, followed by optional space, followed by a colon.
         /// Does not match the simple word or the colon (just initial whitespace and comment) 
         /// </summary>
-        private static Regex s_regexHack6 = new Regex(
+        private static readonly Regex s_regexHack6 = new Regex(
             @"(?<=\w)/\*([^*]|(\*+[^*/]))*\*+/\s*(?=:)",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -175,7 +171,7 @@ namespace Microsoft.Ajax.Utilities
         /// an attempted comment hack.
         /// Format: /**/ or /* */ (single space)
         /// </summary>
-        private static Regex s_regexHack7 = new Regex(
+        private static readonly Regex s_regexHack7 = new Regex(
             @"/\*(\s?)\*/",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -189,7 +185,7 @@ namespace Microsoft.Ajax.Utilities
         /// values are not necessarily the same). Used to identify #rrggbb values
         /// that can be collapsed to #rgb
         /// </summary>
-        private static Regex s_rrggbb = new Regex(
+        private static readonly Regex s_rrggbb = new Regex(
             @"^\#(?<r>[0-9a-fA-F])\k<r>(?<g>[0-9a-fA-F])\k<g>(?<b>[0-9a-fA-F])\k<b>$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -206,13 +202,13 @@ namespace Microsoft.Ajax.Utilities
         /// for value-replacement matching
         /// Format: /* [id] */
         /// </summary>
-        private static Regex s_valueReplacement = new Regex(
+        private static readonly Regex s_valueReplacement = new Regex(
             @"/\*\s*\[(?<id>\w+)\]\s*\*/",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
         // this variable will be set whenever we encounter a value-replacement comment
         // and have a string to replace it with
-        private string m_valueReplacement;// = null;
+        private string m_valueReplacement; // = null;
 
         #endregion
 
@@ -225,7 +221,7 @@ namespace Microsoft.Ajax.Utilities
         ///     where id is one of: ReplaceColor, ReplaceFont, or RecolorImage
         ///     and parameters is anything other than a close square-bracket
         /// </summary>
-        private static Regex s_sharepointReplacement = new Regex(
+        private static readonly Regex s_sharepointReplacement = new Regex(
             @"/\*\s*\[(ReplaceBGImage|((ReplaceColor|ReplaceFont|RecolorImage)\([^\]]*))\]\s*\*/",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -311,19 +307,16 @@ namespace Microsoft.Ajax.Utilities
                     }
 
                     // set up for the parse
-                    using (StringReader reader = new StringReader(source))
+                    using (var reader = new StringReader(source))
                     {
                         m_scanner = new CssScanner(reader);
                         m_scanner.AllowEmbeddedAspNetBlocks = this.Settings.AllowEmbeddedAspNetBlocks;
                         m_scanner.ScannerError += (sender, ea) =>
-                            {
-                                ea.Error.File = this.FileContext;
-                                OnCssError(ea.Error);
-                            };
-                        m_scanner.ContextChange += (sender, ea) =>
-                            {
-                                FileContext = ea.FileContext;
-                            };
+                        {
+                            ea.Error.File = this.FileContext;
+                            OnCssError(ea.Error);
+                        };
+                        m_scanner.ContextChange += (sender, ea) => { FileContext = ea.FileContext; };
 
                         // create the string builder into which we will be 
                         // building our crunched stylesheet
@@ -351,19 +344,19 @@ namespace Microsoft.Ajax.Utilities
 
                         if (!m_scanner.EndOfFile)
                         {
-                            int errorNumber = (int)CssErrorCode.ExpectedEndOfFile;
-                            OnCssError(new ContextError()
-                                {
-                                    IsError = true,
-                                    Severity = 0,
-                                    Subcategory = ContextError.GetSubcategory(0),
-                                    File = FileContext,
-                                    ErrorNumber = errorNumber,
-                                    ErrorCode = "CSS{0}".FormatInvariant(errorNumber & (0xffff)),
-                                    StartLine = m_currentToken.Context.Start.Line,
-                                    StartColumn = m_currentToken.Context.Start.Char,
-                                    Message = CssStrings.ExpectedEndOfFile,
-                                });
+                            var errorNumber = (int) CssErrorCode.ExpectedEndOfFile;
+                            OnCssError(new ContextError
+                            {
+                                IsError = true,
+                                Severity = 0,
+                                Subcategory = ContextError.GetSubcategory(0),
+                                File = FileContext,
+                                ErrorNumber = errorNumber,
+                                ErrorCode = "CSS{0}".FormatInvariant(errorNumber & (0xffff)),
+                                StartLine = m_currentToken.Context.Start.Line,
+                                StartColumn = m_currentToken.Context.Start.Char,
+                                Message = CssStrings.ExpectedEndOfFile,
+                            });
                         }
 
                         // get the crunched string and dump the string builder
@@ -401,7 +394,7 @@ namespace Microsoft.Ajax.Utilities
 
             if (source.StartsWith("/*/#SOURCE", StringComparison.OrdinalIgnoreCase))
             {
-                var firstLineBreak = source.IndexOfAny(new[] { '\n', '\r' });
+                var firstLineBreak = source.IndexOfAny(new[] {'\n', '\r'});
                 if (firstLineBreak >= 0)
                 {
                     if (source[firstLineBreak] == '\r' && source[firstLineBreak + 1] == '\n')
@@ -425,7 +418,9 @@ namespace Microsoft.Ajax.Utilities
                 var charsetAscii = "@charset ";
                 if (string.CompareOrdinal(source, 3, charsetAscii, 0, charsetAscii.Length) != 0
                     || (source[3 + charsetAscii.Length] != '"' && source[3 + charsetAscii.Length] != '\'')
-                    || string.Compare(source, 4 + charsetAscii.Length, "ascii", 0, 5, StringComparison.OrdinalIgnoreCase) != 0)
+                    ||
+                    string.Compare(source, 4 + charsetAscii.Length, "ascii", 0, 5, StringComparison.OrdinalIgnoreCase) !=
+                    0)
                 {
                     // we either don't have a @charset statement, or it's pointing to something other than ASCII, in which
                     // case we might have a problem here. But because that's a "MIGHT," let's make it a pri-1 instead of
@@ -438,7 +433,7 @@ namespace Microsoft.Ajax.Utilities
                 source = source.Substring(3);
             }
             else if (source.StartsWith("\u00fe\u00ff\u0000\u0000", StringComparison.Ordinal)
-                || source.StartsWith("\u0000\u0000\u00ff\u00fe", StringComparison.Ordinal))
+                     || source.StartsWith("\u0000\u0000\u00ff\u00fe", StringComparison.Ordinal))
             {
                 // apparently we had a UTF-32 BOM (either BE or LE) that wasn't stripped. Remove it now.
                 // throw a syntax-level error because the rest of the file is probably whack.
@@ -446,7 +441,7 @@ namespace Microsoft.Ajax.Utilities
                 source = source.Substring(4);
             }
             else if (source.StartsWith("\u00fe\u00ff", StringComparison.Ordinal)
-                || source.StartsWith("\u00ff\u00fe", StringComparison.Ordinal))
+                     || source.StartsWith("\u00ff\u00fe", StringComparison.Ordinal))
             {
                 // apparently we had a UTF-16 BOM (either BE or LE) that wasn't stripped. Remove it now.
                 // throw a syntax-level error because the rest of the file is probably whack.
@@ -469,7 +464,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseStylesheet()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
 
             // ignore any semicolons that may be the result of concatenation on the part of AjaxMin
             SkipSemicolons();
@@ -502,12 +497,12 @@ namespace Microsoft.Ajax.Utilities
 
             // the main guts of stuff
             while (ParseRule() == Parsed.True
-              || ParseMedia() == Parsed.True
-              || ParsePage() == Parsed.True
-              || ParseFontFace() == Parsed.True
-              || ParseKeyFrames() == Parsed.True
-              || ParseAtKeyword() == Parsed.True
-              || ParseAspNetBlock() == Parsed.True)
+                   || ParseMedia() == Parsed.True
+                   || ParsePage() == Parsed.True
+                   || ParseFontFace() == Parsed.True
+                   || ParseKeyFrames() == Parsed.True
+                   || ParseAtKeyword() == Parsed.True
+                   || ParseAspNetBlock() == Parsed.True)
             {
                 // any number of S, Comment, CDO or CDC elements
                 // (or semicolons possibly introduced via concatenation)
@@ -530,11 +525,11 @@ namespace Microsoft.Ajax.Utilities
 
                 // try the guts again
                 while (ParseRule() == Parsed.True
-                  || ParseMedia() == Parsed.True
-                  || ParsePage() == Parsed.True
-                  || ParseFontFace() == Parsed.True
-                  || ParseAtKeyword() == Parsed.True
-                  || ParseAspNetBlock() == Parsed.True)
+                       || ParseMedia() == Parsed.True
+                       || ParsePage() == Parsed.True
+                       || ParseFontFace() == Parsed.True
+                       || ParseAtKeyword() == Parsed.True
+                       || ParseAspNetBlock() == Parsed.True)
                 {
                     // any number of S, Comment, CDO or CDC elements
                     // (or semicolons possibly introduced via concatenation)
@@ -582,10 +577,10 @@ namespace Microsoft.Ajax.Utilities
         private void ParseSCDOCDCComments()
         {
             while (CurrentTokenType == TokenType.Space
-              || CurrentTokenType == TokenType.Comment
-              || CurrentTokenType == TokenType.CommentOpen
-              || CurrentTokenType == TokenType.CommentClose
-              || (CurrentTokenType == TokenType.Character && CurrentTokenText == ";"))
+                   || CurrentTokenType == TokenType.Comment
+                   || CurrentTokenType == TokenType.CommentOpen
+                   || CurrentTokenType == TokenType.CommentClose
+                   || (CurrentTokenType == TokenType.Character && CurrentTokenText == ";"))
             {
                 // don't output any space we encounter here, but do output comments.
                 // we also want to skip over any semicolons we may encounter at this point
@@ -642,7 +637,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseAtKeyword()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.AtKeyword)
             {
                 // only report an unexpected at-keyword IF the identifier doesn't start 
@@ -673,7 +668,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseAspNetBlock()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (Settings.AllowEmbeddedAspNetBlocks &&
                 CurrentTokenType == TokenType.AspNetBlock)
             {
@@ -686,7 +681,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseNamespace()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.NamespaceSymbol)
             {
                 NewLine();
@@ -711,7 +706,7 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 if (CurrentTokenType != TokenType.String
-                  && CurrentTokenType != TokenType.Uri)
+                    && CurrentTokenType != TokenType.Uri)
                 {
                     ReportError(0, CssErrorCode.ExpectedNamespace, CurrentTokenText);
                     SkipToEndOfStatement();
@@ -724,7 +719,7 @@ namespace Microsoft.Ajax.Utilities
                     SkipSpace();
 
                     if (CurrentTokenType == TokenType.Character
-                      && CurrentTokenText == ";")
+                        && CurrentTokenText == ";")
                     {
                         Append(';');
                         SkipSpace();
@@ -757,7 +752,7 @@ namespace Microsoft.Ajax.Utilities
         private Parsed ParseKeyFrames()
         {
             // '@keyframes' IDENT '{' keyframes-blocks '}'
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.KeyFramesSymbol)
             {
                 // found the @keyframes at-rule
@@ -848,7 +843,7 @@ namespace Microsoft.Ajax.Utilities
         private Parsed ParseKeyFrameSelectors()
         {
             // [ 'from' | 'to' | PERCENTAGE ] [ ',' [ 'from' | 'to' | PERCENTAGE ] ]*
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
 
             // see if we start with a percentage or the words "from" or "to"
             if (CurrentTokenType == TokenType.Percentage)
@@ -907,7 +902,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseImport()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.ImportSymbol)
             {
                 NewLine();
@@ -915,7 +910,7 @@ namespace Microsoft.Ajax.Utilities
                 SkipSpace();
 
                 if (CurrentTokenType != TokenType.String
-                  && CurrentTokenType != TokenType.Uri)
+                    && CurrentTokenType != TokenType.Uri)
                 {
                     ReportError(0, CssErrorCode.ExpectedImport, CurrentTokenText);
                     SkipToEndOfStatement();
@@ -959,7 +954,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseMedia()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.MediaSymbol)
             {
                 NewLine();
@@ -990,11 +985,11 @@ namespace Microsoft.Ajax.Utilities
 
                         // the main guts of stuff
                         while (ParseRule() == Parsed.True
-                          || ParseMedia() == Parsed.True
-                          || ParsePage() == Parsed.True
-                          || ParseFontFace() == Parsed.True
-                          || ParseAtKeyword() == Parsed.True
-                          || ParseAspNetBlock() == Parsed.True)
+                               || ParseMedia() == Parsed.True
+                               || ParsePage() == Parsed.True
+                               || ParseFontFace() == Parsed.True
+                               || ParseAtKeyword() == Parsed.True
+                               || ParseAspNetBlock() == Parsed.True)
                         {
                             // any number of S, Comment, CDO or CDC elements
                             ParseSCDOCDCComments();
@@ -1014,7 +1009,7 @@ namespace Microsoft.Ajax.Utilities
                             {
                                 Unindent();
                             }
-                            
+
                             NewLine();
                         }
                         else if (CurrentTokenText == "}")
@@ -1054,10 +1049,10 @@ namespace Microsoft.Ajax.Utilities
         private Parsed ParseMediaQueryList(bool mightNeedSpace)
         {
             // see if we have a media query
-            Parsed parsed = ParseMediaQuery(mightNeedSpace);
+            var parsed = ParseMediaQuery(mightNeedSpace);
 
             // it's a comma-separated list, so as long as we find a comma, keep parsing queries
-            while(CurrentTokenType == TokenType.Character && CurrentTokenText == ",")
+            while (CurrentTokenType == TokenType.Character && CurrentTokenText == ",")
             {
                 // output the comma and skip any space
                 AppendCurrent();
@@ -1081,7 +1076,7 @@ namespace Microsoft.Ajax.Utilities
             // we have an optional word ONLY or NOT -- they will show up as identifiers here
             if (CurrentTokenType == TokenType.Identifier &&
                 (string.Compare(CurrentTokenText, "ONLY", StringComparison.OrdinalIgnoreCase) == 0
-                || string.Compare(CurrentTokenText, "NOT", StringComparison.OrdinalIgnoreCase) == 0))
+                 || string.Compare(CurrentTokenText, "NOT", StringComparison.OrdinalIgnoreCase) == 0))
             {
                 // if this is the first query, the last thing we output was @media, which will need a separator.
                 // if it's not the first, the last thing was a comma, so no space is needed.
@@ -1094,7 +1089,7 @@ namespace Microsoft.Ajax.Utilities
                 // output the only/not string and skip any subsequent space
                 AppendCurrent();
                 SkipSpace();
-                
+
                 // we might need a space since the last thing was the only/not
                 mightNeedSpace = true;
             }
@@ -1148,9 +1143,9 @@ namespace Microsoft.Ajax.Utilities
             // OR we have an *identifier* AND (and followed by space)
             // OR we have a *function* AND (and followed by the opening paren, scanned as a function)
             while ((CurrentTokenType == TokenType.Identifier
-                && string.Compare(CurrentTokenText, "AND", StringComparison.OrdinalIgnoreCase) == 0)
-                || (CurrentTokenType == TokenType.Function
-                && string.Compare(CurrentTokenText, "AND(", StringComparison.OrdinalIgnoreCase) == 0))
+                    && string.Compare(CurrentTokenText, "AND", StringComparison.OrdinalIgnoreCase) == 0)
+                   || (CurrentTokenType == TokenType.Function
+                       && string.Compare(CurrentTokenText, "AND(", StringComparison.OrdinalIgnoreCase) == 0))
             {
                 // if we might need a space, output it now
                 if (mightNeedSpace || Settings.OutputMode == OutputMode.MultipleLines)
@@ -1336,7 +1331,7 @@ namespace Microsoft.Ajax.Utilities
             return Parsed.True;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private Parsed ParseDeclarationList(bool allowMargins)
         {
             var parsed = Parsed.Empty;
@@ -1348,7 +1343,7 @@ namespace Microsoft.Ajax.Utilities
                     AddNewLine();
                 }
 
-                Parsed parsedDecl = ParseDeclaration();
+                var parsedDecl = ParseDeclaration();
                 if (parsed == Parsed.Empty && parsedDecl != Parsed.Empty)
                 {
                     parsed = parsedDecl;
@@ -1367,7 +1362,7 @@ namespace Microsoft.Ajax.Utilities
                 if (!parsedMargin)
                 {
                     if ((CurrentTokenType != TokenType.Character
-                        || (CurrentTokenText != ";" && CurrentTokenText != "}"))
+                         || (CurrentTokenText != ";" && CurrentTokenText != "}"))
                         && !m_scanner.EndOfFile)
                     {
                         ReportError(0, CssErrorCode.ExpectedSemicolonOrClosingBrace, CurrentTokenText);
@@ -1421,7 +1416,7 @@ namespace Microsoft.Ajax.Utilities
                         // to the end, or if we can crunch it out, but use a special function
                         // that doesn't send any comments to the stream yet -- it batches them
                         // up and returns them (if any)
-                        string comments = NextSignificantToken();
+                        var comments = NextSignificantToken();
 
                         if (m_scanner.EndOfFile)
                         {
@@ -1443,7 +1438,7 @@ namespace Microsoft.Ajax.Utilities
                             }
                             break;
                         }
-                        else if (CurrentTokenType != TokenType.Character
+                        if (CurrentTokenType != TokenType.Character
                             || (CurrentTokenText != "}" && CurrentTokenText != ";")
                             || (comments.Length > 0 && comments != "/* */" && comments != "/**/"))
                         {
@@ -1473,7 +1468,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParsePage()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.PageSymbol)
             {
                 NewLine();
@@ -1512,7 +1507,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParsePseudoPage()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.Character && CurrentTokenText == ":")
             {
                 Append(':');
@@ -1532,7 +1527,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseMargin()
         {
-            Parsed parsed = Parsed.Empty;
+            var parsed = Parsed.Empty;
             switch (CurrentTokenType)
             {
                 case TokenType.TopLeftCornerSymbol:
@@ -1570,7 +1565,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseFontFace()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.FontFaceSymbol)
             {
                 NewLine();
@@ -1586,9 +1581,9 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseOperator()
         {
-            Parsed parsed = Parsed.Empty;
+            var parsed = Parsed.Empty;
             if (CurrentTokenType == TokenType.Character
-              && (CurrentTokenText == "/" || CurrentTokenText == ","))
+                && (CurrentTokenText == "/" || CurrentTokenText == ","))
             {
                 AppendCurrent();
                 SkipSpace();
@@ -1599,9 +1594,9 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseCombinator()
         {
-            Parsed parsed = Parsed.Empty;
+            var parsed = Parsed.Empty;
             if (CurrentTokenType == TokenType.Character
-              && (CurrentTokenText == "+" || CurrentTokenText == ">" || CurrentTokenText == "~"))
+                && (CurrentTokenText == "+" || CurrentTokenText == ">" || CurrentTokenText == "~"))
             {
                 AppendCurrent();
                 SkipSpace();
@@ -1619,7 +1614,7 @@ namespace Microsoft.Ajax.Utilities
             }
 
             m_forceNewLine = true;
-            Parsed parsed = ParseSelector();
+            var parsed = ParseSelector();
             if (parsed == Parsed.True)
             {
                 if (m_scanner.EndOfFile)
@@ -1683,12 +1678,9 @@ namespace Microsoft.Ajax.Utilities
                             ReportError(4, CssErrorCode.ExpectedSelector, CurrentTokenText);
                             continue;
                         }
-                        else
-                        {
-                            // not something we know about -- skip the whole statement
-                            ReportError(0, CssErrorCode.ExpectedSelector, CurrentTokenText);
-                            SkipToEndOfStatement();
-                        }
+                        // not something we know about -- skip the whole statement
+                        ReportError(0, CssErrorCode.ExpectedSelector, CurrentTokenText);
+                        SkipToEndOfStatement();
                         AppendCurrent();
                         SkipSpace();
                         break;
@@ -1701,7 +1693,7 @@ namespace Microsoft.Ajax.Utilities
         private Parsed ParseSelector()
         {
             // should start with a selector
-            Parsed parsed = ParseSimpleSelector();
+            var parsed = ParseSimpleSelector();
             if (parsed == Parsed.False && CurrentTokenType != TokenType.None)
             {
                 // no selector? See if it starts with a combinator.
@@ -1718,11 +1710,11 @@ namespace Microsoft.Ajax.Utilities
             if (parsed == Parsed.True)
             {
                 // save whether or not we are skipping anything by checking the type before we skip
-                bool spaceWasSkipped = SkipIfSpace();
+                var spaceWasSkipped = SkipIfSpace();
 
                 while (!m_scanner.EndOfFile)
                 {
-                    Parsed parsedCombinator = ParseCombinator();
+                    var parsedCombinator = ParseCombinator();
                     if (parsedCombinator != Parsed.True)
                     {
                         // we know the selector ends with a comma or an open brace,
@@ -1730,11 +1722,11 @@ namespace Microsoft.Ajax.Utilities
                         // otherwise we're going to slap a space in the stream (if we found one)
                         // and look for the next selector
                         if (CurrentTokenType == TokenType.Character
-                          && (CurrentTokenText == "," || CurrentTokenText == "{"))
+                            && (CurrentTokenText == "," || CurrentTokenText == "{"))
                         {
                             break;
                         }
-                        else if (spaceWasSkipped)
+                        if (spaceWasSkipped)
                         {
                             Append(' ');
                         }
@@ -1745,11 +1737,8 @@ namespace Microsoft.Ajax.Utilities
                         ReportError(0, CssErrorCode.ExpectedSelector, CurrentTokenText);
                         break;
                     }
-                    else
-                    {
-                        // save the "we skipped whitespace" flag before skipping the whitespace
-                        spaceWasSkipped = SkipIfSpace();
-                    }
+                    // save the "we skipped whitespace" flag before skipping the whitespace
+                    spaceWasSkipped = SkipIfSpace();
                 }
             }
             return parsed;
@@ -1759,7 +1748,7 @@ namespace Microsoft.Ajax.Utilities
         private Parsed ParseSimpleSelector()
         {
             // the element name is optional
-            Parsed parsed = ParseElementName();
+            var parsed = ParseElementName();
             while (!m_scanner.EndOfFile)
             {
                 if (CurrentTokenType == TokenType.Hash)
@@ -1790,9 +1779,9 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseClass()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.Character
-              && CurrentTokenText == ".")
+                && CurrentTokenText == ".")
             {
                 AppendCurrent();
                 NextToken();
@@ -1824,7 +1813,7 @@ namespace Microsoft.Ajax.Utilities
             }
             else if (CurrentTokenType == TokenType.Dimension || CurrentTokenType == TokenType.Number)
             {
-                string rawNumber = m_scanner.RawNumber;
+                var rawNumber = m_scanner.RawNumber;
                 if (rawNumber != null && rawNumber.StartsWith(".", StringComparison.Ordinal))
                 {
                     // if we are expecting a class but we got dimension or number that starts with a period,
@@ -1858,8 +1847,8 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseElementName()
         {
-            Parsed parsed = Parsed.False;
-            bool foundNamespace = false;
+            var parsed = Parsed.False;
+            var foundNamespace = false;
 
             // if the next character is a pipe, then we have an empty namespace prefix
             if (CurrentTokenType == TokenType.Character && CurrentTokenText == "|")
@@ -1875,7 +1864,7 @@ namespace Microsoft.Ajax.Utilities
                 // if we already found a namespace, then there was none specified and the
                 // element name started with |. Otherwise, save the current ident as a possible
                 // namespace identifier
-                string identifier = foundNamespace ? null : CurrentTokenText;
+                var identifier = foundNamespace ? null : CurrentTokenText;
 
                 AppendCurrent();
                 NextToken();
@@ -1920,18 +1909,18 @@ namespace Microsoft.Ajax.Utilities
             return parsed;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private Parsed ParseAttrib()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.Character
-              && CurrentTokenText == "[")
+                && CurrentTokenText == "[")
             {
                 Append('[');
                 SkipSpace();
 
-                bool foundNamespace = false;
-                
+                var foundNamespace = false;
+
                 // must be either an identifier, an asterisk, or a namespace separator
                 if (CurrentTokenType == TokenType.Character && CurrentTokenText == "|")
                 {
@@ -1947,14 +1936,14 @@ namespace Microsoft.Ajax.Utilities
                     // if we already found a namespace, then there was none specified and the
                     // element name started with |. Otherwise, save the current ident as a possible
                     // namespace identifier
-                    string identifier = foundNamespace ? null : CurrentTokenText;
+                    var identifier = foundNamespace ? null : CurrentTokenText;
 
                     AppendCurrent();
                     SkipSpace();
 
                     // check to see if that identifier is actually a namespace because the current
                     // token is a namespace separator
-                    if (!foundNamespace 
+                    if (!foundNamespace
                         && CurrentTokenType == TokenType.Character && CurrentTokenText == "|")
                     {
                         // namespaced attribute
@@ -1988,11 +1977,11 @@ namespace Microsoft.Ajax.Utilities
 
                 // check to see if there's an (optional) attribute operator
                 if ((CurrentTokenType == TokenType.Character && CurrentTokenText == "=")
-                  || (CurrentTokenType == TokenType.Includes)
-                  || (CurrentTokenType == TokenType.DashMatch)
-                  || (CurrentTokenType == TokenType.PrefixMatch)
-                  || (CurrentTokenType == TokenType.SuffixMatch)
-                  || (CurrentTokenType == TokenType.SubstringMatch))
+                    || (CurrentTokenType == TokenType.Includes)
+                    || (CurrentTokenType == TokenType.DashMatch)
+                    || (CurrentTokenType == TokenType.PrefixMatch)
+                    || (CurrentTokenType == TokenType.SuffixMatch)
+                    || (CurrentTokenType == TokenType.SubstringMatch))
                 {
                     AppendCurrent();
                     SkipSpace();
@@ -2007,7 +1996,7 @@ namespace Microsoft.Ajax.Utilities
                         }
                     }
                     else if (CurrentTokenType != TokenType.Identifier
-                      && CurrentTokenType != TokenType.String)
+                             && CurrentTokenType != TokenType.String)
                     {
                         ReportError(0, CssErrorCode.ExpectedIdentifierOrString, CurrentTokenText);
                     }
@@ -2017,7 +2006,7 @@ namespace Microsoft.Ajax.Utilities
                 }
 
                 if (CurrentTokenType != TokenType.Character
-                  || CurrentTokenText != "]")
+                    || CurrentTokenText != "]")
                 {
                     ReportError(0, CssErrorCode.ExpectedClosingBracket, CurrentTokenText);
                 }
@@ -2032,9 +2021,9 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParsePseudo()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.Character
-              && CurrentTokenText == ":")
+                && CurrentTokenText == ":")
             {
                 Append(':');
                 NextToken();
@@ -2069,7 +2058,7 @@ namespace Microsoft.Ajax.Utilities
 
                         // don't forget the closing paren
                         if (CurrentTokenType != TokenType.Character
-                          || CurrentTokenText != ")")
+                            || CurrentTokenText != ")")
                         {
                             ReportError(0, CssErrorCode.ExpectedIdentifier, CurrentTokenText);
                         }
@@ -2088,7 +2077,7 @@ namespace Microsoft.Ajax.Utilities
                         // functions. So as long as the current token is a comma, keep on parsing
                         // expressions.
                         while (CurrentTokenType == TokenType.Character
-                            && CurrentTokenText == ",")
+                               && CurrentTokenText == ",")
                         {
                             AppendCurrent();
                             NextToken();
@@ -2096,7 +2085,7 @@ namespace Microsoft.Ajax.Utilities
                         }
 
                         if (CurrentTokenType != TokenType.Character
-                          || CurrentTokenText != ")")
+                            || CurrentTokenText != ")")
                         {
                             ReportError(0, CssErrorCode.ExpectedIdentifier, CurrentTokenText);
                         }
@@ -2115,10 +2104,10 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseExpression()
         {
-            Parsed parsed = Parsed.Empty;
-            while(true)
+            var parsed = Parsed.Empty;
+            while (true)
             {
-                switch(CurrentTokenType)
+                switch (CurrentTokenType)
                 {
                     case TokenType.Dimension:
                     case TokenType.Number:
@@ -2158,13 +2147,13 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseDeclaration()
         {
-            Parsed parsed = Parsed.Empty;
+            var parsed = Parsed.Empty;
 
             // see if the developer is using an IE hack of prefacing property names
             // with an asterisk -- IE seems to ignore it; other browsers will recognize
             // the invalid property name and ignore it.
             string prefix = null;
-            if (CurrentTokenType == TokenType.Character 
+            if (CurrentTokenType == TokenType.Character
                 && (CurrentTokenText == "*" || CurrentTokenText == "."))
             {
                 // spot a low-pri error because this is actually invalid CSS
@@ -2179,7 +2168,7 @@ namespace Microsoft.Ajax.Utilities
             if (CurrentTokenType == TokenType.Identifier)
             {
                 // save the property name
-                string propertyName = CurrentTokenText;
+                var propertyName = CurrentTokenText;
 
                 NewLine();
                 if (prefix != null)
@@ -2194,7 +2183,7 @@ namespace Microsoft.Ajax.Utilities
                 SkipSpaceComment();
 
                 if (CurrentTokenType != TokenType.Character
-                  || CurrentTokenText != ":")
+                    || CurrentTokenText != ":")
                 {
                     ReportError(0, CssErrorCode.ExpectedColon, CurrentTokenText);
                     SkipToEndOfDeclaration();
@@ -2221,7 +2210,7 @@ namespace Microsoft.Ajax.Utilities
                     ParseExpr();
                     m_noOutput = false;
                 }
-                else 
+                else
                 {
                     m_parsingColorValue = MightContainColorNames(propertyName);
                     parsed = ParseExpr();
@@ -2245,7 +2234,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParsePrio()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.ImportantSymbol)
             {
                 if (Settings.OutputMode == OutputMode.MultipleLines)
@@ -2296,12 +2285,12 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseExpr()
         {
-            Parsed parsed = ParseTerm(false);
+            var parsed = ParseTerm(false);
             if (parsed == Parsed.True)
             {
                 while (!m_scanner.EndOfFile)
                 {
-                    Parsed parsedOp = ParseOperator();
+                    var parsedOp = ParseOperator();
                     if (parsedOp != Parsed.False)
                     {
                         if (ParseTerm(parsedOp == Parsed.Empty) == Parsed.False)
@@ -2316,20 +2305,20 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseFunctionParameters()
         {
-            Parsed parsed = ParseTerm(false);
+            var parsed = ParseTerm(false);
             if (parsed == Parsed.True)
             {
                 while (!m_scanner.EndOfFile)
                 {
                     if (CurrentTokenType == TokenType.Character
-                      && CurrentTokenText == "=")
+                        && CurrentTokenText == "=")
                     {
                         AppendCurrent();
                         SkipSpace();
                         ParseTerm(false);
                     }
 
-                    Parsed parsedOp = ParseOperator();
+                    var parsedOp = ParseOperator();
                     if (parsedOp != Parsed.False)
                     {
                         if (ParseTerm(parsedOp == Parsed.Empty) == Parsed.False)
@@ -2340,8 +2329,8 @@ namespace Microsoft.Ajax.Utilities
                 }
             }
             else if (parsed == Parsed.False
-              && CurrentTokenType == TokenType.Character
-              && CurrentTokenText == ")")
+                     && CurrentTokenType == TokenType.Character
+                     && CurrentTokenText == ")")
             {
                 // it's okay to have no parameters in functions
                 parsed = Parsed.Empty;
@@ -2349,11 +2338,11 @@ namespace Microsoft.Ajax.Utilities
             return parsed;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private Parsed ParseTerm(bool wasEmpty)
         {
-            Parsed parsed = Parsed.False;
-            bool hasUnary = false;
+            var parsed = Parsed.False;
+            var hasUnary = false;
             if (CurrentTokenType == TokenType.Character
                 && (CurrentTokenText == "-" || CurrentTokenText == "+"))
             {
@@ -2400,7 +2389,7 @@ namespace Microsoft.Ajax.Utilities
                 case TokenType.String:
                 case TokenType.Identifier:
                 case TokenType.Uri:
-                //case TokenType.RGB:
+                    //case TokenType.RGB:
                 case TokenType.UnicodeRange:
                     if (hasUnary)
                     {
@@ -2552,7 +2541,7 @@ namespace Microsoft.Ajax.Utilities
                             ReportError(0, CssErrorCode.ExpectedClosingParenthesis, CurrentTokenText);
                         }
                     }
-                    else if ( CurrentTokenText == "%")
+                    else if (CurrentTokenText == "%")
                     {
                         // see if this is the start of a replacement token
                         UpdateIfReplacementToken();
@@ -2593,7 +2582,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseProgId()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.ProgId)
             {
                 ReportError(4, CssErrorCode.ProgIdIEOnly);
@@ -2614,7 +2603,7 @@ namespace Microsoft.Ajax.Utilities
                     SkipSpace();
 
                     if (CurrentTokenType != TokenType.Character
-                      && CurrentTokenText != "=")
+                        && CurrentTokenText != "=")
                     {
                         ReportError(0, CssErrorCode.ExpectedEqualSign, CurrentTokenText);
                     }
@@ -2628,7 +2617,7 @@ namespace Microsoft.Ajax.Utilities
                     }
 
                     if (CurrentTokenType == TokenType.Character
-                      && CurrentTokenText == ",")
+                        && CurrentTokenText == ",")
                     {
                         Append(',');
                         SkipSpace();
@@ -2640,7 +2629,7 @@ namespace Microsoft.Ajax.Utilities
 
                 // make sure we're at the close paren
                 if (CurrentTokenType == TokenType.Character
-                  && CurrentTokenText == ")")
+                    && CurrentTokenText == ")")
                 {
                     Append(')');
                     SkipSpace();
@@ -2670,7 +2659,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseFunction()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.Function)
             {
                 var functionText = GetRoot(CurrentTokenText);
@@ -2719,8 +2708,9 @@ namespace Microsoft.Ajax.Utilities
             return parsed;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "we want lower-case output")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
+            Justification = "we want lower-case output")]
         private Parsed ParseRgb()
         {
             var parsed = Parsed.False;
@@ -2843,7 +2833,8 @@ namespace Microsoft.Ajax.Utilities
                         {
                             // percentage
                             float percentageValue;
-                            if (tokenText.Substring(0, tokenText.Length - 1).TryParseSingleInvariant(out percentageValue))
+                            if (tokenText.Substring(0, tokenText.Length - 1)
+                                .TryParseSingleInvariant(out percentageValue))
                             {
                                 percentageValue *= (negateNumber ? -1 : 1);
                                 if (percentageValue < 0)
@@ -2858,7 +2849,7 @@ namespace Microsoft.Ajax.Utilities
                                 }
                                 else
                                 {
-                                    rgb[ndx] = System.Convert.ToInt32(percentageValue * 255 / 100);
+                                    rgb[ndx] = System.Convert.ToInt32(percentageValue*255/100);
                                 }
                             }
                             else
@@ -2921,7 +2912,8 @@ namespace Microsoft.Ajax.Utilities
             return parsed;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "we want lower-case output")]
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
+            Justification = "we want lower-case output")]
         private Parsed ParseExpressionFunction()
         {
             var parsed = Parsed.False;
@@ -2937,12 +2929,12 @@ namespace Microsoft.Ajax.Utilities
                 // need a full-blown JS-parser to crunch it properly. Kinda scary.
                 // Start the parenLevel at 0 because the "expression(" token contains the first paren.
                 var jsBuilder = new StringBuilder();
-                int parenLevel = 0;
+                var parenLevel = 0;
 
                 while (!m_scanner.EndOfFile
-                  && (CurrentTokenType != TokenType.Character
-                    || CurrentTokenText != ")"
-                    || parenLevel > 0))
+                       && (CurrentTokenType != TokenType.Character
+                           || CurrentTokenText != ")"
+                           || parenLevel > 0))
                 {
                     if (CurrentTokenType == TokenType.Function)
                     {
@@ -2980,7 +2972,7 @@ namespace Microsoft.Ajax.Utilities
                 if (Settings.MinifyExpressions)
                 {
                     // we want to minify the javascript expressions
-                    JSParser jsParser = new JSParser();
+                    var jsParser = new JSParser();
 
                     // hook the error handler and set the "contains errors" flag to false.
                     // the handler will set the value to true if it encounters any errors
@@ -2992,7 +2984,8 @@ namespace Microsoft.Ajax.Utilities
                     };
 
                     // parse the source as an expression using our common JS settings
-                    var block = jsParser.Parse(new DocumentContext(expressionCode) { FileContext = this.FileContext }, m_jsSettings);
+                    var block = jsParser.Parse(new DocumentContext(expressionCode) {FileContext = this.FileContext},
+                        m_jsSettings);
 
                     // if we got back a parsed block and there were no errors, output the minified code.
                     // if we didn't get back the block, or if there were any errors at all, just output
@@ -3030,7 +3023,7 @@ namespace Microsoft.Ajax.Utilities
 
         private Parsed ParseHexcolor()
         {
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
 
             if (CurrentTokenType == TokenType.Hash)
             {
@@ -3054,7 +3047,7 @@ namespace Microsoft.Ajax.Utilities
                     parsed = Parsed.True;
 
                     // we won't do any conversion on the #aarrggbb formats to make them smaller.
-                    string hexColor = CrunchHexColor(colorHash, Settings.ColorNames, m_noColorAbbreviation);
+                    var hexColor = CrunchHexColor(colorHash, Settings.ColorNames, m_noColorAbbreviation);
                     Append(hexColor);
 
                     if (appendEscapedTab)
@@ -3164,7 +3157,9 @@ namespace Microsoft.Ajax.Utilities
                 // keep going while we have product operators
                 // "mod" isn't a final operator, but it was in earlier drafts so keep allowing it.
                 while ((CurrentTokenType == TokenType.Character && (CurrentTokenText == "*" || CurrentTokenText == "/"))
-                    || (CurrentTokenType == TokenType.Identifier && string.Compare(CurrentTokenText, "mod", StringComparison.OrdinalIgnoreCase) == 0))
+                       ||
+                       (CurrentTokenType == TokenType.Identifier &&
+                        string.Compare(CurrentTokenText, "mod", StringComparison.OrdinalIgnoreCase) == 0))
                 {
                     if (CurrentTokenText == "*" || CurrentTokenText == "/")
                     {
@@ -3250,14 +3245,15 @@ namespace Microsoft.Ajax.Utilities
             return parsed;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification="we want lower-case output")]
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
+            Justification = "we want lower-case output")]
         private Parsed ParseMinMax()
         {
             // return false if the function isn't min or max
-            Parsed parsed = Parsed.False;
+            var parsed = Parsed.False;
             if (CurrentTokenType == TokenType.Function
                 && (string.Compare(CurrentTokenText, "min(", StringComparison.OrdinalIgnoreCase) == 0
-                || string.Compare(CurrentTokenText, "max(", StringComparison.OrdinalIgnoreCase) == 0))
+                    || string.Compare(CurrentTokenText, "max(", StringComparison.OrdinalIgnoreCase) == 0))
             {
                 // output lower-case version and skip any space
                 Append(CurrentTokenText.ToLowerInvariant());
@@ -3268,8 +3264,8 @@ namespace Microsoft.Ajax.Utilities
 
                 // comma-delimited sums continue
                 while (parsed == Parsed.True
-                    && CurrentTokenType == TokenType.Character
-                    && CurrentTokenText == ",")
+                       && CurrentTokenType == TokenType.Character
+                       && CurrentTokenText == ",")
                 {
                     AppendCurrent();
                     SkipSpace();
@@ -3294,7 +3290,8 @@ namespace Microsoft.Ajax.Utilities
             return parsed;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "we want lower-case output")]
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
+            Justification = "we want lower-case output")]
         private Parsed ParseCalc()
         {
             var parsed = Parsed.False;
@@ -3371,8 +3368,8 @@ namespace Microsoft.Ajax.Utilities
                 if (CurrentTokenType == TokenType.Comment)
                 {
                     // check for important comment
-                    string commentText = CurrentTokenText;
-                    bool importantComment = commentText.StartsWith("/*!", StringComparison.Ordinal);
+                    var commentText = CurrentTokenText;
+                    var importantComment = commentText.StartsWith("/*!", StringComparison.Ordinal);
                     if (importantComment)
                     {
                         // get rid of the exclamation mark in some situations
@@ -3382,8 +3379,8 @@ namespace Microsoft.Ajax.Utilities
                     // if the comment mode is none, don't ever output it.
                     // if the comment mode is all, always output it.
                     // otherwise only output it if it is an important comment.
-                    bool writeComment = Settings.CommentMode == CssComment.All
-                        || (importantComment && Settings.CommentMode != CssComment.None);
+                    var writeComment = Settings.CommentMode == CssComment.All
+                                       || (importantComment && Settings.CommentMode != CssComment.None);
 
                     if (!importantComment)
                     {
@@ -3396,7 +3393,7 @@ namespace Microsoft.Ajax.Utilities
                         else
                         {
                             // see if this is a value-replacement id
-                            Match match = s_valueReplacement.Match(commentText);
+                            var match = s_valueReplacement.Match(commentText);
                             if (match.Success)
                             {
                                 // check all the resource strings objects to see if one is a match.
@@ -3406,7 +3403,7 @@ namespace Microsoft.Ajax.Utilities
                                 if (resourceList.Count > 0)
                                 {
                                     // get the id of the string we want to substitute
-                                    string ident = match.Result("${id}");
+                                    var ident = match.Result("${id}");
 
                                     // walk the list BACKWARDS so later resource string objects override previous ones
                                     for (var ndx = resourceList.Count - 1; ndx >= 0; --ndx)
@@ -3553,7 +3550,7 @@ namespace Microsoft.Ajax.Utilities
             // reset the skipped-space flag
             m_skippedSpace = false;
 
-            bool tokenIsSpace = CurrentTokenType == TokenType.Space;
+            var tokenIsSpace = CurrentTokenType == TokenType.Space;
             var encounteredNewLine = m_encounteredNewLine;
             // while space, keep stepping
             while (CurrentTokenType == TokenType.Space)
@@ -3569,18 +3566,18 @@ namespace Microsoft.Ajax.Utilities
 
         private void SkipToEndOfStatement()
         {
-            bool possibleSpace = false;
+            var possibleSpace = false;
             // skip to next semicolon or next block
             // AND honor opening/closing pairs of (), [], and {}
             while (!m_scanner.EndOfFile
-                && (CurrentTokenType != TokenType.Character || CurrentTokenText != ";"))
+                   && (CurrentTokenType != TokenType.Character || CurrentTokenText != ";"))
             {
                 // if the token is one of the characters we need to match closing characters...
                 if (CurrentTokenType == TokenType.Character
                     && (CurrentTokenText == "(" || CurrentTokenText == "[" || CurrentTokenText == "{"))
                 {
                     // see if this is this a block -- if so, we'll bail when we're done
-                    bool isBlock = (CurrentTokenText == "{");
+                    var isBlock = (CurrentTokenText == "{");
 
                     SkipToClose();
 
@@ -3611,12 +3608,12 @@ namespace Microsoft.Ajax.Utilities
 
         private void SkipToEndOfDeclaration()
         {
-            bool possibleSpace = false;
+            var possibleSpace = false;
             // skip to end of declaration: ; or }
             // BUT honor opening/closing pairs of (), [], and {}
             while (!m_scanner.EndOfFile
-                && (CurrentTokenType != TokenType.Character
-                  || (CurrentTokenText != ";" && CurrentTokenText != "}")))
+                   && (CurrentTokenType != TokenType.Character
+                       || (CurrentTokenText != ";" && CurrentTokenText != "}")))
             {
                 // if the token is one of the characters we need to match closing characters...
                 if (CurrentTokenType == TokenType.Character
@@ -3658,7 +3655,7 @@ namespace Microsoft.Ajax.Utilities
 
         private void SkipToClose()
         {
-            bool possibleSpace = false;
+            var possibleSpace = false;
             string closingText;
             switch (CurrentTokenText)
             {
@@ -3693,7 +3690,7 @@ namespace Microsoft.Ajax.Utilities
             }
 
             while (!m_scanner.EndOfFile
-                && (CurrentTokenType != TokenType.Character || CurrentTokenText != closingText))
+                   && (CurrentTokenType != TokenType.Character || CurrentTokenText != closingText))
             {
                 // if the token is one of the characters we need to match closing characters...
                 if (CurrentTokenType == TokenType.Character
@@ -3753,23 +3750,23 @@ namespace Microsoft.Ajax.Utilities
         private bool AppendCurrent()
         {
             return Append(
-                CurrentTokenText, 
+                CurrentTokenText,
                 CurrentTokenType);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"),
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode"),
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"),
+         SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode"),
+         SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         private bool Append(object obj, TokenType tokenType)
         {
-            bool outputText = false;
-            bool textEndsInEscapeSequence = false;
+            var outputText = false;
+            var textEndsInEscapeSequence = false;
 
             // if the no-output flag is true, don't output anything
             // or process value replacement comments
             if (!m_noOutput)
             {
-                string text = obj.ToString();
+                var text = obj.ToString();
 
                 // first if there are replacement tokens in the settings, then we'll want to
                 // replace any tokens with the appropriate replacement values
@@ -3860,9 +3857,9 @@ namespace Microsoft.Ajax.Utilities
                     }
 
                     // loop through remaining characters, escaping any invalid nmchar characters
-                    for(var ndx = firstIndex + 1; ndx < text.Length; ++ndx)
+                    for (var ndx = firstIndex + 1; ndx < text.Length; ++ndx)
                     {
-                        char nextChar = text[ndx];
+                        var nextChar = text[ndx];
 
                         // anything at or above 0x80, then it's okay and doesnt need to be escaped
                         if (nextChar < 0x80)
@@ -3881,11 +3878,11 @@ namespace Microsoft.Ajax.Utilities
                                 ++ndx;
                             }
                             else if (nextChar != '-'
-                                && nextChar != '_'
-                                && nextChar != ' '
-                                && ('0' > nextChar || nextChar > '9')
-                                && ('a' > nextChar || nextChar > 'z')
-                                && ('A' > nextChar || nextChar > 'Z'))
+                                     && nextChar != '_'
+                                     && nextChar != ' '
+                                     && ('0' > nextChar || nextChar > '9')
+                                     && ('a' > nextChar || nextChar > 'z')
+                                     && ('A' > nextChar || nextChar > 'Z'))
                             {
                                 // need to escape this character -- create the builder if we haven't already
                                 if (escapedBuilder == null)
@@ -3901,7 +3898,7 @@ namespace Microsoft.Ajax.Utilities
                                     // digit in the previous escaped sequence.
                                     // and if the first character is a space, we need to protect it from the
                                     // previous escaped sequence with another space, too.
-                                    string unescapedSubstring = text.Substring(startIndex, ndx - startIndex);
+                                    var unescapedSubstring = text.Substring(startIndex, ndx - startIndex);
                                     if ((protectNextHexCharacter && CssScanner.IsH(unescapedSubstring[0]))
                                         || (textEndsInEscapeSequence && unescapedSubstring[0] == ' '))
                                     {
@@ -3932,8 +3929,8 @@ namespace Microsoft.Ajax.Utilities
                             // digit in the previous escaped sequence.
                             // same for spaces! a trailing space will be part of the escape, so if we need
                             // a real space to follow, need to make sure there are TWO.
-                            string unescapedSubstring = text.Substring(startIndex);
-                            if ((protectNextHexCharacter && CssScanner.IsH(unescapedSubstring[0])) 
+                            var unescapedSubstring = text.Substring(startIndex);
+                            if ((protectNextHexCharacter && CssScanner.IsH(unescapedSubstring[0]))
                                 || unescapedSubstring[0] == ' ')
                             {
                                 escapedBuilder.Append(' ');
@@ -4014,7 +4011,7 @@ namespace Microsoft.Ajax.Utilities
                         // UNLESS the comment mode is none. If it IS none, bail now.
                         if (Settings.CommentMode == CssComment.None)
                         {
-                            return false;    
+                            return false;
                         }
 
                         // this is an important comment that we always want to output
@@ -4049,7 +4046,7 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // not important, and not sharepoint.
                         // check to see if it's a special value-replacement comment
-                        Match match = s_valueReplacement.Match(CurrentTokenText);
+                        var match = s_valueReplacement.Match(CurrentTokenText);
                         if (match.Success)
                         {
                             m_valueReplacement = null;
@@ -4058,7 +4055,7 @@ namespace Microsoft.Ajax.Utilities
                             if (resourceList.Count > 0)
                             {
                                 // it is! see if we have a replacement string
-                                string id = match.Result("${id}");
+                                var id = match.Result("${id}");
 
                                 // if we have resource strings in the settings, check each one for the
                                 // id and set the value replacement field to the value.
@@ -4079,11 +4076,8 @@ namespace Microsoft.Ajax.Utilities
                                 // for the next time we encounter a value
                                 return false;
                             }
-                            else
-                            {
-                                // make sure the comment is normalized
-                                text = NormalizedValueReplacementComment(text);
-                            }
+                            // make sure the comment is normalized
+                            text = NormalizedValueReplacementComment(text);
                         }
                         else if (Settings.CommentMode != CssComment.All)
                         {
@@ -4096,12 +4090,12 @@ namespace Microsoft.Ajax.Utilities
                     isImportant = text.StartsWith("/*!", StringComparison.Ordinal);
                 }
                 else if (m_parsingColorValue
-                    && (tokenType == TokenType.Identifier || tokenType == TokenType.ReplacementToken))
+                         && (tokenType == TokenType.Identifier || tokenType == TokenType.ReplacementToken))
                 {
                     if (!text.StartsWith("#", StringComparison.Ordinal))
                     {
-                        bool nameConvertedToHex = false;
-                        string lowerCaseText = text.ToLowerInvariant();
+                        var nameConvertedToHex = false;
+                        var lowerCaseText = text.ToLowerInvariant();
                         string rgbString;
 
                         switch (Settings.ColorNames)
@@ -4122,7 +4116,8 @@ namespace Microsoft.Ajax.Utilities
                                 // convert all non-strict name to hex, AND any strict names to hex if the hex is
                                 // shorter than the name. So check the set that contains all non-strict name-to-hex
                                 // values and all the strict name-to-hex values where hex is shorter than name.
-                                if (ColorSlice.StrictHexShorterThanNameAndAllNonStrict.TryGetValue(lowerCaseText, out rgbString))
+                                if (ColorSlice.StrictHexShorterThanNameAndAllNonStrict.TryGetValue(lowerCaseText,
+                                    out rgbString))
                                 {
                                     text = rgbString;
                                     nameConvertedToHex = true;
@@ -4213,7 +4208,7 @@ namespace Microsoft.Ajax.Utilities
                         {
                             AddNewLine();
                         }
-                        
+
                         // reset the flag
                         m_forceNewLine = false;
                     }
@@ -4271,7 +4266,7 @@ namespace Microsoft.Ajax.Utilities
             // (the slash followed by six hex digits), we might
             // need to append a space before the next valid character if it is a valid hex digit.
             // (we will always need to append another space after an escape sequence if the next valid character is a space)
-            var hex = "\\{0:x}".FormatInvariant((int)character);
+            var hex = "\\{0:x}".FormatInvariant((int) character);
             sb.Append(hex);
             return hex.Length < 7;
         }
@@ -4337,7 +4332,7 @@ namespace Microsoft.Ajax.Utilities
 
         #region color methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         private static string CrunchHexColor(string hexColor, CssColor colorNames, bool noAbbr)
         {
             if (!noAbbr)
@@ -4384,7 +4379,7 @@ namespace Microsoft.Ajax.Utilities
 
         private static bool MightContainColorNames(string propertyName)
         {
-            bool hasColor = (propertyName.EndsWith("color", StringComparison.Ordinal));
+            var hasColor = (propertyName.EndsWith("color", StringComparison.Ordinal));
             if (!hasColor)
             {
                 switch (propertyName)
@@ -4420,20 +4415,20 @@ namespace Microsoft.Ajax.Utilities
             //        3 == this can lead to performance problems
             //        4 == this is just not right
 
-            string message = ErrorFormat(errorNumber).FormatInvariant(arguments);
+            var message = ErrorFormat(errorNumber).FormatInvariant(arguments);
             Debug.Assert(!message.IsNullOrWhiteSpace());
-            var error = new ContextError()
-                {
-                    IsError = severity < 2,
-                    Severity = severity,
-                    Subcategory = ContextError.GetSubcategory(severity),
-                    File = FileContext,
-                    ErrorNumber = (int)errorNumber,
-                    ErrorCode = "CSS{0}".FormatInvariant(((int)errorNumber) & (0xffff)),
-                    StartLine = context.IfNotNull(c => c.Start.Line),
-                    StartColumn = context.IfNotNull(c => c.Start.Char),
-                    Message = message,
-                };
+            var error = new ContextError
+            {
+                IsError = severity < 2,
+                Severity = severity,
+                Subcategory = ContextError.GetSubcategory(severity),
+                File = FileContext,
+                ErrorNumber = (int) errorNumber,
+                ErrorCode = "CSS{0}".FormatInvariant(((int) errorNumber) & (0xffff)),
+                StartLine = context.IfNotNull(c => c.Start.Line),
+                StartColumn = context.IfNotNull(c => c.Start.Char),
+                Message = message,
+            };
 
             // but warnings we want to just report and carry on
             OnCssError(error);
@@ -4455,10 +4450,10 @@ namespace Microsoft.Ajax.Utilities
                 // that list, fire the event to whomever is listening for it.
                 if (!Settings.IgnoreErrorCollection.Contains(cssError.ErrorCode))
                 {
-                    CssError(this, new ContextErrorEventArgs()
-                        {
-                            Error = cssError
-                        });
+                    CssError(this, new ContextErrorEventArgs
+                    {
+                        Error = cssError
+                    });
                 }
             }
         }
@@ -4473,13 +4468,12 @@ namespace Microsoft.Ajax.Utilities
 //        private static Regex s_regexNewlines = new Regex(
 //            @"\r\n|\f|\r|\n",
 //            RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-
-        static string NormalizedValueReplacementComment(string source)
+        private static string NormalizedValueReplacementComment(string source)
         {
             return s_valueReplacement.Replace(source, "/*[${id}]*/");
         }
 
-        static bool CommentContainsText(string comment)
+        private static bool CommentContainsText(string comment)
         {
             for (var ndx = 0; ndx < comment.Length; ++ndx)
             {
@@ -4493,7 +4487,7 @@ namespace Microsoft.Ajax.Utilities
             return false;
         }
 
-        string NormalizeImportantComment(string source)
+        private string NormalizeImportantComment(string source)
         {
             // if this important comment does not contain any text, assume it's for a comment hack
             // and return a normalized string without the exclamation mark.
@@ -4524,6 +4518,7 @@ namespace Microsoft.Ajax.Utilities
             }
             return source;
         }
+
         #endregion
 
         #region private enums

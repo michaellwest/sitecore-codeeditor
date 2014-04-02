@@ -44,7 +44,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         protected void EditCode(ClientPipelineArgs args)
         {
             Assert.ArgumentNotNull(args, "args");
-            var itemNotNull = Client.GetItemNotNull(Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),
+            var itemNotNull = Client.GetItemNotNull(Sitecore.Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),
                 Version.Parse(ItemVersion));
             MediaItem mediaItem = itemNotNull;
             if (!mediaItem.HasMediaStream(FieldID) && mediaItem.FilePath.Length == 0)
@@ -145,7 +145,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             Assert.ArgumentNotNull(output, "output");
             var mediaItem =
                 (MediaItem)
-                    Client.ContentDatabase.GetItem(Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),
+                    Client.ContentDatabase.GetItem(Sitecore.Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),
                         Version.Parse(ItemVersion));
 
             var content = String.Empty;

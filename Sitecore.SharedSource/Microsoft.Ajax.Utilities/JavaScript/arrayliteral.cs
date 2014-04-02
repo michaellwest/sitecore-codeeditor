@@ -16,13 +16,13 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public sealed class ArrayLiteral : Expression
     {
         private AstNodeList m_elements;
 
-        public AstNodeList Elements 
+        public AstNodeList Elements
         {
             get { return m_elements; }
             set
@@ -39,7 +39,7 @@ namespace Microsoft.Ajax.Utilities
         {
             get
             {
-                int count = 0;
+                var count = 0;
                 foreach (var element in m_elements)
                 {
                     if (!element.IsConstant)
@@ -80,10 +80,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(Elements);
-            }
+            get { return EnumerateNonNullNodes(Elements); }
         }
 
         public override void Accept(IVisitor visitor)
@@ -105,16 +102,13 @@ namespace Microsoft.Ajax.Utilities
                     Elements = null;
                     return true;
                 }
-                else
+                // if the new node isn't an AstNodeList, then ignore the call
+                var newList = newNode as AstNodeList;
+                if (newList != null)
                 {
-                    // if the new node isn't an AstNodeList, then ignore the call
-                    AstNodeList newList = newNode as AstNodeList;
-                    if (newList != null)
-                    {
-                        // replace it
-                        Elements = newList;
-                        return true;
-                    }
+                    // replace it
+                    Elements = newList;
+                    return true;
                 }
             }
             return false;
@@ -122,10 +116,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override bool IsConstant
         {
-            get
-            {
-                return Elements == null ? true : Elements.IsConstant;
-            }
+            get { return Elements == null ? true : Elements.IsConstant; }
         }
     }
 }

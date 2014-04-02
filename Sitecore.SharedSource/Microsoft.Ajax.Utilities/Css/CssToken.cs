@@ -14,23 +14,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
-{
-    using System.ComponentModel;
+using System.ComponentModel;
 
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css
+{
     /// <summary>
     /// Token class represents a parsed token of information consumed by the parser
     /// </summary>
     internal class CssToken
     {
-        private TokenType m_tokenType;
-        public TokenType TokenType { get { return m_tokenType; } }
+        private readonly TokenType m_tokenType;
 
-        private string m_text;
-        public string Text { get { return m_text; } }
+        public TokenType TokenType
+        {
+            get { return m_tokenType; }
+        }
 
-        private CssContext m_context;
-        public CssContext Context { get { return m_context; } }
+        private readonly string m_text;
+
+        public string Text
+        {
+            get { return m_text; }
+        }
+
+        private readonly CssContext m_context;
+
+        public CssContext Context
+        {
+            get { return m_context; }
+        }
 
         public CssToken(TokenType tokenType, [Localizable(false)] string text, CssContext context)
         {
@@ -51,12 +63,14 @@ namespace Microsoft.Ajax.Utilities
         {
             get { return m_start; }
         }
+
         private Position m_start;
 
         public Position End
         {
             get { return m_end; }
         }
+
         private Position m_end;
 
         internal CssContext()
@@ -79,9 +93,9 @@ namespace Microsoft.Ajax.Utilities
         public CssContext Clone()
         {
             return new CssContext(
-              m_start.Clone(),
-              m_end.Clone()
-              );
+                m_start.Clone(),
+                m_end.Clone()
+                );
         }
 
         public void Reset(int line, int column)
@@ -97,12 +111,14 @@ namespace Microsoft.Ajax.Utilities
         {
             get { return m_line; }
         }
+
         private int m_line;
 
         public int Char
         {
             get { return m_char; }
         }
+
         private int m_char;
 
         public Position()
@@ -198,7 +214,7 @@ namespace Microsoft.Ajax.Utilities
         RightMiddleSymbol,
         RightBottomSymbol,
 
-		AspNetBlock,
+        AspNetBlock,
         ReplacementToken,
 
         Error = -1

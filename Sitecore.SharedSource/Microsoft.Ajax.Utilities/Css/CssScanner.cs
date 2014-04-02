@@ -14,13 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
-{
-    using System;
-    using System.IO;
-    using System.Text;
-    using System.Text.RegularExpressions;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css
+{
     /// <summary>
     /// Scanner takes input stream and breaks it into Tokens
     /// </summary>
@@ -39,27 +40,36 @@ namespace Microsoft.Ajax.Utilities
 
         #endregion
 
-        private TextReader m_reader;
+        private readonly TextReader m_reader;
         private string m_readAhead;
 
         private char m_currentChar;
 
         private string m_rawNumber;
-        public string RawNumber { get { return m_rawNumber; } }
 
-        private CssContext m_context;
+        public string RawNumber
+        {
+            get { return m_rawNumber; }
+        }
 
-        private static Regex s_leadingZeros = new Regex("^0*([0-9]+?)$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private readonly CssContext m_context;
 
-        private static Regex s_trailingZeros = new Regex("^([0-9]+?)0*$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex s_leadingZeros = new Regex("^0*([0-9]+?)$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        private static Regex s_sourceDirective = new Regex(@"#SOURCE\s+(?<line>\d+)\s+(?<col>\d+)\s+(?<path>.*)\s*\*/", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex s_trailingZeros = new Regex("^([0-9]+?)0*$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static readonly Regex s_sourceDirective =
+            new Regex(@"#SOURCE\s+(?<line>\d+)\s+(?<col>\d+)\s+(?<path>.*)\s*\*/",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
         public bool AllowEmbeddedAspNetBlocks { get; set; }
 
         public bool GotEndOfLine { get; set; }
 
-        private bool m_isAtEOF;// = false;
+        private bool m_isAtEOF; // = false;
+
         public bool EndOfFile
         {
             get { return m_isAtEOF; }
@@ -76,7 +86,8 @@ namespace Microsoft.Ajax.Utilities
             NextChar();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification="Big case statement")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "Big case statement")]
         public CssToken NextToken()
         {
             GotEndOfLine = false;
@@ -148,7 +159,7 @@ namespace Microsoft.Ajax.Utilities
                         {
                             // identifier in CSS2.1 and CSS3 can start with a hyphen
                             // to indicate vendor-specific identifiers.
-                            string ident = GetIdent();
+                            var ident = GetIdent();
                             if (ident != null)
                             {
                                 // vendor-specific identifier
@@ -253,7 +264,7 @@ namespace Microsoft.Ajax.Utilities
 
         #region Scan... methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private CssToken ScanComment()
         {
             CssToken token = null;
@@ -262,10 +273,10 @@ namespace Microsoft.Ajax.Utilities
             {
                 NextChar();
                 // everything is a comment until we get to */
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 sb.Append("/*");
 
-                bool terminated = false;
+                var terminated = false;
                 while (m_currentChar != '\0')
                 {
                     sb.Append(m_currentChar);
@@ -299,7 +310,7 @@ namespace Microsoft.Ajax.Utilities
                 {
                     ReportError(0, CssErrorCode.UnterminatedComment);
                 }
-                
+
                 var comment = sb.ToString();
                 if (string.Compare(comment, 2, "/#SOURCE", 0, 8, StringComparison.OrdinalIgnoreCase) == 0)
                 {
@@ -361,11 +372,11 @@ namespace Microsoft.Ajax.Utilities
                             DirectiveSkipSpace();
 
                             // pull the line and column numbers. Must be positive integers greater than zero.
-                            int line = DirectiveScanInteger();
+                            var line = DirectiveScanInteger();
                             if (line > 0)
                             {
                                 DirectiveSkipSpace();
-                                int column = DirectiveScanInteger();
+                                var column = DirectiveScanInteger();
                                 if (column > 0)
                                 {
                                     DirectiveSkipSpace();
@@ -447,8 +458,8 @@ namespace Microsoft.Ajax.Utilities
 
         private CssToken ScanAspNetBlock()
         {
-            StringBuilder sb = new StringBuilder();
-            char prev = ' ';
+            var sb = new StringBuilder();
+            var prev = ' ';
             while (m_currentChar != '\0' &&
                    !(m_currentChar == '>' &&
                      prev == '%'))
@@ -598,19 +609,19 @@ namespace Microsoft.Ajax.Utilities
         private CssToken ScanString()
         {
             // get the string literal
-            string stringLiteral = GetString();
+            var stringLiteral = GetString();
 
             // the literal must include both delimiters to be valid, so it has to AT LEAST
             // be two characters long. And then the first and the last characters should be
             // the same
-            bool isValidString = (stringLiteral.Length >= 2
-                && stringLiteral[0] == stringLiteral[stringLiteral.Length - 1]);
+            var isValidString = (stringLiteral.Length >= 2
+                                 && stringLiteral[0] == stringLiteral[stringLiteral.Length - 1]);
 
             return new CssToken(
-              (isValidString ? TokenType.String : TokenType.Error),
-              stringLiteral,
-              m_context
-              );
+                (isValidString ? TokenType.String : TokenType.Error),
+                stringLiteral,
+                m_context
+                );
         }
 
         private CssToken ScanHash()
@@ -631,24 +642,24 @@ namespace Microsoft.Ajax.Utilities
                 : new CssToken(TokenType.Hash, '#' + name, m_context);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private CssToken ScanAtKeyword()
         {
             NextChar();
 
             // by default we're just going to return a character token for the "@" sign -- unless it
             // is followed by an identifier, in which case it's an at-symbol.
-            TokenType tokenType = TokenType.Character;
+            var tokenType = TokenType.Character;
 
             // if the next character is a hyphen, then we're going to want to pull it off and see if the
             // NEXT token is an identifier. If it's not, we'll stuff the hyphen back into the read buffer.
-            bool startsWithHyphen = m_currentChar == '-';
+            var startsWithHyphen = m_currentChar == '-';
             if (startsWithHyphen)
             {
                 NextChar();
             }
 
-            string ident = GetIdent();
+            var ident = GetIdent();
             if (ident != null)
             {
                 // if this started with a hyphen, then we need to add it to the start of our identifier now
@@ -775,7 +786,7 @@ namespace Microsoft.Ajax.Utilities
             CssToken token = null;
             NextChar();
 
-            string w = GetW();
+            var w = GetW();
             if (char.ToUpperInvariant(m_currentChar) == 'I')
             {
                 if (ReadString("IMPORTANT"))
@@ -796,21 +807,21 @@ namespace Microsoft.Ajax.Utilities
             return (token != null ? token : new CssToken(TokenType.Character, '!', m_context));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private CssToken ScanUnicodeRange()
         {
             // when called, the current character is the character *after* U+
             CssToken token = null;
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("U+");
 
-            bool hasQuestions = false;
-            int count = 0;
-            bool leadingZero = true;
-            int firstValue = 0;
+            var hasQuestions = false;
+            var count = 0;
+            var leadingZero = true;
+            var firstValue = 0;
             while (m_currentChar != '\0'
-                && count < 6
-                && (m_currentChar == '?' || (!hasQuestions && IsH(m_currentChar))))
+                   && count < 6
+                   && (m_currentChar == '?' || (!hasQuestions && IsH(m_currentChar))))
             {
                 // if this isn't a leading zero, reset the flag
                 if (leadingZero && m_currentChar != '0')
@@ -821,7 +832,7 @@ namespace Microsoft.Ajax.Utilities
                 if (m_currentChar == '?')
                 {
                     hasQuestions = true;
-                    
+
                     // assume the digit is an "F" for maximum value
                     firstValue = firstValue*16 + HValue('F');
                 }
@@ -871,7 +882,7 @@ namespace Microsoft.Ajax.Utilities
 
                     count = 0;
                     leadingZero = true;
-                    int secondValue = 0;
+                    var secondValue = 0;
                     while (m_currentChar != '\0' && count < 6 && IsH(m_currentChar))
                     {
                         // if this isn't a leading zero, reset the flag
@@ -880,7 +891,7 @@ namespace Microsoft.Ajax.Utilities
                             leadingZero = false;
                         }
 
-                        secondValue = secondValue * 16 + HValue(m_currentChar);
+                        secondValue = secondValue*16 + HValue(m_currentChar);
 
                         if (!leadingZero)
                         {
@@ -949,12 +960,12 @@ namespace Microsoft.Ajax.Utilities
             }
             else if (ReadString("URL("))
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 sb.Append("url(");
 
                 GetW();
 
-                string url = GetString();
+                var url = GetString();
                 if (url == null)
                 {
                     url = GetUrl();
@@ -970,10 +981,10 @@ namespace Microsoft.Ajax.Utilities
                         NextChar();
 
                         token = new CssToken(
-                          TokenType.Uri,
-                          sb.ToString(),
-                          m_context
-                          );
+                            TokenType.Uri,
+                            sb.ToString(),
+                            m_context
+                            );
                     }
                 }
             }
@@ -983,7 +994,7 @@ namespace Microsoft.Ajax.Utilities
         private CssToken ScanNum()
         {
             CssToken token = null;
-            string num = GetNum();
+            var num = GetNum();
             if (num != null)
             {
                 if (m_currentChar == '%')
@@ -993,17 +1004,17 @@ namespace Microsoft.Ajax.Utilities
                     // let's always keep the percentage on the number, even if it's
                     // zero -- some things require it (like the rgb function)
                     token = new CssToken(
-                      TokenType.Percentage,
-                      num + '%',
-                      m_context
-                      );
+                        TokenType.Percentage,
+                        num + '%',
+                        m_context
+                        );
 
                     // and make sure the "raw number" we keep has it as well
                     m_rawNumber += '%';
                 }
                 else
                 {
-                    string dimen = GetIdent();
+                    var dimen = GetIdent();
                     if (dimen == null)
                     {
                         // if there is no identifier, it's a num.
@@ -1015,58 +1026,58 @@ namespace Microsoft.Ajax.Utilities
                         m_rawNumber += dimen;
 
                         // classify the dimension type
-                        TokenType tokenType = TokenType.Dimension;
+                        var tokenType = TokenType.Dimension;
                         switch (dimen.ToUpperInvariant())
                         {
-                            case "EM":          // font-size of the element
-                            case "EX":          // x-height of the element's font
-                            case "CH":          // width of the zero glyph in the element's font
-                            case "REM":         // font-size of the root element
-                            case "VW":          // viewport's width
-                            case "VH":          // viewport's height
-                            case "VM":          // viewport width or height, whichever is smaller of the two (use VMIN)
-                            case "VMIN":        // minimum of the viewport's height and width
-                            case "VMAX":        // maximum of the viewport's height and width
-                            case "FR":          // fraction of available space
-                            case "GR":          // grid unit
-                            case "GD":          // text grid unit
+                            case "EM": // font-size of the element
+                            case "EX": // x-height of the element's font
+                            case "CH": // width of the zero glyph in the element's font
+                            case "REM": // font-size of the root element
+                            case "VW": // viewport's width
+                            case "VH": // viewport's height
+                            case "VM": // viewport width or height, whichever is smaller of the two (use VMIN)
+                            case "VMIN": // minimum of the viewport's height and width
+                            case "VMAX": // maximum of the viewport's height and width
+                            case "FR": // fraction of available space
+                            case "GR": // grid unit
+                            case "GD": // text grid unit
                                 tokenType = TokenType.RelativeLength;
                                 break;
 
-                            case "CM":          // centimeters
-                            case "MM":          // millimeters
-                            case "IN":          // inches (1in == 2.54cm)
-                            case "PX":          // pixels (1px == 1/96in)
-                            case "PT":          // points (1pt == 1/72in)
-                            case "PC":          // picas (1pc == 12pt)
+                            case "CM": // centimeters
+                            case "MM": // millimeters
+                            case "IN": // inches (1in == 2.54cm)
+                            case "PX": // pixels (1px == 1/96in)
+                            case "PT": // points (1pt == 1/72in)
+                            case "PC": // picas (1pc == 12pt)
                                 tokenType = TokenType.AbsoluteLength;
                                 break;
 
-                            case "DEG":         // degrees (360deg == 1 full circle)
-                            case "GRAD":        // gradians (400grad == 1 full circle)
-                            case "RAD":         // radians (2*pi radians == 1 full circle)
-                            case "TURN":        // turns (1turn == 1 full circle)
+                            case "DEG": // degrees (360deg == 1 full circle)
+                            case "GRAD": // gradians (400grad == 1 full circle)
+                            case "RAD": // radians (2*pi radians == 1 full circle)
+                            case "TURN": // turns (1turn == 1 full circle)
                                 tokenType = TokenType.Angle;
                                 break;
 
-                            case "MS":          // milliseconds
-                            case "S":           // seconds
+                            case "MS": // milliseconds
+                            case "S": // seconds
                                 tokenType = TokenType.Time;
                                 break;
 
-                            case "DPI":         // dots per inch
-                            case "DPCM":        // dots per centimeter
-                            case "DPPX":        // dots per pixel
+                            case "DPI": // dots per inch
+                            case "DPCM": // dots per centimeter
+                            case "DPPX": // dots per pixel
                                 tokenType = TokenType.Resolution;
                                 break;
 
-                            case "HZ":          // hertz
-                            case "KHZ":         // kilohertz
+                            case "HZ": // hertz
+                            case "KHZ": // kilohertz
                                 tokenType = TokenType.Frequency;
                                 break;
 
-                            case "DB":          // decibel
-                            case "ST":          // semitones
+                            case "DB": // decibel
+                            case "ST": // semitones
                                 tokenType = TokenType.Speech;
                                 break;
                         }
@@ -1077,7 +1088,7 @@ namespace Microsoft.Ajax.Utilities
                         // And percentages, since 0% is the same as 0. (true?)
                         // ALSO, if we don't recognize the dimension, leave it -- it could be a browser hack or some
                         // other intentional construct.
-                        if (num == "0" 
+                        if (num == "0"
                             && tokenType != TokenType.Dimension
                             && tokenType != TokenType.Angle
                             && tokenType != TokenType.Time
@@ -1114,7 +1125,7 @@ namespace Microsoft.Ajax.Utilities
         {
             CssToken token = null;
 
-            string ident = GetIdent();
+            var ident = GetIdent();
             if (ident != null)
             {
                 if (m_currentChar == '(')
@@ -1156,9 +1167,9 @@ namespace Microsoft.Ajax.Utilities
         private CssToken ScanProgId()
         {
             CssToken token = null;
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("progid:");
-            string ident = GetIdent();
+            var ident = GetIdent();
             while (ident != null)
             {
                 sb.Append(ident);
@@ -1223,10 +1234,10 @@ namespace Microsoft.Ajax.Utilities
         public static bool IsH(char ch)
         {
             return (
-              ('0' <= ch && ch <= '9')
-              || ('a' <= ch && ch <= 'f')
-              || ('A' <= ch && ch <= 'F')
-              );
+                ('0' <= ch && ch <= '9')
+                || ('a' <= ch && ch <= 'f')
+                || ('A' <= ch && ch <= 'F')
+                );
         }
 
         private static bool IsD(char ch)
@@ -1242,11 +1253,11 @@ namespace Microsoft.Ajax.Utilities
         internal static bool IsNmChar(char ch)
         {
             return IsNonAscii(ch)
-                  || (ch == '-')
-                  || (ch == '_')
-                  || ('0' <= ch && ch <= '9')
-                  || ('a' <= ch && ch <= 'z')
-                  || ('A' <= ch && ch <= 'Z');
+                   || (ch == '-')
+                   || (ch == '_')
+                   || ('0' <= ch && ch <= '9')
+                   || ('a' <= ch && ch <= 'z')
+                   || ('A' <= ch && ch <= 'Z');
         }
 
         #endregion
@@ -1334,13 +1345,13 @@ namespace Microsoft.Ajax.Utilities
         /// <returns>int value representing up to 6 hex digits</returns>
         private int GetUnicodeEncodingValue(out bool follwedByWhitespace)
         {
-            int unicodeValue = 0;
+            var unicodeValue = 0;
 
             // loop for no more than 6 hex characters
-            int count = 0;
+            var count = 0;
             while (m_currentChar != '\0' && count++ < 6 && IsH(m_currentChar))
             {
-                unicodeValue = (unicodeValue * 16) + HValue(m_currentChar);
+                unicodeValue = (unicodeValue*16) + HValue(m_currentChar);
                 NextChar();
             }
 
@@ -1360,7 +1371,7 @@ namespace Microsoft.Ajax.Utilities
             string unicode = null;
             if (m_currentChar == '\\')
             {
-                char ch = PeekChar();
+                var ch = PeekChar();
                 if (IsH(ch))
                 {
                     // let's actually decode the escapes so another encoding
@@ -1371,7 +1382,7 @@ namespace Microsoft.Ajax.Utilities
                     // decode the hexadecimal digits at the current character point,
                     // up to six characters
                     bool followedByWhitespace;
-                    int unicodeValue = GetUnicodeEncodingValue(out followedByWhitespace);
+                    var unicodeValue = GetUnicodeEncodingValue(out followedByWhitespace);
                     if (unicodeValue == 0x5c || unicodeValue == 0x20)
                     {
                         // okay, we have an escaped backslash or space. Ideally, if we were making an interpreter,
@@ -1394,37 +1405,37 @@ namespace Microsoft.Ajax.Utilities
                         if (0xd800 <= unicodeValue && unicodeValue <= 0xdbff)
                         {
                             // this is a high-surrogate value.
-                            int hi = unicodeValue;
+                            var hi = unicodeValue;
                             // the next encoding BETTER be a unicode value
                             if (m_currentChar == '\\' && IsH(PeekChar()))
                             {
                                 // skip the slash
                                 NextChar();
                                 // get the lo value
-                                int lo = GetUnicodeEncodingValue(out followedByWhitespace);
+                                var lo = GetUnicodeEncodingValue(out followedByWhitespace);
                                 if (0xdc00 <= lo && lo <= 0xdfff)
                                 {
                                     // combine the hi/lo pair into one character value
                                     unicodeValue = 0x10000
-                                      + (hi - 0xd800) * 0x400
-                                      + (lo - 0xdc00);
+                                                   + (hi - 0xd800)*0x400
+                                                   + (lo - 0xdc00);
                                 }
                                 else
                                 {
                                     // ERROR! not a valid unicode lower-surrogate value!
                                     ReportError(
-                                      0,
-                                      CssErrorCode.InvalidLowSurrogate, hi, lo
-                                      );
+                                        0,
+                                        CssErrorCode.InvalidLowSurrogate, hi, lo
+                                        );
                                 }
                             }
                             else
                             {
                                 // ERROR! the high-surrogate is not followed by a low surrogate!
                                 ReportError(
-                                  0,
-                                  CssErrorCode.HighSurrogateNoLow, unicodeValue
-                                  );
+                                    0,
+                                    CssErrorCode.HighSurrogateNoLow, unicodeValue
+                                    );
                             }
                         }
 
@@ -1445,12 +1456,12 @@ namespace Microsoft.Ajax.Utilities
 
         private string GetEscape()
         {
-            string escape = GetUnicode();
+            var escape = GetUnicode();
             if (escape == null && m_currentChar == '\\')
             {
-                char ch = PeekChar();
+                var ch = PeekChar();
                 if ((' ' <= ch && ch <= '~')
-                  || IsNonAscii(ch))
+                    || IsNonAscii(ch))
                 {
                     NextChar();
                     NextChar();
@@ -1462,22 +1473,22 @@ namespace Microsoft.Ajax.Utilities
 
         private string GetNmStart()
         {
-            string nmStart = GetEscape();
+            var nmStart = GetEscape();
             if (nmStart == null)
             {
                 if (IsNonAscii(m_currentChar)
-                  || (m_currentChar == '_')
-                  || ('a' <= m_currentChar && m_currentChar <= 'z')
-                  || ('A' <= m_currentChar && m_currentChar <= 'Z'))
+                    || (m_currentChar == '_')
+                    || ('a' <= m_currentChar && m_currentChar <= 'z')
+                    || ('A' <= m_currentChar && m_currentChar <= 'Z'))
                 {
                     // actually, CSS1 and CSS2 don't allow underscores in
                     // identifier names, especially not the first character
                     if (m_currentChar == '_')
                     {
                         ReportError(
-                          4,
-                          CssErrorCode.UnderscoreNotValid
-                          );
+                            4,
+                            CssErrorCode.UnderscoreNotValid
+                            );
                     }
 
                     nmStart = char.ToString(m_currentChar);
@@ -1489,7 +1500,7 @@ namespace Microsoft.Ajax.Utilities
 
         private string GetNmChar()
         {
-            string nmChar = GetEscape();
+            var nmChar = GetEscape();
             if (nmChar == null)
             {
                 if (IsNmChar(m_currentChar))
@@ -1499,9 +1510,9 @@ namespace Microsoft.Ajax.Utilities
                     if (m_currentChar == '_')
                     {
                         ReportError(
-                          4,
-                          CssErrorCode.UnderscoreNotValid
-                          );
+                            4,
+                            CssErrorCode.UnderscoreNotValid
+                            );
                     }
                     nmChar = char.ToString(m_currentChar);
                     NextChar();
@@ -1510,16 +1521,16 @@ namespace Microsoft.Ajax.Utilities
             return nmChar;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private string GetString()
         {
             string str = null;
             if (m_currentChar == '\'' || m_currentChar == '"')
             {
-                char delimiter = m_currentChar;
+                var delimiter = m_currentChar;
                 NextChar();
 
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 sb.Append(delimiter);
 
                 while (m_currentChar != '\0' && m_currentChar != delimiter)
@@ -1560,20 +1571,20 @@ namespace Microsoft.Ajax.Utilities
                         {
                             // unexpected escape sequence
                             ReportError(
-                              0,
-                              CssErrorCode.UnexpectedEscape, m_currentChar
-                              );
+                                0,
+                                CssErrorCode.UnexpectedEscape, m_currentChar
+                                );
                         }
                     }
                     else if ((m_currentChar == ' ')
-                      || (m_currentChar == '\t')
-                      || (m_currentChar == '!')
-                      || (m_currentChar == '#')
-                      || (m_currentChar == '$')
-                      || (m_currentChar == '%')
-                      || (m_currentChar == '&')
-                      || ('(' <= m_currentChar && m_currentChar <= '~')
-                      || (m_currentChar == (delimiter == '"' ? '\'' : '"')))
+                             || (m_currentChar == '\t')
+                             || (m_currentChar == '!')
+                             || (m_currentChar == '#')
+                             || (m_currentChar == '$')
+                             || (m_currentChar == '%')
+                             || (m_currentChar == '&')
+                             || ('(' <= m_currentChar && m_currentChar <= '~')
+                             || (m_currentChar == (delimiter == '"' ? '\'' : '"')))
                     {
                         // save the current character, add it to the builder we are keeping,
                         // and get the next character
@@ -1583,7 +1594,7 @@ namespace Microsoft.Ajax.Utilities
 
                         // if we are allowing embedded ASP.NET blocks and that last character ws
                         // a less-than character and the current character is a percent...
-                        if (AllowEmbeddedAspNetBlocks 
+                        if (AllowEmbeddedAspNetBlocks
                             && ch == '<'
                             && m_currentChar == '%')
                         {
@@ -1594,14 +1605,14 @@ namespace Microsoft.Ajax.Utilities
                         }
                     }
                     else if (m_currentChar == '\n'
-                        || m_currentChar == '\r')
+                             || m_currentChar == '\r')
                     {
                         // unterminated string
                         GotEndOfLine = true;
                         ReportError(
-                          0,
-                          CssErrorCode.UnterminatedString, sb.ToString()
-                          );
+                            0,
+                            CssErrorCode.UnterminatedString, sb.ToString()
+                            );
                         // add the newline to the string so it will line-break in the output
                         sb.AppendLine();
 
@@ -1619,9 +1630,9 @@ namespace Microsoft.Ajax.Utilities
                     {
                         // unexpected string character
                         ReportError(
-                          0,
-                          CssErrorCode.UnexpectedStringCharacter, m_currentChar
-                          );
+                            0,
+                            CssErrorCode.UnexpectedStringCharacter, m_currentChar
+                            );
                     }
                 }
                 if (m_currentChar == delimiter)
@@ -1671,10 +1682,10 @@ namespace Microsoft.Ajax.Utilities
 
         private string GetIdent()
         {
-            string ident = GetNmStart();
+            var ident = GetNmStart();
             if (ident != null)
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 sb.Append(ident);
                 while (m_currentChar != '\0' && (ident = GetNmChar()) != null)
                 {
@@ -1687,10 +1698,10 @@ namespace Microsoft.Ajax.Utilities
 
         private string GetName()
         {
-            string name = GetNmChar();
+            var name = GetNmChar();
             if (name != null)
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 sb.Append(name);
                 while (m_currentChar != '\0' && (name = GetNmChar()) != null)
                 {
@@ -1706,11 +1717,11 @@ namespace Microsoft.Ajax.Utilities
             string num = null;
             string units = null;
             string fraction = null;
-            bool hasDecimalPoint = false;
+            var hasDecimalPoint = false;
 
             if (IsD(m_currentChar))
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 sb.Append(m_currentChar);
                 NextChar();
                 while (IsD(m_currentChar))
@@ -1728,7 +1739,7 @@ namespace Microsoft.Ajax.Utilities
                     // move over the decimal point
                     NextChar();
 
-                    StringBuilder sb = new StringBuilder();
+                    var sb = new StringBuilder();
                     // check for extra digits
                     while (IsD(m_currentChar))
                     {
@@ -1745,9 +1756,9 @@ namespace Microsoft.Ajax.Utilities
                     // digits
                     hasDecimalPoint = true;
                     ReportError(
-                      2,
-                      CssErrorCode.DecimalNoDigit
-                      );
+                        2,
+                        CssErrorCode.DecimalNoDigit
+                        );
                     fraction = string.Empty;
                     NextChar();
                 }
@@ -1756,8 +1767,8 @@ namespace Microsoft.Ajax.Utilities
             {
                 // get the raw number. This SHOULD match the input exactly
                 m_rawNumber = units ?? ""
-                    + (hasDecimalPoint ? "." : "")
-                    + fraction ?? "";
+                              + (hasDecimalPoint ? "." : "")
+                              + fraction ?? "";
 
                 //if (m_collapseNumbers)
                 {
@@ -1813,21 +1824,21 @@ namespace Microsoft.Ajax.Utilities
 
         private string GetUrl()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             while (m_currentChar != '\0')
             {
-                string escape = GetEscape();
+                var escape = GetEscape();
                 if (escape != null)
                 {
                     sb.Append(escape);
                 }
                 else if (IsNonAscii(m_currentChar)
-                  || (m_currentChar == '!')
-                  || (m_currentChar == '#')
-                  || (m_currentChar == '$')
-                  || (m_currentChar == '%')
-                  || (m_currentChar == '&')
-                  || ('*' <= m_currentChar && m_currentChar <= '~'))
+                         || (m_currentChar == '!')
+                         || (m_currentChar == '#')
+                         || (m_currentChar == '$')
+                         || (m_currentChar == '%')
+                         || (m_currentChar == '&')
+                         || ('*' <= m_currentChar && m_currentChar <= '~'))
                 {
                     sb.Append(m_currentChar);
                     NextChar();
@@ -1842,7 +1853,7 @@ namespace Microsoft.Ajax.Utilities
 
         private string GetW()
         {
-            string w = string.Empty;
+            var w = string.Empty;
             if (IsSpace(m_currentChar))
             {
                 w = " ";
@@ -1912,14 +1923,14 @@ namespace Microsoft.Ajax.Utilities
             }
             else
             {
-                int ch = m_reader.Read();
+                var ch = m_reader.Read();
                 if (ch < 0)
                 {
                     m_currentChar = '\0';
                 }
                 else
                 {
-                    m_currentChar = (char)ch;
+                    m_currentChar = (char) ch;
                     switch (m_currentChar)
                     {
                         case '\n':
@@ -1949,13 +1960,13 @@ namespace Microsoft.Ajax.Utilities
                 return m_readAhead[0];
             }
 
-            int ch = m_reader.Peek();
+            var ch = m_reader.Peek();
             if (ch < 0)
             {
                 return '\0';
             }
 
-            return (char)ch;
+            return (char) ch;
         }
 
         // case-INsensitive string at the current location in the input stream
@@ -1977,7 +1988,7 @@ namespace Microsoft.Ajax.Utilities
 
             // we'll start peeking ahead so we have less to push
             // if we fail
-            for (int ndx = 1; ndx < str.Length; ++ndx)
+            for (var ndx = 1; ndx < str.Length; ++ndx)
             {
                 if (char.ToUpperInvariant(PeekChar()) != char.ToUpperInvariant(str[ndx]))
                 {
@@ -2038,7 +2049,7 @@ namespace Microsoft.Ajax.Utilities
             }
 
             // REVIEW: doesn't handle pushing a newline back onto the buffer
-            for (int ndx = 0; ndx < str.Length; ++ndx)
+            for (var ndx = 0; ndx < str.Length; ++ndx)
             {
                 m_context.End.PreviousChar();
             }
@@ -2051,7 +2062,7 @@ namespace Microsoft.Ajax.Utilities
         private char DirectiveNextChar()
         {
             var next = m_reader.Read();
-            m_currentChar = next < 0 ? '\0' : (char)next;
+            m_currentChar = next < 0 ? '\0' : (char) next;
             return m_currentChar;
         }
 
@@ -2069,7 +2080,7 @@ namespace Microsoft.Ajax.Utilities
             var number = 0;
             while ('0' <= m_currentChar && m_currentChar <= '9')
             {
-                number = number * 10 + (m_currentChar - '0');
+                number = number*10 + (m_currentChar - '0');
                 NextChar();
             }
 
@@ -2088,19 +2099,20 @@ namespace Microsoft.Ajax.Utilities
             //        3 == this can lead to performance problems
             //        4 == this is just not right
 
-            string message = CssStrings.ResourceManager.GetString(error.ToString(), CssStrings.Culture).FormatInvariant(args);
-            OnScannerError(new ContextError()
-                {
-                    IsError = severity < 2,
-                    Severity = severity,
-                    Subcategory = CssStrings.ScannerSubsystem,
-                    File = "",
-                    ErrorNumber = (int)error,
-                    ErrorCode = "CSS{0}".FormatInvariant(((int)error) & (0xffff)),
-                    StartLine = m_context.End.Line,
-                    StartColumn = m_context.End.Char,
-                    Message = message,
-                });
+            var message =
+                CssStrings.ResourceManager.GetString(error.ToString(), CssStrings.Culture).FormatInvariant(args);
+            OnScannerError(new ContextError
+            {
+                IsError = severity < 2,
+                Severity = severity,
+                Subcategory = CssStrings.ScannerSubsystem,
+                File = "",
+                ErrorNumber = (int) error,
+                ErrorCode = "CSS{0}".FormatInvariant(((int) error) & (0xffff)),
+                StartLine = m_context.End.Line,
+                StartColumn = m_context.End.Char,
+                Message = message,
+            });
         }
 
         public event EventHandler<ContextErrorEventArgs> ScannerError;
@@ -2109,10 +2121,10 @@ namespace Microsoft.Ajax.Utilities
         {
             if (ScannerError != null)
             {
-                ScannerError(this, new ContextErrorEventArgs()
-                    {
-                        Error = error
-                    });
+                ScannerError(this, new ContextErrorEventArgs
+                {
+                    Error = error
+                });
             }
         }
 
@@ -2123,7 +2135,7 @@ namespace Microsoft.Ajax.Utilities
             m_context.Reset(line, column);
             if (ContextChange != null)
             {
-                ContextChange(this, new CssScannerContextChangeEventArgs(fileContext/*, line, column*/));
+                ContextChange(this, new CssScannerContextChangeEventArgs(fileContext /*, line, column*/));
             }
         }
 
@@ -2132,11 +2144,11 @@ namespace Microsoft.Ajax.Utilities
 
     internal class CssScannerContextChangeEventArgs : EventArgs
     {
-        public string FileContext {get; private set;}
+        public string FileContext { get; private set; }
         //public int Line {get; private set;}
         //public int Column {get; private set;}
 
-        public CssScannerContextChangeEventArgs(string fileContext/*, int line, int column*/)
+        public CssScannerContextChangeEventArgs(string fileContext /*, int line, int column*/)
         {
             FileContext = fileContext;
             //Line = line;

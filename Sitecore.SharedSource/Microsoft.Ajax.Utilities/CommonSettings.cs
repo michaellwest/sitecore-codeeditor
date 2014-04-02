@@ -18,8 +18,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {
     /// <summary>
     /// Output mode setting
@@ -102,11 +103,7 @@ namespace Microsoft.Ajax.Utilities
         /// <summary>
         /// Gets or sets a boolean value indicating whether embedded asp.net blocks (&lt;% %>) should be recognized and output as is. Default is false.
         /// </summary>
-        public bool AllowEmbeddedAspNetBlocks
-        {
-            get;
-            set;
-        }
+        public bool AllowEmbeddedAspNetBlocks { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the opening curly brace for blocks is
@@ -114,40 +111,24 @@ namespace Microsoft.Ajax.Utilities
         /// or taking a hint from the source code position (UseSource). Only relevant when OutputMode is 
         /// set to MultipleLines.
         /// </summary>
-        public BlockStart BlocksStartOnSameLine
-        {
-            get;
-            set;
-        }
+        public BlockStart BlocksStartOnSameLine { get; set; }
 
         /// <summary>
         /// Gets or sets a flag for whether to ignore ALL errors found in the input code.
         /// Default is false.
         /// </summary>
-        public bool IgnoreAllErrors 
-        { 
-            get; 
-            set; 
-        }
+        public bool IgnoreAllErrors { get; set; }
 
         /// <summary>
         /// Gets or sets an integer value specifying the number of spaces per indent level when in MultipleLines output mode. (Default = 4)
         /// </summary>
-        public int IndentSize
-        {
-            get;
-            set;
-        }
+        public int IndentSize { get; set; }
 
         /// <summary>
         /// Gets or sets the column position at which the line will be broken at the next available opportunity.
         /// Default value is int.MaxValue - 1000.
         /// </summary>
-        public int LineBreakThreshold
-        {
-            get;
-            set;
-        }
+        public int LineBreakThreshold { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating the output mode:
@@ -155,40 +136,25 @@ namespace Microsoft.Ajax.Utilities
         /// MultipleLines - break the output into multiple lines to be more human-readable;
         /// SingleLine mode may still result in multiple lines if the LineBreakThreshold is set to a small enough value.
         /// </summary>
-        public OutputMode OutputMode
-        {
-            get;
-            set;
-        }
+        public OutputMode OutputMode { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean value indicting whether to add a semicolon at the end of the parsed code (true) or not (false, default)
         /// </summary>
-        public bool TermSemicolons
-        {
-            get;
-            set;
-        }
+        public bool TermSemicolons { get; set; }
 
         /// <summary>
         /// Gets or sets a long integer value containing kill switch flags for each individual mod to the parsed code tree. Allows for
         /// callers to turn off specific modifications if desired. Default is 0, meaning no kill switches are set.
         /// </summary>
-        public long KillSwitch
-        {
-            get;
-            set;
-        }
+        public long KillSwitch { get; set; }
 
         /// <summary>
         /// Gets an appropriate line-terminator string given the output mode
         /// </summary>
         public string LineTerminator
         {
-            get
-            {
-                return OutputMode == Utilities.OutputMode.MultipleLines ? "\r\n" : "\n";
-            }
+            get { return OutputMode == OutputMode.MultipleLines ? "\r\n" : "\n"; }
         }
 
         #endregion
@@ -196,7 +162,7 @@ namespace Microsoft.Ajax.Utilities
         #region Indent methods
 
         // this is the indent level and size for the pretty-print
-        private int m_indentLevel;// = 0;
+        private int m_indentLevel; // = 0;
 
         internal void Indent()
         {
@@ -214,10 +180,7 @@ namespace Microsoft.Ajax.Utilities
 
         internal string TabSpaces
         {
-            get
-            {
-                return new string(' ', m_indentLevel * IndentSize);
-            }
+            get { return new string(' ', m_indentLevel*IndentSize); }
         }
 
         #endregion
@@ -321,7 +284,8 @@ namespace Microsoft.Ajax.Utilities
                     // must be a valid JS identifier
                     if (JSScanner.IsValidIdentifier(trimmedName))
                     {
-                        PreprocessorValues.Add(trimmedName, ndxEquals < 0 ? string.Empty : define.Substring(ndxEquals + 1));
+                        PreprocessorValues.Add(trimmedName,
+                            ndxEquals < 0 ? string.Empty : define.Substring(ndxEquals + 1));
                     }
                 }
             }

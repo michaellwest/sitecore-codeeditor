@@ -42,9 +42,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caching\CacheUtil.cs" />
+    <Compile Include="Data\ResourceType.cs" />
+    <Compile Include="Data\SaveResult.cs" />
+    <Compile Include="Extensions\FieldExtensions.cs" />
+    <Compile Include="Extensions\MediaItemExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\TemplateItemExtensions.cs" />
+    <Compile Include="IO\DirectoryUtil.cs" />
+    <Compile Include="IO\FileUtil.cs" />
+    <Compile Include="BaseResourcePage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Microsoft.Ajax.Utilities\CommonData.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\CommonSettings.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\CommonStrings.Designer.cs" />
+    <Compile Include="Microsoft.Ajax.Utilities\CommonStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CommonStrings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Microsoft.Ajax.Utilities\Configuration.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\ContextError.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\CssEncoderFallback.cs" />
@@ -53,7 +69,11 @@
     <Compile Include="Microsoft.Ajax.Utilities\Css\CssParser.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\Css\CssScanner.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\Css\CssSettings.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Css\CssStrings.Designer.cs" />
+    <Compile Include="Microsoft.Ajax.Utilities\Css\CssStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CssStrings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Microsoft.Ajax.Utilities\Css\CssToken.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\Extensions.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\Helpers.cs" />
@@ -126,7 +146,11 @@
     <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ISourceMap.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\JavaScript\IterationStatement.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\JavaScript\IVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\JScript.Designer.cs" />
+    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\JScript.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>JScript.resx</DependentUpon>
+    </Compile>
     <Compile Include="Microsoft.Ajax.Utilities\JavaScript\jserror.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\JavaScript\jskeyword.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\JavaScript\JSON.cs" />
@@ -180,22 +204,36 @@
     <Compile Include="Microsoft.Ajax.Utilities\SwitchParser.cs" />
     <Compile Include="Pipelines\Save\SaveEx.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Web\ResourceRenderer.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeAttachment.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeText.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditCode\EditCodePage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditHtmlEx\EditHtmlExPage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
+    <Compile Include="TemplateIDs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App_Config\Include\Sitecore.SharedSource.CodeEditor.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Microsoft.Ajax.Utilities\Migrated rules for AjaxMinDll.ruleset" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Microsoft.Ajax.Utilities\CommonStrings.resx" />
-    <EmbeddedResource Include="Microsoft.Ajax.Utilities\Css\CssStrings.resx" />
-    <EmbeddedResource Include="Microsoft.Ajax.Utilities\JavaScript\JScript.resx" />
+    <EmbeddedResource Include="Microsoft.Ajax.Utilities\CommonStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Microsoft.Ajax.Utilities\Css\CssStrings.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <CustomToolNamespace>Microsoft.Ajax.Utilities</CustomToolNamespace>
+      <LastGenOutput>CssStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Microsoft.Ajax.Utilities\JavaScript\JScript.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <CustomToolNamespace>Microsoft.Ajax.Utilities</CustomToolNamespace>
+      <LastGenOutput>JScript.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -203,8 +241,10 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)\..\Website\bin\$(TargetName).dll"
-copy /Y "$(ProjectDir)\App_Config\Include\$(TargetName).config" "$(SolutionDir)\..\Website\App_Config\Include\$(TargetName).config"</PostBuildEvent>
+    <PostBuildEvent>
+      copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)\..\Website\bin\$(TargetName).dll"
+      copy /Y "$(ProjectDir)\App_Config\Include\$(TargetName).config" "$(SolutionDir)\..\Website\App_Config\Include\$(TargetName).config"
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

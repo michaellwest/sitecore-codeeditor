@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
     public class ImportExportSpecifier : AstNode, INameDeclaration
     {
@@ -96,10 +96,7 @@ namespace Microsoft.Ajax.Utilities
 
         public override IEnumerable<AstNode> Children
         {
-            get
-            {
-                return EnumerateNonNullNodes(m_localIdentifier);
-            }
+            get { return EnumerateNonNullNodes(m_localIdentifier); }
         }
 
         public override bool ReplaceChild(AstNode oldNode, AstNode newNode)

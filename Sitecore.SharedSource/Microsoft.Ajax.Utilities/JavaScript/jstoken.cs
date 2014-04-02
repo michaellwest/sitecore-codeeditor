@@ -14,18 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Microsoft.Ajax.Utilities
+namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
-
-    public enum JSToken : int
+    public enum JSToken
     {
         None = -1,
         EndOfFile,
 
         // main statement switch
-        Semicolon,                      // ;
-        RightCurly,                     // }
-        LeftCurly,                      // {
+        Semicolon, // ;
+        RightCurly, // }
+        LeftCurly, // {
         Debugger,
         Var,
         If,
@@ -41,15 +40,15 @@ namespace Microsoft.Ajax.Utilities
         Try,
         Function,
         Else,
-        ConditionalCommentStart,        // /*@ or //@
-        ConditionalCommentEnd,          // @*/ or EOL
-        ConditionalCompilationOn,       // @cc_on
-        ConditionalCompilationSet,      // @set
-        ConditionalCompilationIf,       // @if
-        ConditionalCompilationElseIf,   // @elif
-        ConditionalCompilationElse,     // @else
-        ConditionalCompilationEnd,      // @end
-        ConditionalCompilationVariable,           // entity defined defined during preprocessing
+        ConditionalCommentStart, // /*@ or //@
+        ConditionalCommentEnd, // @*/ or EOL
+        ConditionalCompilationOn, // @cc_on
+        ConditionalCompilationSet, // @set
+        ConditionalCompilationIf, // @if
+        ConditionalCompilationElseIf, // @elif
+        ConditionalCompilationElse, // @else
+        ConditionalCompilationEnd, // @end
+        ConditionalCompilationVariable, // entity defined defined during preprocessing
 
         // used by both statement and expression switches
 
@@ -62,71 +61,71 @@ namespace Microsoft.Ajax.Utilities
         StringLiteral,
         IntegerLiteral,
         NumericLiteral,
-        TemplateLiteral,                // (may be complete, head, middle or tail)
+        TemplateLiteral, // (may be complete, head, middle or tail)
 
-        LeftParenthesis,                // (
-        LeftBracket,                    // [
-        AccessField,                    // .
-        ArrowFunction,                  // =>
-        RestSpread,                     // ...
+        LeftParenthesis, // (
+        LeftBracket, // [
+        AccessField, // .
+        ArrowFunction, // =>
+        RestSpread, // ...
 
         // operators
         FirstOperator,
         // unary ops
         Delete = FirstOperator,
-        Increment,                      // ++
-        Decrement,                      // --
+        Increment, // ++
+        Decrement, // --
         Void,
         TypeOf,
-        LogicalNot,                     // !
-        BitwiseNot,                     // ~
+        LogicalNot, // !
+        BitwiseNot, // ~
 
         FirstBinaryOperator,
         // binary ops
-        Plus = FirstBinaryOperator,     // +
-        Minus,                          // -
-        Multiply,                       // *
-        Divide,                         // /
-        Modulo,                         // %
-        BitwiseAnd,                     // &
-        BitwiseOr,                      // |
-        BitwiseXor,                     // ^
-        LeftShift,                      // <<
-        RightShift,                     // >>
-        UnsignedRightShift,             // >>>
+        Plus = FirstBinaryOperator, // +
+        Minus, // -
+        Multiply, // *
+        Divide, // /
+        Modulo, // %
+        BitwiseAnd, // &
+        BitwiseOr, // |
+        BitwiseXor, // ^
+        LeftShift, // <<
+        RightShift, // >>
+        UnsignedRightShift, // >>>
 
-        Equal,                          // ==
-        NotEqual,                       // !=
-        StrictEqual,                    // ===
-        StrictNotEqual,                 // !==
-        LessThan,                       // <
-        LessThanEqual,                  // <=
-        GreaterThan,                    // >
-        GreaterThanEqual,               // >=
+        Equal, // ==
+        NotEqual, // !=
+        StrictEqual, // ===
+        StrictNotEqual, // !==
+        LessThan, // <
+        LessThanEqual, // <=
+        GreaterThan, // >
+        GreaterThanEqual, // >=
 
-        LogicalAnd,                     // &&
-        LogicalOr,                      // ||
+        LogicalAnd, // &&
+        LogicalOr, // ||
 
         InstanceOf,
         In,
-        Comma,                          // ,
+        Comma, // ,
 
-        Assign,                         // =
-        PlusAssign,                     // +=
-        MinusAssign,                    // -=
-        MultiplyAssign,                 // *=
-        DivideAssign,                   // /=
-        ModuloAssign,                   // %=
-        BitwiseAndAssign,               // &=
-        BitwiseOrAssign,                // |=
-        BitwiseXorAssign,               // ^=
-        LeftShiftAssign,                // <<=
-        RightShiftAssign,               // >>=
-        UnsignedRightShiftAssign,       // >>>=
+        Assign, // =
+        PlusAssign, // +=
+        MinusAssign, // -=
+        MultiplyAssign, // *=
+        DivideAssign, // /=
+        ModuloAssign, // %=
+        BitwiseAndAssign, // &=
+        BitwiseOrAssign, // |=
+        BitwiseXorAssign, // ^=
+        LeftShiftAssign, // <<=
+        RightShiftAssign, // >>=
+        UnsignedRightShiftAssign, // >>>=
         LastAssign = UnsignedRightShiftAssign,
 
-        ConditionalIf,                  // ? // MUST FOLLOW LastBinaryOp
-        Colon,                          // :
+        ConditionalIf, // ? // MUST FOLLOW LastBinaryOp
+        Colon, // :
         LastOperator = Colon,
 
         // context specific keywords
@@ -135,11 +134,11 @@ namespace Microsoft.Ajax.Utilities
         Default,
         Finally,
         New,
-        RightParenthesis,               // )
-        RightBracket,                   // ]
-        SingleLineComment,              // for authoring
-        MultipleLineComment,            // for authoring
-        UnterminatedComment,            // for authoring
+        RightParenthesis, // )
+        RightBracket, // ]
+        SingleLineComment, // for authoring
+        MultipleLineComment, // for authoring
+        UnterminatedComment, // for authoring
         PreprocessorDirective,
 
         // reserved words
@@ -173,12 +172,11 @@ namespace Microsoft.Ajax.Utilities
         Set,
 
         AspNetBlock,
-        ReplacementToken,               // %name(.name)*%
+        ReplacementToken, // %name(.name)*%
 
         EndOfLine, // only returned if the RawTokens flag is set on the scanner, but also used in error-recovery
         WhiteSpace, // only returned if the RawTokens flag is set on the scanner
         Error, // only returned if the RawTokens flag is set on the scanner
         RegularExpression, // only returned if the RawTokens flag is set on the scanner
-
     }
 }
