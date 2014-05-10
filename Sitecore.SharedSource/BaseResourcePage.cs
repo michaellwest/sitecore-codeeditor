@@ -16,7 +16,7 @@ namespace Sitecore.SharedSource
                 return;
             }
 
-            // Determine if the page has an addon.
+            // Determine if the page has a resources.
             var pageItem = Sitecore.Context.Item;
             var resource = pageItem.Children.FirstOrDefault(x => x.TemplateID == TemplateIDs.ResourceReference);
             if (resource == null)
@@ -29,15 +29,21 @@ namespace Sitecore.SharedSource
             if (results.Any(x => x.Resource == ResourceType.Script))
             {
                 var placeholder = base.FindControl("ScriptsPlaceHolder");
-                placeholder.Controls.Add(
-                    new Literal(ResourceRenderer.RenderResourceHtmlString(results, ResourceType.Script)));
+                if (placeholder != null)
+                {
+                    placeholder.Controls.Add(
+                        new Literal(ResourceRenderer.RenderResourceHtmlString(results, ResourceType.Script)));
+                }
             }
 
             if (results.Any(x => x.Resource == ResourceType.Style))
             {
                 var placeholder = base.FindControl("StylesPlaceHolder");
-                placeholder.Controls.Add(
-                    new Literal(ResourceRenderer.RenderResourceHtmlString(results, ResourceType.Style)));
+                if (placeholder != null)
+                {
+                    placeholder.Controls.Add(
+                        new Literal(ResourceRenderer.RenderResourceHtmlString(results, ResourceType.Style)));
+                }
             }
         }
     }

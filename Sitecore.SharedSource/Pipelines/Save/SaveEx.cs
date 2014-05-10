@@ -29,7 +29,6 @@ namespace Sitecore.SharedSource.Pipelines.Save
                     if (field == null)
                     {
                         continue;
-                        ;
                     }
 
                     if (field.IsBlobField &&
