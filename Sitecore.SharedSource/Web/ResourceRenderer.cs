@@ -131,9 +131,10 @@ namespace Sitecore.SharedSource.Web
             var results = CacheUtil.GetCachedItem<List<SaveResult>>(cacheKey) ?? new List<SaveResult>();
             if (results.Any()) return results;
 
-            if (String.IsNullOrEmpty(resource.Fields["Path"].Value)) return results;
+            var mediaPath = resource.Fields["MediaPath"];
+            if (mediaPath == null || String.IsNullOrEmpty(mediaPath.Value)) return results;
 
-            var ids = resource.Fields["Path"].Value.Split('|').ToList();
+            var ids = mediaPath.Value.Split('|').ToList();
             results.AddRange(SaveItemsToFile(ids));
 
             CacheUtil.SetCachedItem(cacheKey, results);

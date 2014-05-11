@@ -2,7 +2,6 @@
 using System.Web.UI;
 using Sitecore.SharedSource.Data;
 using Sitecore.Web.UI;
-using Sitecore.Web.UI.HtmlControls;
 
 namespace Sitecore.SharedSource.Web.UI
 {
@@ -18,9 +17,9 @@ namespace Sitecore.SharedSource.Web.UI
                 return;
             }
 
-            // Determine if the page has a resources.
+            // Determine if the page has a resource.
             var pageItem = Sitecore.Context.Item;
-            var resource = pageItem.Children.FirstOrDefault(x => x.TemplateID == TemplateIDs.ResourceReference);
+            var resource = pageItem.Template.BaseTemplates.Any(x => x.ID == TemplateIDs.MediaResource) ? pageItem : null;
             if (resource == null)
             {
                 return;
