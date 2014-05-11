@@ -38,7 +38,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -51,9 +54,6 @@
     <Compile Include="Extensions\TemplateItemExtensions.cs" />
     <Compile Include="IO\DirectoryUtil.cs" />
     <Compile Include="IO\FileUtil.cs" />
-    <Compile Include="BaseResourcePage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
     <Compile Include="Microsoft.Ajax.Utilities\CommonData.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\CommonSettings.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\CommonStrings.Designer.cs">
@@ -211,6 +211,7 @@
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditHtmlEx\EditHtmlExPage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
     <Compile Include="TemplateIDs.cs" />
+    <Compile Include="Web\UI\ResourceWebControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App_Config\Include\Sitecore.SharedSource.CodeEditor.config">
