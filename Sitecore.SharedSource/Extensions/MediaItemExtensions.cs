@@ -53,7 +53,12 @@ namespace Sitecore.SharedSource.Extensions
                             String.Format(
                                 "Skipped saving the media item {0} with id {1} to the specified path {2} because it has not changed.",
                                 mediaItem.Name, mediaItem.ID, filePath), mediaItem.GetType());
-                        return new SaveResult {Exists = true, RelativePath = relativePath, Resource = resourceType};
+                        return new SaveResult
+                        {
+                            RelativePath = relativePath,
+                            FilePath = filePath,
+                            Resource = resourceType
+                        };
                     }
                 }
                 catch (UnauthorizedAccessException ex)
@@ -105,14 +110,13 @@ namespace Sitecore.SharedSource.Extensions
                     Log.Error(
                         String.Format("Error saving the media item {0} with id {1} to the specified path {2}.",
                             mediaItem.Name, mediaItem.ID, filePath), ex, mediaItem.GetType());
-                    return new SaveResult {WasSaved = false};
+                    return new SaveResult();
                 }
 
                 return new SaveResult
                 {
-                    Exists = true,
-                    WasSaved = true,
                     RelativePath = relativePath,
+                    FilePath = filePath,
                     Resource = resourceType
                 };
             }

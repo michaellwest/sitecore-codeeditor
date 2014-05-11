@@ -211,7 +211,7 @@
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditHtmlEx\EditHtmlExPage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
     <Compile Include="TemplateIDs.cs" />
-    <Compile Include="Web\UI\ResourceWebControl.cs" />
+    <Compile Include="Web\UI\WebControls\ResourceWebControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App_Config\Include\Sitecore.SharedSource.CodeEditor.config">

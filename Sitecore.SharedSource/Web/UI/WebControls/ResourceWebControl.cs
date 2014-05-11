@@ -3,7 +3,7 @@ using System.Web.UI;
 using Sitecore.SharedSource.Data;
 using Sitecore.Web.UI;
 
-namespace Sitecore.SharedSource.Web.UI
+namespace Sitecore.SharedSource.Web.UI.WebControls
 {
     [ToolboxData("<{0}:ResourceWebControl runat=server></{0}:ResourceWebControl>")]
     public class ResourceWebControl : WebControl
@@ -35,6 +35,11 @@ namespace Sitecore.SharedSource.Web.UI
             {
                 writer.Write(ResourceRenderer.RenderResourceHtmlString(results, ResourceType.Style));
             }
+        }
+
+        protected override string GetCachingID()
+        {
+            return GetType().FullName + "_" + UniqueID;
         }
     }
 }

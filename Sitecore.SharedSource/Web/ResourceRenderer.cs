@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -129,7 +130,18 @@ namespace Sitecore.SharedSource.Web
             }
 
             var results = CacheUtil.GetCachedItem<List<SaveResult>>(cacheKey) ?? new List<SaveResult>();
-            if (results.Any()) return results;
+            if (results.Any())
+            {
+                if (results.Any(result => !File.Exists(result.FilePath)))
+                {
+                    results.Clear();
+                    CacheUtil.RemoveCachedItem(cacheKey);
+                }
+                else
+                {
+                    return results;
+                }
+            }
 
             var mediaPath = resource.Fields["MediaPath"];
             if (mediaPath == null || String.IsNullOrEmpty(mediaPath.Value)) return results;
