@@ -25,15 +25,18 @@ namespace Sitecore.SharedSource.Web.UI.WebControls
                 return;
             }
 
-            var results = ResourceRenderer.LoadResourceReference(resource);
+            using (var renderer = new ResourceRenderer())
+            {
+                var results = renderer.LoadResourceReference(resource);
 
-            if (ResourceType == ResourceType.Script && results.Any(x => x.Resource == ResourceType.Script))
-            {
-                writer.Write(ResourceRenderer.RenderResourceHtmlString(results, ResourceType.Script));
-            }
-            else if (ResourceType == ResourceType.Style && results.Any(x => x.Resource == ResourceType.Style))
-            {
-                writer.Write(ResourceRenderer.RenderResourceHtmlString(results, ResourceType.Style));
+                if (ResourceType == ResourceType.Script && results.Any(x => x.Resource == ResourceType.Script))
+                {
+                    writer.Write(renderer.RenderResourceHtmlString(results, ResourceType.Script));
+                }
+                else if (ResourceType == ResourceType.Style && results.Any(x => x.Resource == ResourceType.Style))
+                {
+                    writer.Write(renderer.RenderResourceHtmlString(results, ResourceType.Style));
+                }
             }
         }
 

@@ -14,21 +14,17 @@ using Sitecore.SharedSource.Extensions;
 
 namespace Sitecore.SharedSource.Web
 {
-    public static class ResourceRenderer
+    public class ResourceRenderer : IDisposable
     {
         private const string ScriptTagFormat = "<script src=\"{0}\"></script>";
 
         private const string StyleTagFormat = "<link href=\"{0}\" rel=\"stylesheet\" />";
 
-        private static readonly string ScriptsFormat =
+        private static readonly string _scriptsFormat =
             Settings.GetSetting("CodeEditor.Media.ScriptsPath", "/Scripts/Media/") + "{0}{1}.{2}";
 
-        private static readonly string StylesFormat =
+        private static readonly string _stylesFormat =
             Settings.GetSetting("CodeEditor.Media.StylesPath", "/Content/Media/") + "{0}{1}.{2}";
-
-        static ResourceRenderer()
-        {
-        }
 
         private static IHtmlString Render(ResourceType resourceType, params string[] paths)
         {
@@ -75,13 +71,13 @@ namespace Sitecore.SharedSource.Web
                 switch (mediaItem.Extension.ToLower())
                 {
                     case "js":
-                        var scriptsRelativePath = String.Format(ScriptsFormat, mediaItem.Name, suffix,
+                        var scriptsRelativePath = String.Format(_scriptsFormat, mediaItem.Name, suffix,
                             mediaItem.Extension);
                         results.Add(mediaItem.ToFile(scriptsRelativePath,
                             HttpContext.Current.Server.MapPath(scriptsRelativePath), ResourceType.Script));
                         break;
                     case "css":
-                        var stylesRelativePath = String.Format(StylesFormat, mediaItem.Name, suffix,
+                        var stylesRelativePath = String.Format(_stylesFormat, mediaItem.Name, suffix,
                             mediaItem.Extension);
                         results.Add(mediaItem.ToFile(stylesRelativePath,
                             HttpContext.Current.Server.MapPath(stylesRelativePath), ResourceType.Style));
@@ -98,7 +94,7 @@ namespace Sitecore.SharedSource.Web
         /// <param name="results">The results to render.</param>
         /// <param name="resourceType">The type of resource to render.</param>
         /// <returns></returns>
-        public static string RenderResourceHtmlString(List<SaveResult> results, ResourceType resourceType)
+        public string RenderResourceHtmlString(List<SaveResult> results, ResourceType resourceType)
         {
             var content = String.Empty;
             switch (resourceType)
@@ -120,7 +116,7 @@ namespace Sitecore.SharedSource.Web
             return content;
         }
 
-        public static List<SaveResult> LoadResourceReference(Item resource)
+        public List<SaveResult> LoadResourceReference(Item resource)
         {
             var cacheKey = resource.ID.ToShortID().ToString();
             if (!Context.PageMode.IsNormal)
@@ -153,5 +149,31 @@ namespace Sitecore.SharedSource.Web
 
             return results;
         }
+
+        #region IDisposable
+
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            _disposed = true;
+        }
+
+        #endregion
     }
 }
