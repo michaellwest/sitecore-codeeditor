@@ -16,18 +16,20 @@ namespace Sitecore.SharedSource.Web
 {
     public class ResourceRenderer : IDisposable
     {
-        private const string ScriptTagFormat = "<script src=\"{0}\"></script>";
+        private const string ScriptTagFormat = "<script src='{0}'></script>";
 
-        private const string StyleTagFormat = "<link href=\"{0}\" rel=\"stylesheet\" />";
+        private const string StyleTagFormat = "<link href='{0}' rel='stylesheet' />";
 
-        private static readonly string _scriptsFormat =
+        private static readonly string ScriptsFormat =
             Settings.GetSetting("CodeEditor.Media.ScriptsPath", "/Scripts/Media/") + "{0}{1}.{2}";
 
-        private static readonly string _stylesFormat =
+        private static readonly string StylesFormat =
             Settings.GetSetting("CodeEditor.Media.StylesPath", "/Content/Media/") + "{0}{1}.{2}";
 
         private static IHtmlString Render(ResourceType resourceType, params string[] paths)
         {
+            Assert.ArgumentNotNull(paths, "paths");
+
             var tagFormat = String.Empty;
             switch (resourceType)
             {
@@ -38,13 +40,6 @@ namespace Sitecore.SharedSource.Web
                     tagFormat = StyleTagFormat;
                     break;
             }
-            return RenderFormat(tagFormat, paths);
-        }
-
-        private static IHtmlString RenderFormat(string tagFormat, params string[] paths)
-        {
-            Assert.ArgumentNotNullOrEmpty(tagFormat, "tagFormat");
-            Assert.ArgumentNotNull(paths, "paths");
 
             foreach (var str in paths)
             {
@@ -71,13 +66,13 @@ namespace Sitecore.SharedSource.Web
                 switch (mediaItem.Extension.ToLower())
                 {
                     case "js":
-                        var scriptsRelativePath = String.Format(_scriptsFormat, mediaItem.Name, suffix,
+                        var scriptsRelativePath = String.Format(ScriptsFormat, mediaItem.Name, suffix,
                             mediaItem.Extension);
                         results.Add(mediaItem.ToFile(scriptsRelativePath,
                             HttpContext.Current.Server.MapPath(scriptsRelativePath), ResourceType.Script));
                         break;
                     case "css":
-                        var stylesRelativePath = String.Format(_stylesFormat, mediaItem.Name, suffix,
+                        var stylesRelativePath = String.Format(StylesFormat, mediaItem.Name, suffix,
                             mediaItem.Extension);
                         results.Add(mediaItem.ToFile(stylesRelativePath,
                             HttpContext.Current.Server.MapPath(stylesRelativePath), ResourceType.Style));
