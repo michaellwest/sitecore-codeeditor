@@ -19,6 +19,12 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 {
     public class CodeAttachment : Attachment
     {
+        public CodeAttachment()
+        {
+            this.Class = "scContentControl";
+            this.Attributes.Add("style", "height: 150px; background-color: #fff;");
+        }
+
         public override void HandleMessage(Message message)
         {
             Assert.ArgumentNotNull(message, "message");
@@ -160,9 +166,9 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 }
             }
 
-            output.Write(
-                "<div class=\"scContentControl\" style=\"background-color: #fff;font: 12pt tahoma;padding: 4px;height: 150px;overflow: hidden;\">");
-            output.Write(content);
+            this.SetWidthAndHeightStyle();
+            output.Write("<div" + this.ControlAttributes + ">" + content);
+            this.RenderChildren(output);
             output.Write("</div>");
         }
     }

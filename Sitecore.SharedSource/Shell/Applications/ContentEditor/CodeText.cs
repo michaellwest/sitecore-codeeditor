@@ -1,4 +1,7 @@
-﻿using Sitecore.Diagnostics;
+﻿using System;
+using System.Web;
+using System.Web.UI;
+using Sitecore.Diagnostics;
 using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
@@ -8,6 +11,12 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 {
     public class CodeText : RichText
     {
+        public CodeText()
+        {
+            this.Class = "scContentControl";
+            this.Attributes.Add("style", "height: 150px; background-color: #fff;");
+        }
+
         public override void HandleMessage(Message message)
         {
             Assert.ArgumentNotNull(message, "message");
