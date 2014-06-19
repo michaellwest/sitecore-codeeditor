@@ -1,7 +1,4 @@
-﻿using System;
-using System.Web;
-using System.Web.UI;
-using Sitecore.Diagnostics;
+﻿using Sitecore.Diagnostics;
 using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
