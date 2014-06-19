@@ -61,8 +61,10 @@ namespace Sitecore.SharedSource.Web
 
             var suffix = HttpContext.Current.IsDebuggingEnabled ? String.Empty : ".min";
 
-            foreach (var mediaItem in ids.Select(id => (MediaItem) Context.Database.GetItem(ID.Parse(id))))
+            foreach (var item in ids.Select(id => Context.Database.GetItem(ID.Parse(id))).Where(item => item != null))
             {
+                var mediaItem = (MediaItem) item;
+
                 switch (mediaItem.Extension.ToLower())
                 {
                     case "js":
