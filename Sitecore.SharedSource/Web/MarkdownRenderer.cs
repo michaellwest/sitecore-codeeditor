@@ -1,11 +1,12 @@
 ﻿using System;
+using MarkdownDeep;
 using Sitecore.Collections;
+using Sitecore.SharedSource.Extensions;
 
 namespace Sitecore.SharedSource.Web
 {
     public class MarkdownRenderer
     {
-
         public class Options
         {
             public static readonly string SafeMode = "safemode";
@@ -21,7 +22,12 @@ namespace Sitecore.SharedSource.Web
 
         public static string Render(string markdown, SafeDictionary<string> parameters)
         {
-            var parser = new MarkdownDeep.Markdown();
+            var parser = new Markdown
+            {
+                NewWindowForExternalLinks = true,
+                HtmlClassFootnotes = String.Empty,
+                HtmlClassTitledImages = String.Empty
+            };
 
             // Default values
 
@@ -29,70 +35,38 @@ namespace Sitecore.SharedSource.Web
             // parser.ExtraMode = true;
             // parser.SafeMode = true;
             // parser.MarkdownInHtml = true;
-            parser.NewWindowForExternalLinks = true;
             // parser.NewWindowForLocalLinks = false;
             // parser.NoFollowLinks = false;
             // parser.AutoHeadingIDs = true;
+            
+            if (parameters.HasValue(Options.ExtraMode))
+                parser.ExtraMode = parameters[Options.ExtraMode].ToBool();
 
-            parser.HtmlClassFootnotes = "";
-            parser.HtmlClassTitledImages = "";
+            if (parameters.HasValue(Options.SafeMode))
+                parser.SafeMode = parameters[Options.SafeMode].ToBool();
 
+            if (parameters.HasValue(Options.MarkdownInHtml))
+                parser.MarkdownInHtml = parameters[Options.MarkdownInHtml].ToBool();
 
-            if (HasValue(parameters, Options.ExtraMode))
-                parser.ExtraMode = StringToBool(parameters[Options.ExtraMode]);
+            if (parameters.HasValue(Options.AutoHeadingIDs))
+                parser.AutoHeadingIDs = parameters[Options.AutoHeadingIDs].ToBool();
 
-            if (HasValue(parameters, Options.SafeMode))
-                parser.SafeMode = StringToBool(parameters[Options.SafeMode]);
+            if (parameters.HasValue(Options.NewWindowForExternalLinks))
+                parser.NewWindowForExternalLinks = parameters[Options.NewWindowForExternalLinks].ToBool();
 
-            if (HasValue(parameters, Options.MarkdownInHtml))
-                parser.MarkdownInHtml = StringToBool(parameters[Options.MarkdownInHtml]);
+            if (parameters.HasValue(Options.NewWindowForLocalLinks))
+                parser.NewWindowForLocalLinks = parameters[Options.NewWindowForLocalLinks].ToBool();
 
-            if (HasValue(parameters, Options.AutoHeadingIDs))
-                parser.AutoHeadingIDs = StringToBool(parameters[Options.AutoHeadingIDs]);
+            if (parameters.HasValue(Options.NoFollowLinks))
+                parser.NoFollowLinks = parameters[Options.NoFollowLinks].ToBool();
 
-            if (HasValue(parameters, Options.NewWindowForExternalLinks))
-                parser.NewWindowForExternalLinks = StringToBool(parameters[Options.NewWindowForExternalLinks]);
-
-            if (HasValue(parameters, Options.NewWindowForLocalLinks))
-                parser.NewWindowForLocalLinks = StringToBool(parameters[Options.NewWindowForLocalLinks]);
-
-            if (HasValue(parameters, Options.NoFollowLinks))
-                parser.NoFollowLinks = StringToBool(parameters[Options.NoFollowLinks]);
-
-            if (HasValue(parameters, Options.HtmlClassFootnotes))
+            if (parameters.HasValue(Options.HtmlClassFootnotes))
                 parser.HtmlClassFootnotes = parameters[Options.HtmlClassFootnotes];
 
-            if (HasValue(parameters, Options.HtmlClassTitledImages))
+            if (parameters.HasValue(Options.HtmlClassTitledImages))
                 parser.HtmlClassTitledImages = parameters[Options.HtmlClassTitledImages];
 
-            var output = parser.Transform(markdown);
-
-            return output;
-        }
-
-        public static string BoolToString(bool? value)
-        {
-            switch (value)
-            {
-                case null:
-                    return String.Empty;
-                case true:
-                    return "1";
-                default:
-                    return "0";
-            }
-        }
-
-        public static bool StringToBool(string flag)
-        {
-            return flag == "1";
-        }
-
-        private static bool HasValue(SafeDictionary<string> list, string key)
-        {
-            if (list == null || key == null) return false;
-
-            return !String.IsNullOrEmpty(list[key]);
+            return parser.Transform(markdown);
         }
     }
 }

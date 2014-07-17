@@ -10,6 +10,7 @@ namespace Sitecore.SharedSource.Pipelines
         {
             var fieldTypeKey = args.FieldTypeKey;
             if (fieldTypeKey != "code text") return;
+            args.DisableWebEdit = true;
 
             var parameters = args.GetField().Source.ToDictionary(args.Parameters);
             if (!parameters.ContainsKey("mode") || !parameters["mode"].Is("markdown")) return;
