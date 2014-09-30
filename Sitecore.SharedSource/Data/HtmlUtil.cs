@@ -9,7 +9,7 @@ namespace Sitecore.SharedSource.Data
         {
             if (String.IsNullOrEmpty(input)) return input;
 
-            return Regex.Replace(input, @"(\s{2,}\n|\r\n|\n)", "<br />", RegexOptions.Compiled);
+            return Regex.Replace(input, @"(\r\n|\n)", "<br />", RegexOptions.Compiled);
         }
 
         public static string ReplaceHtmlBreaks(string input)
