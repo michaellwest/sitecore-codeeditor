@@ -1,6 +1,8 @@
 ﻿using Sitecore.Diagnostics;
 using Sitecore.Globalization;
 using Sitecore.Pipelines.Save;
+using Sitecore.SharedSource.Data;
+using Sitecore.SharedSource.Extensions;
 
 namespace Sitecore.SharedSource.Pipelines.Save
 {
@@ -42,6 +44,15 @@ namespace Sitecore.SharedSource.Pipelines.Save
                     if (saveField.OriginalValue == saveField.Value)
                     {
                         continue;
+                    }
+
+                    if (field.TypeKey == "code text")
+                    {
+                        var parameters = field.Source.ToDictionary();
+                        if (parameters.ContainsKey("mode") && parameters["mode"].Is("markdown"))
+                        {
+                            saveField.Value = HtmlUtil.ReplaceHtmlBreaks(saveField.Value);
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(saveField.Value) && NeedsHtmlTagEncode(saveField))
