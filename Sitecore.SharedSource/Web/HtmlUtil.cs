@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace Sitecore.SharedSource.Data
+namespace Sitecore.SharedSource.Web
 {
     public class HtmlUtil
     {

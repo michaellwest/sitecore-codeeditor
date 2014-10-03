@@ -1,21 +1,42 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Web;
 using System.Web.UI;
 using Sitecore.Diagnostics;
-using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
+using Sitecore.Web.UI.HtmlControls;
 using Sitecore.Web.UI.Sheer;
-using HtmlUtil = Sitecore.SharedSource.Data.HtmlUtil;
+using HtmlUtil = Sitecore.SharedSource.Web.HtmlUtil;
 
 namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 {
     public class CodeText : Memo
     {
+        public string ItemLanguage
+        {
+            get { return StringUtil.GetString(ServerProperties["ItemLanguage"]); }
+            set { ServerProperties["ItemLanguage"] = value; }
+        }
+
+        public override string Value
+        {
+            get { return GetViewStateString("Value"); }
+            set
+            {
+                if (value == Value) return;
+
+                SetViewStateString("Value", value);
+
+                // Encode so the content editor will properly render the content.
+                SheerResponse.SetInnerHtml(ID, RenderPreview());
+            }
+        }
+
         public CodeText()
         {
-            this.Class = "scContentControl";
-            this.Attributes.Add("style", "background-color: #fff; padding: 4px; min-height: 100px;");
+            Class = "scContentControl";
+            Attributes.Add("style", "background-color: #fff; padding: 4px; min-height: 100px;");
         }
 
         public override void HandleMessage(Message message)
@@ -110,46 +131,37 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         /// </value>
         public string Source
         {
-            get { return this.GetViewStateString("Source"); }
+            get { return GetViewStateString("Source"); }
             set
             {
                 Assert.ArgumentNotNull(value, "value");
-                this.SetViewStateString("Source", value);
+                SetViewStateString("Source", value);
             }
         }
 
-        private string RenderPreview()
+        protected override void OnPreRender(EventArgs e)
+        {
+            Assert.ArgumentNotNull(e, "e");
+            base.OnPreRender(e);
+            ServerProperties["Value"] = ServerProperties["Value"];
+            Disabled = false;
+        }
+
+        protected string RenderPreview()
         {
             var output = new StringBuilder();
             output.Append("<div style='height: 100%; overflow: hidden;'>" +
-                         HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(this.Value)));
+                          HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(Value)));
             output.Append("</div>");
             return output.ToString();
         }
 
         protected override void DoRender(HtmlTextWriter output)
         {
-            this.SetWidthAndHeightStyle();
-            output.Write("<div " + this.ControlAttributes + ">");
+            SetWidthAndHeightStyle();
+            output.Write("<div " + ControlAttributes + ">");
             output.Write(RenderPreview());
             output.Write("</div>");
-        }
-
-        public override string Value
-        {
-            get
-            {
-                return this.GetViewStateString("Value");
-            }
-            set
-            {
-                if (!(value != this.Value))
-                    return;
-                this.SetViewStateString("Value", value);
-
-                // Encode so the content editor will properly render the content.
-                SheerResponse.SetInnerHtml(this.ID, RenderPreview());
-            }
         }
     }
 }

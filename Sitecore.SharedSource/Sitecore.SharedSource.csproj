@@ -53,7 +53,7 @@
     <Compile Include="Data\Fields\CodeTextFieldReader.cs" />
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\SaveResult.cs" />
-    <Compile Include="Data\HtmlUtil.cs" />
+    <Compile Include="Web\HtmlUtil.cs" />
     <Compile Include="Extensions\BoolExtensions.cs" />
     <Compile Include="Extensions\FieldExtensions.cs" />
     <Compile Include="Extensions\MediaItemExtensions.cs" />
