@@ -1,17 +1,20 @@
-﻿using Sitecore.Diagnostics;
+﻿using System.Web;
+using System.Web.UI;
+using Sitecore.Diagnostics;
 using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
 using Sitecore.Web.UI.Sheer;
+using HtmlUtil = Sitecore.SharedSource.Data.HtmlUtil;
 
 namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 {
-    public class CodeText : RichText
+    public class CodeText : Memo
     {
         public CodeText()
         {
             this.Class = "scContentControl";
-            this.Attributes.Add("style", "height: 150px; background-color: #fff;");
+            this.Attributes.Add("style", "background-color: #fff; padding: 4px; min-height: 100px;");
         }
 
         public override void HandleMessage(Message message)
@@ -85,12 +88,59 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             Assert.ArgumentNotNull(args, "args");
             var text = args.Result;
             if (text == "__#!$No value$!#__")
+            {
                 text = string.Empty;
-            if (text != Value)
-                SetModified();
-            SheerResponse.Eval("scForm.browser.getControl('" + ID + "').contentWindow.scSetText(" +
-                               StringUtil.EscapeJavascriptString(text) + ")");
-            SheerResponse.Eval("scContent.startValidators()");
+            }
+
+            if (text == Value) return;
+
+            SetModified();
+
+            Value = text;
+        }
+
+        /// <summary>
+        /// Gets or sets the source.
+        /// 
+        /// </summary>
+        /// 
+        /// <value>
+        /// The source.
+        /// </value>
+        public string Source
+        {
+            get { return this.GetViewStateString("Source"); }
+            set
+            {
+                Assert.ArgumentNotNull(value, "value");
+                this.SetViewStateString("Source", value);
+            }
+        }
+
+        protected override void DoRender(HtmlTextWriter output)
+        {
+            this.SetWidthAndHeightStyle();
+            output.Write("<div " + this.ControlAttributes + "><div style='height: 100%; overflow: hidden;'>" +
+                         HtmlUtil.ReplaceLineBreaks(HttpUtility.HtmlEncode(this.Value)));
+            this.RenderChildren(output);
+            output.Write("</div></div>");
+        }
+
+        public override string Value
+        {
+            get
+            {
+                return this.GetViewStateString("Value");
+            }
+            set
+            {
+                if (!(value != this.Value))
+                    return;
+                this.SetViewStateString("Value", value);
+
+                // Encode so the content editor will properly render the content.
+                SheerResponse.SetInnerHtml(this.ID, HttpUtility.HtmlEncode(value));
+            }
         }
     }
 }
