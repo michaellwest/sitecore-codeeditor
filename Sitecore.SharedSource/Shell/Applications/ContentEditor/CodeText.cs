@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System.Text;
+using System.Web;
 using System.Web.UI;
 using Sitecore.Diagnostics;
 using Sitecore.Shell.Applications.ContentEditor;
@@ -117,13 +118,21 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             }
         }
 
+        private string RenderPreview()
+        {
+            var output = new StringBuilder();
+            output.Append("<div style='height: 100%; overflow: hidden;'>" +
+                         HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(this.Value)));
+            output.Append("</div>");
+            return output.ToString();
+        }
+
         protected override void DoRender(HtmlTextWriter output)
         {
             this.SetWidthAndHeightStyle();
-            output.Write("<div " + this.ControlAttributes + "><div style='height: 100%; overflow: hidden;'>" +
-                         HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(this.Value)));
-            this.RenderChildren(output);
-            output.Write("</div></div>");
+            output.Write("<div " + this.ControlAttributes + ">");
+            output.Write(RenderPreview());
+            output.Write("</div>");
         }
 
         public override string Value
@@ -139,7 +148,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 this.SetViewStateString("Value", value);
 
                 // Encode so the content editor will properly render the content.
-                SheerResponse.SetInnerHtml(this.ID, HttpUtility.HtmlEncode(value));
+                SheerResponse.SetInnerHtml(this.ID, RenderPreview());
             }
         }
     }

@@ -29,10 +29,10 @@ namespace Sitecore.SharedSource.Pipelines
             if (!parameters.ContainsKey("mode") || !parameters["mode"].Is("markdown")) return;
 
             // Decode the html and then convert new lines to html breaks.
-            var firstPart = args.Result.FirstPart;//HtmlUtil.ReplaceNewLines(HttpUtility.HtmlDecode(args.Result.FirstPart));
+            var firstPart = args.Result.FirstPart;
             args.Result.FirstPart = MarkdownRenderer.Render(firstPart, parameters);
 
-            var lastPart = HtmlUtil.ReplaceNewLines(HtmlUtil.ReplaceLineBreaks(args.Result.LastPart));
+            var lastPart = args.Result.LastPart;
             args.Result.LastPart = MarkdownRenderer.Render(lastPart, parameters);
         }
     }
