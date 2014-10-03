@@ -121,7 +121,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         {
             this.SetWidthAndHeightStyle();
             output.Write("<div " + this.ControlAttributes + "><div style='height: 100%; overflow: hidden;'>" +
-                         HtmlUtil.ReplaceLineBreaks(HttpUtility.HtmlEncode(this.Value)));
+                         HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(this.Value)));
             this.RenderChildren(output);
             output.Write("</div></div>");
         }
