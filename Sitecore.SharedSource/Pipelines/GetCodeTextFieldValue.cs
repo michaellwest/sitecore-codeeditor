@@ -27,9 +27,12 @@ namespace Sitecore.SharedSource.Pipelines
             var parameters = args.GetField().Source.ToDictionary(args.Parameters);
             if (!parameters.ContainsKey("mode") || !parameters["mode"].Is("markdown")) return;
 
-            // Decode the html and then convert new lines to html breaks.
-            args.Result.FirstPart = MarkdownRenderer.Render(args.Result.FirstPart, parameters);
-            args.Result.LastPart = MarkdownRenderer.Render(args.Result.LastPart, parameters);
+            using (var renderer = new MarkdownRenderer())
+            {
+                // Decode the html and then convert new lines to html breaks.
+                args.Result.FirstPart = renderer.Render(args.Result.FirstPart, parameters);
+                args.Result.LastPart = renderer.Render(args.Result.LastPart, parameters);   
+            }
         }
     }
 }

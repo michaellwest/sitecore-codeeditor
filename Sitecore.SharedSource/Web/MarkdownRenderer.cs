@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace Sitecore.SharedSource.Web
 {
-    public class MarkdownRenderer
+    public class MarkdownRenderer : IDisposable
     {
-        public static string Render(string markdown, SafeDictionary<string> parameters)
+        public string Render(string markdown, SafeDictionary<string> parameters)
         {
             if (String.IsNullOrEmpty(markdown)) return markdown;
 
@@ -35,5 +35,31 @@ namespace Sitecore.SharedSource.Web
 
             return parser.Transform(markdown);
         }
+
+        #region IDisposable
+
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            _disposed = true;
+        }
+
+        #endregion
     }
 }

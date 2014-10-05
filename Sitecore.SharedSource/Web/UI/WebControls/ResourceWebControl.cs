@@ -27,15 +27,15 @@ namespace Sitecore.SharedSource.Web.UI.WebControls
 
             using (var renderer = new ResourceRenderer())
             {
-                var results = renderer.LoadResourceReference(resource);
+                var results = renderer.Load(resource);
 
                 if (ResourceType == ResourceType.Script && results.Any(x => x.Resource == ResourceType.Script))
                 {
-                    writer.Write(renderer.RenderResourceHtmlString(results, ResourceType.Script));
+                    writer.Write(renderer.Render(results, ResourceType.Script));
                 }
                 else if (ResourceType == ResourceType.Style && results.Any(x => x.Resource == ResourceType.Style))
                 {
-                    writer.Write(renderer.RenderResourceHtmlString(results, ResourceType.Style));
+                    writer.Write(renderer.Render(results, ResourceType.Style));
                 }
             }
         }

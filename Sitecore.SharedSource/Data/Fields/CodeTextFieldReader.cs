@@ -15,9 +15,10 @@ namespace Sitecore.SharedSource.Data.Fields
             var parameters = field.Source.ToDictionary();
             if (!parameters.ContainsKey("mode") || !parameters["mode"].Is("markdown")) return field.Value;
 
-            var renderedMarkdown = MarkdownRenderer.Render(field.Value, parameters);
-
-            return renderedMarkdown;
+            using (var renderer = new MarkdownRenderer())
+            {
+                return renderer.Render(field.Value, parameters);
+            }
         }
     }
 }
