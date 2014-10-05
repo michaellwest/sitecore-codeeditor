@@ -28,7 +28,8 @@ namespace Sitecore.SharedSource.Web
                     if (!properties.ContainsKey(key)) continue;
 
                     var property = properties.SingleOrDefault(p => p.Key.Is(key));
-                    parser.SetPropertyValue(property.Key, property.Value);
+
+                    parser.SetPropertyValue(property.Key, parameters[key]);
                 }
             }
 

@@ -26,7 +26,15 @@ namespace Sitecore.SharedSource.Extensions
             if (item == null) return;
 
             var property = item.GetType().GetProperty(propertyName);
-            property.SetValue(item, System.Convert.ChangeType(value, property.PropertyType), null);
+            if (property.PropertyType == typeof (bool))
+            {
+                var boolValue = (value.ToString() == "1");
+                property.SetValue(item, boolValue, null);
+            }
+            else
+            {
+                property.SetValue(item, System.Convert.ChangeType(value, property.PropertyType), null);
+            }
         }
     }
 }
