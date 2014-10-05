@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.IO;
-using System.Net;
 using System.Text;
+using System.Web;
 using System.Web.UI;
 using Sitecore.Data.Items;
 using Sitecore.Diagnostics;
@@ -13,6 +13,7 @@ using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
 using Sitecore.Web.UI.Sheer;
+using HtmlUtil = Sitecore.SharedSource.Web.HtmlUtil;
 using Version = Sitecore.Data.Version;
 
 namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
@@ -21,8 +22,9 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
     {
         public CodeAttachment()
         {
-            this.Class = "scContentControl";
-            this.Attributes.Add("style", "height: 150px; background-color: #fff;");
+            Class = "scContentControl";
+            // Set minimum height so the control doesn't collapse when empty.
+            Attributes.Add("style", "background-color: #fff; padding: 4px; min-height: 100px;");
         }
 
         public override void HandleMessage(Message message)
@@ -146,9 +148,8 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             }
         }
 
-        protected override void DoRender(HtmlTextWriter output)
+        protected string RenderPreview()
         {
-            Assert.ArgumentNotNull(output, "output");
             var mediaItem =
                 (MediaItem)
                     Client.ContentDatabase.GetItem(Sitecore.Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),
@@ -161,15 +162,20 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 {
                     using (var stream = new StreamReader(mediaStream))
                     {
-                        content = WebUtility.HtmlEncode(stream.ReadToEnd());
+                        content = stream.ReadToEnd();
                     }
                 }
             }
 
-            this.SetWidthAndHeightStyle();
-            output.Write("<div" + this.ControlAttributes + ">" + content);
-            this.RenderChildren(output);
-            output.Write("</div>");
+            // Renders the html for the field preview in the content editor.
+            return String.Format("<div style='height: 100%; overflow: hidden;'>{0}</div>",
+                HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(content)));
+        }
+
+        protected override void DoRender(HtmlTextWriter output)
+        {
+            SetWidthAndHeightStyle();
+            output.Write("<div {0}>{1}</div>", ControlAttributes, RenderPreview());
         }
     }
 }

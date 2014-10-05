@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Web;
 using System.Web.UI;
 using Sitecore.Diagnostics;
@@ -19,6 +18,16 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             set { ServerProperties["ItemLanguage"] = value; }
         }
 
+        public string Source
+        {
+            get { return GetViewStateString("Source"); }
+            set
+            {
+                Assert.ArgumentNotNull(value, "value");
+                SetViewStateString("Source", value);
+            }
+        }
+
         public override string Value
         {
             get { return GetViewStateString("Value"); }
@@ -36,29 +45,33 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         public CodeText()
         {
             Class = "scContentControl";
+            // Set minimum height so the control doesn't collapse when empty.
             Attributes.Add("style", "background-color: #fff; padding: 4px; min-height: 100px;");
         }
 
-        public override void HandleMessage(Message message)
+        protected override void OnPreRender(EventArgs e)
         {
-            Assert.ArgumentNotNull(message, "message");
+            Assert.ArgumentNotNull(e, "e");
 
-            if (message["id"] != ID) return;
+            base.OnPreRender(e);
+            ServerProperties["Value"] = ServerProperties["Value"];
+            Disabled = false;
+        }
 
-            string messageText;
-            if ((messageText = message.Name) == null)
+        protected void UpdateText(ClientPipelineArgs args)
+        {
+            Assert.ArgumentNotNull(args, "args");
+            var text = args.Result;
+            if (text == "__#!$No value$!#__")
             {
-                return;
+                text = string.Empty;
             }
 
-            switch (messageText)
-            {
-                case "codetext:editcode":
-                    Sitecore.Context.ClientPage.Start(this, "EditCode");
-                    return;
-            }
+            if (text == Value) return;
 
-            base.HandleMessage(message);
+            SetModified();
+
+            Value = text;
         }
 
         protected void EditCode(ClientPipelineArgs args)
@@ -101,67 +114,36 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             }
         }
 
-        /// <summary>
-        /// Updates the Text. 
-        /// </summary>
-        /// <param name="args">The arguments.</param>
-        protected virtual void UpdateText(ClientPipelineArgs args)
+        public override void HandleMessage(Message message)
         {
-            Assert.ArgumentNotNull(args, "args");
-            var text = args.Result;
-            if (text == "__#!$No value$!#__")
+            Assert.ArgumentNotNull(message, "message");
+
+            if (message["id"] != ID) return;
+
+            string messageText;
+            if ((messageText = message.Name) == null) return;
+
+            switch (messageText)
             {
-                text = string.Empty;
+                case "codetext:editcode":
+                    Sitecore.Context.ClientPage.Start(this, "EditCode");
+                    return;
             }
 
-            if (text == Value) return;
-
-            SetModified();
-
-            Value = text;
-        }
-
-        /// <summary>
-        /// Gets or sets the source.
-        /// 
-        /// </summary>
-        /// 
-        /// <value>
-        /// The source.
-        /// </value>
-        public string Source
-        {
-            get { return GetViewStateString("Source"); }
-            set
-            {
-                Assert.ArgumentNotNull(value, "value");
-                SetViewStateString("Source", value);
-            }
-        }
-
-        protected override void OnPreRender(EventArgs e)
-        {
-            Assert.ArgumentNotNull(e, "e");
-            base.OnPreRender(e);
-            ServerProperties["Value"] = ServerProperties["Value"];
-            Disabled = false;
+            base.HandleMessage(message);
         }
 
         protected string RenderPreview()
         {
-            var output = new StringBuilder();
-            output.Append("<div style='height: 100%; overflow: hidden;'>" +
-                          HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(Value)));
-            output.Append("</div>");
-            return output.ToString();
+            // Renders the html for the field preview in the content editor.
+            return String.Format("<div style='height: 100%; overflow: hidden;'>{0}</div>",
+                HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(Value)));
         }
 
         protected override void DoRender(HtmlTextWriter output)
         {
             SetWidthAndHeightStyle();
-            output.Write("<div " + ControlAttributes + ">");
-            output.Write(RenderPreview());
-            output.Write("</div>");
+            output.Write("<div {0}>{1}</div>", ControlAttributes, RenderPreview());
         }
     }
 }
