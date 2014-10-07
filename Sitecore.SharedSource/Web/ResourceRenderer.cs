@@ -61,8 +61,10 @@ namespace Sitecore.SharedSource.Web
 
             var suffix = HttpContext.Current.IsDebuggingEnabled ? String.Empty : ".min";
 
-            foreach (var mediaItem in ids.Select(id => (MediaItem) Context.Database.GetItem(ID.Parse(id))))
+            foreach (var item in ids.Select(id => Context.Database.GetItem(ID.Parse(id))).Where(item => item != null))
             {
+                var mediaItem = (MediaItem) item;
+
                 switch (mediaItem.Extension.ToLower())
                 {
                     case "js":
@@ -89,7 +91,7 @@ namespace Sitecore.SharedSource.Web
         /// <param name="results">The results to render.</param>
         /// <param name="resourceType">The type of resource to render.</param>
         /// <returns></returns>
-        public string RenderResourceHtmlString(List<SaveResult> results, ResourceType resourceType)
+        public string Render(List<SaveResult> results, ResourceType resourceType)
         {
             var content = String.Empty;
             switch (resourceType)
@@ -111,7 +113,7 @@ namespace Sitecore.SharedSource.Web
             return content;
         }
 
-        public List<SaveResult> LoadResourceReference(Item resource)
+        public List<SaveResult> Load(Item resource)
         {
             var cacheKey = resource.ID.ToShortID().ToString();
             if (!Context.PageMode.IsNormal)

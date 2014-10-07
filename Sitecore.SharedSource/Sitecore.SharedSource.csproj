@@ -33,6 +33,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Sitecore.ContentSearch">
+      <HintPath>Lib\Sitecore.ContentSearch.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Sitecore.Kernel">
       <HintPath>Lib\Sitecore.Kernel.dll</HintPath>
     </Reference>
@@ -46,14 +50,31 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\CacheUtil.cs" />
+    <Compile Include="Data\Fields\CodeTextFieldReader.cs" />
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\SaveResult.cs" />
+    <Compile Include="Web\HtmlUtil.cs" />
     <Compile Include="Extensions\FieldExtensions.cs" />
     <Compile Include="Extensions\MediaItemExtensions.cs" />
+    <Compile Include="Extensions\ReflectionExtensions.cs" />
+    <Compile Include="Extensions\SafeDictionaryExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TemplateItemExtensions.cs" />
     <Compile Include="IO\DirectoryUtil.cs" />
     <Compile Include="IO\FileUtil.cs" />
+    <Compile Include="MarkdownDeep\Abbreviation.cs" />
+    <Compile Include="MarkdownDeep\Block.cs" />
+    <Compile Include="MarkdownDeep\BlockProcessor.cs" />
+    <Compile Include="MarkdownDeep\FootnoteReference.cs" />
+    <Compile Include="MarkdownDeep\HtmlTag.cs" />
+    <Compile Include="MarkdownDeep\LinkDefinition.cs" />
+    <Compile Include="MarkdownDeep\LinkInfo.cs" />
+    <Compile Include="MarkdownDeep\MardownDeep.cs" />
+    <Compile Include="MarkdownDeep\SpanFormatter.cs" />
+    <Compile Include="MarkdownDeep\StringScanner.cs" />
+    <Compile Include="MarkdownDeep\TableSpec.cs" />
+    <Compile Include="MarkdownDeep\Token.cs" />
+    <Compile Include="MarkdownDeep\Utils.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\CommonData.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\CommonSettings.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\CommonStrings.Designer.cs">
@@ -202,8 +223,10 @@
     <Compile Include="Microsoft.Ajax.Utilities\Minifier.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\ResourceStrings.cs" />
     <Compile Include="Microsoft.Ajax.Utilities\SwitchParser.cs" />
+    <Compile Include="Pipelines\GetCodeTextFieldValue.cs" />
     <Compile Include="Pipelines\Save\SaveEx.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Web\MarkdownRenderer.cs" />
     <Compile Include="Web\ResourceRenderer.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeAttachment.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeText.cs" />
@@ -236,6 +259,7 @@
       <LastGenOutput>JScript.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
