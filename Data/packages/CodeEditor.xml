@@ -3,7 +3,7 @@
     <metadata>
       <PackageName>CodeEditor</PackageName>
       <Author>Michael West</Author>
-      <Version>1.5.0.0</Version>
+      <Version>1.5.1.0</Version>
       <Revision />
       <License>
 &lt;p&gt;Copyright 2013-2014 Michael West&lt;/p&gt;
@@ -35,6 +35,7 @@ Installation Steps
 1. Overwrite any existing files 
 2. Merge/Merge any existing Sitecore items
 3. Uncomment the Lucene index configuration settings in Sitecore.SharedSource.CodeEditor.config to enable indexing of the Code Text field.
+4. Delete the Code Attachment field type from under System Types in the Core database.
 
 Shortcuts
 Ctrl-Space : Snippet/code completion window
@@ -45,6 +46,8 @@ mode=javascript
 mode=css&amp;theme=monokai
 mode=markdown&amp;theme=textmate
 
+User Guide:
+http://michaellwest.gitbooks.io/sitecore-code-editor/
 
 Please report any problems in the issue tracker:
 http://goo.gl/MiDWdD
@@ -66,10 +69,7 @@ http://michaellwest.blogspot.com/</Readme>
         <x-item>/core/sitecore/system/Field types/Custom Types/Code Text/{185AF9DE-8B03-4D37-BD8F-BC8329AA8B26}/invariant/0</x-item>
         <x-item>/core/sitecore/system/Field types/Custom Types/Code Text/Menu/{0CD68B98-BF5C-461E-8825-A559748EAC13}/invariant/0</x-item>
         <x-item>/core/sitecore/system/Field types/Custom Types/Code Text/Menu/Edit Code/{72C1FE61-FA41-497E-8ADA-35C556B94A85}/invariant/0</x-item>
-        <x-item>/core/sitecore/system/Field types/System Types/Code Attachment/{64058D70-F20A-4DCB-9A80-A9718E413B75}/invariant/0</x-item>
-        <x-item>/core/sitecore/system/Field types/System Types/Code Attachment/Menu/{3C3FEAAA-2400-4E63-AA55-15C14E4D9365}/invariant/0</x-item>
-        <x-item>/core/sitecore/system/Field types/System Types/Code Attachment/Menu/Download/{BF4BA31A-BBFD-4800-9114-9CC61806549E}/invariant/0</x-item>
-        <x-item>/core/sitecore/system/Field types/System Types/Code Attachment/Menu/Edit Code/{05DED94C-69E1-42DB-9F48-A1604C4D65E4}/invariant/0</x-item>
+        <x-item>/core/sitecore/system/Field types/System Types/Attachment/{696DAB36-F6FA-4836-A4F8-5167DDE397E4}/invariant/0</x-item>
       </Entries>
       <SkipVersions>False</SkipVersions>
       <Converter>

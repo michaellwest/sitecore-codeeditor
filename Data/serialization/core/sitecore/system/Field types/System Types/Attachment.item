@@ -1,10 +1,10 @@
 ----item----
 version: 1
-id: {64058D70-F20A-4DCB-9A80-A9718E413B75}
+id: {696DAB36-F6FA-4836-A4F8-5167DDE397E4}
 database: core
-path: /sitecore/system/Field types/System Types/Code Attachment
+path: /sitecore/system/Field types/System Types/Attachment
 parent: {7A22EC7C-AACA-4AD5-8AB9-A83C1E8C68E8}
-name: Code Attachment
+name: Attachment
 master: {00000000-0000-0000-0000-000000000000}
 template: {F8A17D6A-118E-4CD7-B5F5-88FF37A4F237}
 templatekey: Template field type
@@ -13,20 +13,20 @@ templatekey: Template field type
 field: {0F0A5388-0467-4A45-95C0-729B1D6DB9FD}
 name: Control
 key: control
-content-length: 29
+content-length: 32
 
-codeattachment:CodeAttachment
+contentattachment:CodeAttachment
 ----field----
 field: {06D5295C-ED2F-4A54-9BF2-26228D113318}
 name: __Icon
 key: __icon
-content-length: 28
+content-length: 36
 
-software/32x32/text_code.png
+Applications/16x16/photo_scenery.png
 ----version----
 language: en
 version: 1
-revision: 108b921a-9069-4d18-8f52-13de9cd892c8
+revision: d9a4a70f-6d73-4ea7-a43c-d41c19cde30b
 
 ----field----
 field: {C8F93AFE-BFD4-4E8F-9C61-152559854661}
@@ -62,14 +62,14 @@ name: __Revision
 key: __revision
 content-length: 36
 
-108b921a-9069-4d18-8f52-13de9cd892c8
+d9a4a70f-6d73-4ea7-a43c-d41c19cde30b
 ----field----
 field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
 name: __Updated
 key: __updated
 content-length: 34
 
-20140315T163242:635304979620991994
+20141207T153413:635535632537544540
 ----field----
 field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
 name: __Updated by

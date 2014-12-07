@@ -41,7 +41,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 
             switch (messageText)
             {
-                case "codeattachment:editcode":
+                case "contentattachment:editcode":
                     Sitecore.Context.ClientPage.Start(this, "EditCode");
                     return;
             }
@@ -57,7 +57,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             MediaItem mediaItem = itemNotNull;
             if (!mediaItem.HasMediaStream(FieldID) && mediaItem.FilePath.Length == 0)
             {
-                SheerResponse.Alert("No file has been attached.", new string[0]);
+                SheerResponse.Alert("No file has been attached.");
             }
             else
             {
@@ -68,7 +68,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 
                 var mediaUri = MediaUri.Parse(mediaItem);
                 var media = MediaManager.GetMedia(mediaUri);
-                Assert.IsNotNull(media, typeof (Media), "MediaUri: {0}", new object[] {mediaUri});
+                Assert.IsNotNull(media, typeof (Media), "MediaUri: {0}", mediaUri);
 
                 if (args.IsPostBack)
                 {
@@ -148,22 +148,20 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             }
         }
 
-        protected string RenderPreview()
+        protected string RenderPreview(MediaItem mediaItem)
         {
-            var mediaItem =
-                (MediaItem)
-                    Client.ContentDatabase.GetItem(Sitecore.Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),
-                        Version.Parse(ItemVersion));
-
             var content = String.Empty;
-            if (mediaItem != null && MediaManager.HasMediaContent(mediaItem))
+            if (mediaItem == null || !MediaManager.HasMediaContent(mediaItem))
             {
-                using (var mediaStream = mediaItem.GetMediaStream())
+                return String.Format("<div style='height: 100%; overflow: hidden;'>{0}</div>",
+                    HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(content)));
+            }
+
+            using (var mediaStream = mediaItem.GetMediaStream())
+            {
+                using (var stream = new StreamReader(mediaStream))
                 {
-                    using (var stream = new StreamReader(mediaStream))
-                    {
-                        content = stream.ReadToEnd();
-                    }
+                    content = stream.ReadToEnd();
                 }
             }
 
@@ -174,8 +172,19 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 
         protected override void DoRender(HtmlTextWriter output)
         {
+            var mediaItem =
+                (MediaItem) Client.ContentDatabase.GetItem(Sitecore.Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),
+                    Version.Parse(ItemVersion));
+
+            if (mediaItem.InnerItem.TemplateID != TemplateIDs.UnversionedCode &&
+                mediaItem.InnerItem.TemplateID != TemplateIDs.VersionedCode)
+            {
+                base.DoRender(output);
+                return;
+            }
+
             SetWidthAndHeightStyle();
-            output.Write("<div {0}>{1}</div>", ControlAttributes, RenderPreview());
+            output.Write("<div {0}>{1}</div>", ControlAttributes, RenderPreview(mediaItem));
         }
     }
 }
