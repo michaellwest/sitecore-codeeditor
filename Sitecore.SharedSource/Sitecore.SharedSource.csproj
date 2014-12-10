@@ -33,6 +33,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Sitecore.Client">
+      <HintPath>Lib\Sitecore.Client.dll</HintPath>
+    </Reference>
     <Reference Include="Sitecore.ContentSearch">
       <HintPath>Lib\Sitecore.ContentSearch.dll</HintPath>
       <Private>False</Private>
@@ -53,6 +56,8 @@
     <Compile Include="Data\Fields\CodeTextFieldReader.cs" />
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\SaveResult.cs" />
+    <Compile Include="Shell\Applications\ContentEditor\EditorFormatter.cs" />
+    <Compile Include="Shell\Applications\ContentEditor\Pipelines\SetEditorFormatter.cs" />
     <Compile Include="Web\HtmlUtil.cs" />
     <Compile Include="Extensions\FieldExtensions.cs" />
     <Compile Include="Extensions\MediaItemExtensions.cs" />

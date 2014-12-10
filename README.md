@@ -12,6 +12,8 @@ Code Attachment has been added to enable code editing of media library items.
 Code type file extensions such as .html, .css, and .js will now be uploaded using
 the Code template, rather than the previous File template.
 
+The user guide can be found [here](http://michaellwest.gitbooks.io/sitecore-code-editor/).
+
 ## Installation
 
 - Install /Packages/CodeEditor-1.x.x.x.zip in Sitecore.
