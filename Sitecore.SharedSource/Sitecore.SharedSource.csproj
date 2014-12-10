@@ -56,6 +56,7 @@
     <Compile Include="Data\Fields\CodeTextFieldReader.cs" />
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\SaveResult.cs" />
+    <Compile Include="Extensions\IntegerExtensions.cs" />
     <Compile Include="Shell\Applications\ContentEditor\EditorFormatter.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Pipelines\SetEditorFormatter.cs" />
     <Compile Include="Web\HtmlUtil.cs" />
