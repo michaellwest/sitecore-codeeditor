@@ -151,7 +151,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         protected string RenderPreview()
         {
             // Renders the html for the field preview in the content editor.
-            return String.Format("<div style='height: 100%; overflow: hidden;'>{0}</div>",
+            return String.Format("<div style='height: 100%; overflow: auto; overflow-x: hidden;'>{0}</div>",
                 HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(Value)));
         }
 
