@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Web;
 using System.Web.UI;
+using Sitecore.Configuration;
 using Sitecore.Diagnostics;
+using Sitecore.SharedSource.Extensions;
 using Sitecore.Text;
 using Sitecore.Web;
 using Sitecore.Web.UI.HtmlControls;
@@ -109,7 +111,20 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 }
                 handle["code"] = str2;
                 handle.Add(urlString);
-                SheerResponse.ShowModalDialog(urlString.ToString(), "1000px", "500px", string.Empty, true);
+
+                var width = Settings.GetSetting("CodeEditor.Dialog.Width").ToNumber(1000);
+                if (parameters["width"] != null && parameters["width"].IsNumber())
+                {
+                    width = parameters["width"].ToNumber(1000);
+                }
+
+                var height = Settings.GetSetting("CodeEditor.Dialog.Height").ToNumber(500);
+                if (parameters["height"] != null && parameters["height"].IsNumber())
+                {
+                    height = parameters["height"].ToNumber(500);
+                }
+
+                SheerResponse.ShowModalDialog(urlString.ToString(), width + "px", height + "px", String.Empty, true);
                 args.WaitForPostBack();
             }
         }

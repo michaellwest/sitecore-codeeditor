@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using Sitecore.Collections;
 
 namespace Sitecore.SharedSource.Extensions
@@ -45,6 +46,16 @@ namespace Sitecore.SharedSource.Extensions
             }
 
             return parameters;
+        }
+
+        public static bool IsNumber(this string input)
+        {
+            return Regex.IsMatch(input, @"^\d+$", RegexOptions.Compiled);
+        }
+
+        public static int ToNumber(this string input, int defaultValue)
+        {
+            return IsNumber(input) ? int.Parse(input) : defaultValue;
         }
     }
 }
