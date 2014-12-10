@@ -151,22 +151,19 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         protected string RenderPreview(MediaItem mediaItem)
         {
             var content = String.Empty;
-            if (mediaItem == null || !MediaManager.HasMediaContent(mediaItem))
+            if (mediaItem != null && MediaManager.HasMediaContent(mediaItem))
             {
-                return String.Format("<div style='height: 100%; overflow: hidden;'>{0}</div>",
-                    HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(content)));
-            }
-
-            using (var mediaStream = mediaItem.GetMediaStream())
-            {
-                using (var stream = new StreamReader(mediaStream))
+                using (var mediaStream = mediaItem.GetMediaStream())
                 {
-                    content = stream.ReadToEnd();
+                    using (var stream = new StreamReader(mediaStream))
+                    {
+                        content = stream.ReadToEnd();
+                    }
                 }
             }
 
             // Renders the html for the field preview in the content editor.
-            return String.Format("<div style='height: 100%; overflow: hidden;'>{0}</div>",
+            return String.Format("<div style='height: 100%; overflow: auto; overflow-x: hidden;'>{0}</div>",
                 HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(content)));
         }
 
