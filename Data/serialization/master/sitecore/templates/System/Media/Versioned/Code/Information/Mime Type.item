@@ -20,9 +20,9 @@ text
 field: {BE351A73-FCB0-4213-93FA-C302D8AB4F51}
 name: Shared
 key: shared
-content-length: 1
+content-length: 0
 
-1
+
 ----field----
 field: {9C903E29-650D-4AF2-B9BD-526D5C14A1A5}
 name: Validator Bar
@@ -45,131 +45,9 @@ content-length: 0
 
 
 ----version----
-language: da
-version: 1
-revision: 3f73af53-dd82-40ad-b125-6e3cff8609f9
-
-----field----
-field: {19A69332-A23E-4E70-8D16-B2640CB24CC8}
-name: Title
-key: title
-content-length: 9
-
-Mime-type
-----field----
-field: {B5E02AD9-D56F-4C41-A065-A133DB87BDEB}
-name: __Display name
-key: __display name
-content-length: 9
-
-Mime-type
-----field----
-field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
-name: __Owner
-key: __owner
-content-length: 14
-
-sitecore\admin
-----field----
-field: {25BED78C-4957-4165-998A-CA1B52F67497}
-name: __Created
-key: __created
-content-length: 34
-
-20130926T185727:635158186479375013
-----field----
-field: {5DD74568-4D4B-44C1-B513-0AF5F4CDA34F}
-name: __Created by
-key: __created by
-content-length: 14
-
-sitecore\admin
-----field----
-field: {8CDC337E-A112-42FB-BBB4-4143751E123F}
-name: __Revision
-key: __revision
-content-length: 36
-
-3f73af53-dd82-40ad-b125-6e3cff8609f9
-----field----
-field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
-name: __Updated
-key: __updated
-content-length: 34
-
-20130926T185727:635158186479687425
-----field----
-field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
-name: __Updated by
-key: __updated by
-content-length: 14
-
-sitecore\admin
-----version----
-language: de-DE
-version: 1
-revision: 8eb67884-91bb-4719-b848-1815afa0e5b2
-
-----field----
-field: {19A69332-A23E-4E70-8D16-B2640CB24CC8}
-name: Title
-key: title
-content-length: 9
-
-Mime Type
-----field----
-field: {B5E02AD9-D56F-4C41-A065-A133DB87BDEB}
-name: __Display name
-key: __display name
-content-length: 9
-
-Mime Type
-----field----
-field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
-name: __Owner
-key: __owner
-content-length: 14
-
-sitecore\admin
-----field----
-field: {25BED78C-4957-4165-998A-CA1B52F67497}
-name: __Created
-key: __created
-content-length: 34
-
-20130926T191943:635158199838913851
-----field----
-field: {5DD74568-4D4B-44C1-B513-0AF5F4CDA34F}
-name: __Created by
-key: __created by
-content-length: 14
-
-sitecore\admin
-----field----
-field: {8CDC337E-A112-42FB-BBB4-4143751E123F}
-name: __Revision
-key: __revision
-content-length: 36
-
-8eb67884-91bb-4719-b848-1815afa0e5b2
-----field----
-field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
-name: __Updated
-key: __updated
-content-length: 34
-
-20130926T191943:635158199839694911
-----field----
-field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
-name: __Updated by
-key: __updated by
-content-length: 14
-
-sitecore\admin
-----version----
 language: en
 version: 1
-revision: 0b87ff0d-39b8-4156-9e8a-88770707d5bc
+revision: 191ca09b-478f-4c62-93eb-95471e694a1e
 
 ----field----
 field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
@@ -198,14 +76,14 @@ name: __Revision
 key: __revision
 content-length: 36
 
-0b87ff0d-39b8-4156-9e8a-88770707d5bc
+191ca09b-478f-4c62-93eb-95471e694a1e
 ----field----
 field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
 name: __Updated
 key: __updated
 content-length: 34
 
-20140315T151052:635304930527785525
+20141211T224847:635539349274410237
 ----field----
 field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
 name: __Updated by
@@ -220,64 +98,3 @@ key: __workflow state
 content-length: 0
 
 
-----version----
-language: ja-JP
-version: 1
-revision: 7d82d849-7ccb-4c48-8646-a8da4c960012
-
-----field----
-field: {19A69332-A23E-4E70-8D16-B2640CB24CC8}
-name: Title
-key: title
-content-length: 8
-
-MIME タイプ
-----field----
-field: {B5E02AD9-D56F-4C41-A065-A133DB87BDEB}
-name: __Display name
-key: __display name
-content-length: 8
-
-MIME タイプ
-----field----
-field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
-name: __Owner
-key: __owner
-content-length: 14
-
-sitecore\admin
-----field----
-field: {25BED78C-4957-4165-998A-CA1B52F67497}
-name: __Created
-key: __created
-content-length: 34
-
-20130926T194035:635158212358215445
-----field----
-field: {5DD74568-4D4B-44C1-B513-0AF5F4CDA34F}
-name: __Created by
-key: __created by
-content-length: 14
-
-sitecore\admin
-----field----
-field: {8CDC337E-A112-42FB-BBB4-4143751E123F}
-name: __Revision
-key: __revision
-content-length: 36
-
-7d82d849-7ccb-4c48-8646-a8da4c960012
-----field----
-field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
-name: __Updated
-key: __updated
-content-length: 34
-
-20130926T194035:635158212358684081
-----field----
-field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
-name: __Updated by
-key: __updated by
-content-length: 14
-
-sitecore\admin
