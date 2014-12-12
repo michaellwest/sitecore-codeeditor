@@ -4,11 +4,13 @@ using System.IO;
 using System.Text;
 using System.Web;
 using System.Web.UI;
+using Sitecore.Configuration;
 using Sitecore.Data.Items;
 using Sitecore.Diagnostics;
 using Sitecore.Globalization;
 using Sitecore.Resources.Media;
 using Sitecore.SecurityModel;
+using Sitecore.SharedSource.Extensions;
 using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
@@ -134,6 +136,19 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                         case "txt":
                             parameters["mode"] = "text";
                             break;
+                        case "scss":
+                            parameters["mode"] = "scss";
+                            break;
+                        case "ps1":
+                            parameters["mode"] = "powershell";
+                            break;
+                        case "less":
+                            parameters["mode"] = "less";
+                            break;
+                        case "md":
+                            parameters["mode"] = "markdown";
+                            break;
+
                     }
 
                     if (parameters["mode"] != null)
@@ -142,7 +157,11 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                     }
 
                     handle.Add(urlString);
-                    SheerResponse.ShowModalDialog(urlString.ToString(), "1000px", "500px", string.Empty, true);
+
+                    var width = Settings.GetSetting("CodeEditor.Dialog.Width").ToNumber(1000);
+                    var height = Settings.GetSetting("CodeEditor.Dialog.Height").ToNumber(500);
+
+                    SheerResponse.ShowModalDialog(urlString.ToString(), width + "px", height + "px", String.Empty, true);
                     args.WaitForPostBack();
                 }
             }
