@@ -44,6 +44,7 @@
       <HintPath>Lib\Sitecore.Kernel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -57,6 +58,8 @@
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\SaveResult.cs" />
     <Compile Include="Extensions\IntegerExtensions.cs" />
+    <Compile Include="Configuration\DialogSettings.cs" />
+    <Compile Include="Configuration\ApplicationSettings.cs" />
     <Compile Include="Shell\Applications\ContentEditor\EditorFormatter.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Pipelines\SetEditorFormatter.cs" />
     <Compile Include="Web\HtmlUtil.cs" />
