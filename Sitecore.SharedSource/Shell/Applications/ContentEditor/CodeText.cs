@@ -102,6 +102,8 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                     urlString.Append("mode", parameters["mode"]);
                 }
                 urlString.Append("theme", parameters["theme"] ?? settings.Theme);
+                urlString.Append("fontSize", parameters["fontSize"] ?? settings.FontSize.ToString());
+                urlString.Append("fontFamily", parameters["fontFamily"] ?? settings.FontFamily);
 
                 var handle = new UrlHandle();
                 var str2 = Value;

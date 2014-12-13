@@ -152,7 +152,9 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 
                     urlString.Append("mode", mode);
                     urlString.Append("theme", settings.Theme);
-
+                    urlString.Append("fontSize", settings.FontSize.ToString());
+                    urlString.Append("fontFamily", settings.FontFamily);
+                    
                     handle.Add(urlString);
 
                     SheerResponse.ShowModalDialog(urlString.ToString(), settings.Width + "px", settings.Height + "px",

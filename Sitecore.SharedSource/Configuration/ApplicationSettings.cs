@@ -18,7 +18,9 @@ namespace Sitecore.SharedSource.Configuration
             {
                 Theme = allusers.Fields["Theme"].Value.ToLower(),
                 Width = allusers.Fields["Width"].Value.ToNumber(width),
-                Height = allusers.Fields["Height"].Value.ToNumber(height)
+                Height = allusers.Fields["Height"].Value.ToNumber(height),
+                FontSize = allusers.Fields["FontSize"].Value.ToNumber(12),
+                FontFamily = allusers.Fields["FontFamily"].Value
             };
 
             return settings;

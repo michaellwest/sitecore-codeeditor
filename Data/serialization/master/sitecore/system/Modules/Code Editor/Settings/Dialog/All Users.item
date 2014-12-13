@@ -19,7 +19,7 @@ People/32x32/users1.png
 ----version----
 language: en
 version: 1
-revision: c02b9161-25a0-43cf-9243-d12683f7561c
+revision: 17df3946-1208-416d-996f-05aa652bb9f0
 
 ----field----
 field: {E6534E6A-E54D-4410-876C-63EFF15A8E4B}
@@ -35,6 +35,20 @@ key: height
 content-length: 3
 
 625
+----field----
+field: {E6720D2D-19FC-49BA-83D6-B387CD725DC3}
+name: FontSize
+key: fontsize
+content-length: 2
+
+12
+----field----
+field: {EB8DA5E4-81C3-4FBA-A5FC-DFBA9A0636E3}
+name: FontFamily
+key: fontfamily
+content-length: 6
+
+Monaco
 ----field----
 field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
 name: __Owner
@@ -62,14 +76,14 @@ name: __Revision
 key: __revision
 content-length: 36
 
-c02b9161-25a0-43cf-9243-d12683f7561c
+17df3946-1208-416d-996f-05aa652bb9f0
 ----field----
 field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
 name: __Updated
 key: __updated
 content-length: 34
 
-20141212T180312:635540041928122044
+20141213T163840:635540855209731517
 ----field----
 field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
 name: __Updated by
