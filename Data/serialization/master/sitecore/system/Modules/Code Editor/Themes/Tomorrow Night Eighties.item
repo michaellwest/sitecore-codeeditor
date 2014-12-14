@@ -1,25 +1,18 @@
 ----item----
 version: 1
-id: {9DAC8FA4-EE28-4D1F-842E-C107F51E2E6C}
+id: {B8BBD14B-057B-45DA-9F1E-54F8862601CD}
 database: master
-path: /sitecore/system/Modules/Code Editor/Settings/All Users
-parent: {6D397E5C-46F9-4781-9FF8-44046DF85B69}
-name: All Users
+path: /sitecore/system/Modules/Code Editor/Themes/Tomorrow Night Eighties
+parent: {4E245F92-0577-409A-9918-6606F15A5FFF}
+name: Tomorrow Night Eighties
 master: {00000000-0000-0000-0000-000000000000}
-template: {4E034734-9440-4AB6-8BCD-1C393D8B781E}
-templatekey: User Settings
+template: {EB5692A6-71C0-48BB-82CB-7DC0C70134D5}
+templatekey: Theme
 
-----field----
-field: {06D5295C-ED2F-4A54-9BF2-26228D113318}
-name: __Icon
-key: __icon
-content-length: 23
-
-People/32x32/users1.png
 ----version----
 language: en
 version: 1
-revision: 7b5db3e7-6ba9-4d36-ae6e-201b5076e512
+revision: d8d11236-e414-4805-ab9c-1925c7d553ca
 
 ----field----
 field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
@@ -34,7 +27,7 @@ name: __Created
 key: __created
 content-length: 15
 
-20141212T165815
+20141213T214037
 ----field----
 field: {5DD74568-4D4B-44C1-B513-0AF5F4CDA34F}
 name: __Created by
@@ -48,14 +41,14 @@ name: __Revision
 key: __revision
 content-length: 36
 
-7b5db3e7-6ba9-4d36-ae6e-201b5076e512
+d8d11236-e414-4805-ab9c-1925c7d553ca
 ----field----
 field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
 name: __Updated
 key: __updated
 content-length: 34
 
-20141213T205338:635541008189269876
+20141213T214037:635541036373997869
 ----field----
 field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
 name: __Updated by
