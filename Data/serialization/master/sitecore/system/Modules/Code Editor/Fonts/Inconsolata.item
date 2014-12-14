@@ -1,26 +1,33 @@
 ----item----
 version: 1
-id: {A01C1DC2-1EE3-4428-B4AD-3D608D683F09}
+id: {44A4D3AE-9DDE-4F94-B12C-9FFFBD3EB3D1}
 database: master
-path: /sitecore/templates/User Defined/CodeEditor
-parent: {B29EE504-861C-492F-95A3-0D890B6FCA09}
-name: CodeEditor
+path: /sitecore/system/Modules/Code Editor/Fonts/Inconsolata
+parent: {A74EF4C3-936B-4FC5-A49F-AA5812B25EAD}
+name: Inconsolata
 master: {00000000-0000-0000-0000-000000000000}
-template: {0437FEE2-44C9-46A6-ABE9-28858D9FEE8C}
-templatekey: Template Folder
+template: {B4045E92-EA98-4A4A-B282-A39D1E6D6BDF}
+templatekey: Font
 
 ----version----
 language: en
 version: 1
-revision: 2f1651f8-49da-490c-8a0a-bcf3855ff035
+revision: 3bd0afbc-8073-43b2-a076-d75a5c156ec9
 
+----field----
+field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
+name: __Owner
+key: __owner
+content-length: 14
+
+sitecore\admin
 ----field----
 field: {25BED78C-4957-4165-998A-CA1B52F67497}
 name: __Created
 key: __created
 content-length: 15
 
-20140328T235415
+20141213T162156
 ----field----
 field: {5DD74568-4D4B-44C1-B513-0AF5F4CDA34F}
 name: __Created by
@@ -34,14 +41,14 @@ name: __Revision
 key: __revision
 content-length: 36
 
-2f1651f8-49da-490c-8a0a-bcf3855ff035
+3bd0afbc-8073-43b2-a076-d75a5c156ec9
 ----field----
 field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
 name: __Updated
 key: __updated
 content-length: 34
 
-20140328T235415:635316476556400826
+20141213T162156:635540845168699038
 ----field----
 field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
 name: __Updated by

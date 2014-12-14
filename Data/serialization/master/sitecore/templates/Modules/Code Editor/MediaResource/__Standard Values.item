@@ -2,7 +2,7 @@
 version: 1
 id: {E5A17A8E-427A-4FB3-A574-56F41A3681D7}
 database: master
-path: /sitecore/templates/User Defined/CodeEditor/MediaResource/__Standard Values
+path: /sitecore/templates/Modules/Code Editor/MediaResource/__Standard Values
 parent: {A3433EFD-6D7F-457E-94E4-9F7559B5BD06}
 name: __Standard Values
 master: {00000000-0000-0000-0000-000000000000}

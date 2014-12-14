@@ -60,6 +60,7 @@
     <Compile Include="Extensions\IntegerExtensions.cs" />
     <Compile Include="Configuration\DialogSettings.cs" />
     <Compile Include="Configuration\ApplicationSettings.cs" />
+    <Compile Include="ItemIDs.cs" />
     <Compile Include="Shell\Applications\ContentEditor\EditorFormatter.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Pipelines\SetEditorFormatter.cs" />
     <Compile Include="Web\HtmlUtil.cs" />

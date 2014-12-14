@@ -1,25 +1,18 @@
 ----item----
 version: 1
-id: {9DAC8FA4-EE28-4D1F-842E-C107F51E2E6C}
+id: {B5C1D64D-9676-4AF0-8E86-D8FD5873D05E}
 database: master
-path: /sitecore/system/Modules/Code Editor/Settings/Dialog/All Users
-parent: {1B4A068E-DBCA-4E37-9D84-DA114B380BBF}
-name: All Users
+path: /sitecore/system/Modules/Code Editor/Fonts/Consolas
+parent: {A74EF4C3-936B-4FC5-A49F-AA5812B25EAD}
+name: Consolas
 master: {00000000-0000-0000-0000-000000000000}
-template: {4E034734-9440-4AB6-8BCD-1C393D8B781E}
-templatekey: Dialog Settings
+template: {B4045E92-EA98-4A4A-B282-A39D1E6D6BDF}
+templatekey: Font
 
-----field----
-field: {06D5295C-ED2F-4A54-9BF2-26228D113318}
-name: __Icon
-key: __icon
-content-length: 23
-
-People/32x32/users1.png
 ----version----
 language: en
 version: 1
-revision: b70e5fbf-79be-4526-b263-9fdc5d836031
+revision: 5458645f-aa6e-4ffc-924f-7a31ca58411e
 
 ----field----
 field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
@@ -34,7 +27,7 @@ name: __Created
 key: __created
 content-length: 15
 
-20141212T165815
+20141213T162124
 ----field----
 field: {5DD74568-4D4B-44C1-B513-0AF5F4CDA34F}
 name: __Created by
@@ -48,14 +41,14 @@ name: __Revision
 key: __revision
 content-length: 36
 
-b70e5fbf-79be-4526-b263-9fdc5d836031
+5458645f-aa6e-4ffc-924f-7a31ca58411e
 ----field----
 field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
 name: __Updated
 key: __updated
 content-length: 34
 
-20141213T192118:635540952788935832
+20141213T162124:635540844840530738
 ----field----
 field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
 name: __Updated by
