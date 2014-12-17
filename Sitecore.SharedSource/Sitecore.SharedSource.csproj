@@ -241,7 +241,6 @@
     <Compile Include="Shell\Applications\ContentEditor\CodeAttachment.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeText.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditCode\EditCodePage.cs" />
-    <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditHtmlEx\EditHtmlExPage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
     <Compile Include="TemplateIDs.cs" />
     <Compile Include="Web\UI\WebControls\ResourceWebControl.cs" />
