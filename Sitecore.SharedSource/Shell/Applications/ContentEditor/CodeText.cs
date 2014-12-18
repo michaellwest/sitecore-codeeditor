@@ -80,7 +80,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             Assert.ArgumentNotNull(args, "args");
 
             if (Disabled) return;
-
+            
             if (args.IsPostBack)
             {
                 if ((args.Result != null) && (args.Result != "undefined"))

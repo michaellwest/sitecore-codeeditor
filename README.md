@@ -29,7 +29,6 @@ The following items are created/updated in the core database:
  
 * /sitecore/system/Field types/Custom Types/Code Text
 * /sitecore/system/Field types/Simple Types/Rich Text
-* /sitecore/system/Field types/System Types/Code Attachment
 
 The following items are created/updated in the master database:
 
@@ -41,7 +40,6 @@ The following items are created/updated in the master database:
 * ~/bin/Sitecore.SharedSource.CodeEditor.dll
 * ~/App_Config/Include/Sitecore.SharedSource.CodeEditor.config
 * ~/sitecore/shell/Applications/Content Manager/Dialogs/EditCode/*
-* ~/sitecore/shell/Applications/Content Manager/Dialogs/EditHtmlEx/*
 * ~/sitecore/shell/Applications/Xaml/Controls/CodePage.xaml.xml
 * ~/sitecore/shell/Applications/Xaml/Controls/HtmlPageEx.xaml.xml
 * ~/sitecore/shell/Applications/Xaml/Controls/Lib/ace/*

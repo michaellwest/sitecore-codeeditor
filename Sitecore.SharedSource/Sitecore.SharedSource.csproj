@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\CacheUtil.cs" />
+    <Compile Include="Data\Fields\CodeTextField.cs" />
     <Compile Include="Data\Fields\CodeTextFieldReader.cs" />
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\SaveResult.cs" />
