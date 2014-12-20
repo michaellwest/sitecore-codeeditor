@@ -1,0 +1,93 @@
+----item----
+version: 1
+id: {28846ADD-7BB3-432E-9959-01D8B8E858F3}
+database: master
+path: /sitecore/templates/Modules/Code Editor/User Settings/__Standard Values
+parent: {4E034734-9440-4AB6-8BCD-1C393D8B781E}
+name: __Standard Values
+master: {00000000-0000-0000-0000-000000000000}
+template: {4E034734-9440-4AB6-8BCD-1C393D8B781E}
+templatekey: User Settings
+
+----version----
+language: en
+version: 1
+revision: 6da64c16-7edc-4600-8bfc-5d94af4febbc
+
+----field----
+field: {7DFDF1D3-C3C0-4575-A371-7273EEF1382E}
+name: Theme
+key: theme
+content-length: 7
+
+Monokai
+----field----
+field: {E6534E6A-E54D-4410-876C-63EFF15A8E4B}
+name: Width
+key: width
+content-length: 4
+
+1000
+----field----
+field: {56B06422-984F-4949-8E48-48AF01B51E11}
+name: Height
+key: height
+content-length: 3
+
+500
+----field----
+field: {E6720D2D-19FC-49BA-83D6-B387CD725DC3}
+name: FontSize
+key: fontsize
+content-length: 2
+
+14
+----field----
+field: {EB8DA5E4-81C3-4FBA-A5FC-DFBA9A0636E3}
+name: FontFamily
+key: fontfamily
+content-length: 8
+
+Consolas
+----field----
+field: {52807595-0F8F-4B20-8D2A-CB71D28C6103}
+name: __Owner
+key: __owner
+content-length: 14
+
+sitecore\admin
+----field----
+field: {25BED78C-4957-4165-998A-CA1B52F67497}
+name: __Created
+key: __created
+content-length: 15
+
+20141212T165938
+----field----
+field: {5DD74568-4D4B-44C1-B513-0AF5F4CDA34F}
+name: __Created by
+key: __created by
+content-length: 14
+
+sitecore\admin
+----field----
+field: {8CDC337E-A112-42FB-BBB4-4143751E123F}
+name: __Revision
+key: __revision
+content-length: 36
+
+6da64c16-7edc-4600-8bfc-5d94af4febbc
+----field----
+field: {D9CF14B1-FA16-4BA6-9288-E8A174D4D522}
+name: __Updated
+key: __updated
+content-length: 34
+
+20141213T192638:635540955985901343
+----field----
+field: {BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}
+name: __Updated by
+key: __updated by
+content-length: 14
+
+sitecore\admin

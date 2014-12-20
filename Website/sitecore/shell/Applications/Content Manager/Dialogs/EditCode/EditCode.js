@@ -21,12 +21,12 @@ sitecore.sharedsource.codeeditor = sitecore.sharedsource.codeeditor || {};
             hash = hashes[i].split('=');
             if (key) {
                 if (hash[0] === key) {
-                    return hash[1];
+                    return decodeURIComponent(hash[1]);
                 }
             } else {
                 vars = [];
                 vars.push(hash[0]);
-                vars[hash[0]] = hash[1];
+                vars[hash[0]] = decodeURIComponent(hash[1]);
             }
         }
         return vars;
@@ -105,22 +105,50 @@ sitecore.sharedsource.codeeditor = sitecore.sharedsource.codeeditor || {};
                 }
             },
             readOnly: true
+        }, {
+            name: "fontSizeIncrease",
+            bindKey: {win: "Ctrl-Alt-Shift-=|Ctrl-Alt-Shift-+", mac: "Ctrl-Alt-Shift-=|Ctrl-Alt-Shift-+"},
+            exec: function(editor) { 
+                editor.setFontSize(Math.min(editor.getFontSize() + 1, 25)); 
+            },
+            readOnly: true
+        }, {
+            name: "fontSizeDecrease",
+            bindKey: {win: "Ctrl-Alt-Shift--", mac: "Ctrl-Alt-Shift--"},
+            exec: function(editor) { 
+                editor.setFontSize(Math.max(editor.getFontSize() - 1, 12)); 
+            },
+            readOnly: true
         }];
 
         codeeditor.commands.addCommands(codeeeditorcommands);
 
-        sitecore.sharedsource.codeeditor.changeMode = function(mode) {
-            mode = mode || 'html';
-            codeeditor.session.setMode("ace/mode/" + mode);
+        sitecore.sharedsource.codeeditor.changeMode = function(setting) {
+            setting = setting || 'html';
+            codeeditor.setOption("mode", "ace/mode/" + setting);
         };
 
         sitecore.sharedsource.codeeditor.changeMode(qs('mode'));
         
-        sitecore.sharedsource.codeeditor.changeTheme = function (theme) {
-            theme = theme || 'monokai';
-            codeeditor.setTheme("ace/theme/" + theme);
+        sitecore.sharedsource.codeeditor.changeTheme = function (setting) {
+            setting = setting || 'monokai';
+            codeeditor.setOption("theme", "ace/theme/" + setting);
         };
 
         sitecore.sharedsource.codeeditor.changeTheme(qs('theme'));
+
+        sitecore.sharedsource.codeeditor.changeFontSize = function (setting) {
+            setting = parseInt(setting) || 12;
+            codeeditor.setOption("fontSize", setting);
+        };
+
+        sitecore.sharedsource.codeeditor.changeFontSize(qs('fontSize'));
+
+        sitecore.sharedsource.codeeditor.changeFontFamily = function (setting) {
+            setting = setting || "Monaco";
+            codeeditor.setOption("fontFamily", setting);
+        };
+
+        sitecore.sharedsource.codeeditor.changeFontFamily(qs('fontFamily'));
     });
 }(jQuery, window.sitecore));

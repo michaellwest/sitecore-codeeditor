@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using System.Web;
 using System.Web.UI;
-using Sitecore.Configuration;
 using Sitecore.Data.Items;
 using Sitecore.Diagnostics;
 using Sitecore.Globalization;
 using Sitecore.Resources.Media;
 using Sitecore.SecurityModel;
-using Sitecore.SharedSource.Extensions;
+using Sitecore.SharedSource.Configuration;
 using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Text;
 using Sitecore.Web;
@@ -115,53 +113,52 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                         new UrlString(
                             "/sitecore/shell/~/xaml/Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditCode.aspx");
 
-                    var parameters = new NameValueCollection();
+                    var settings = ApplicationSettings.GetDialogSettings();
+                    var mode = "text";
+
                     switch (mediaItem.Extension.ToLower())
                     {
                         case "js":
-                            parameters["mode"] = "javascript";
+                            mode = "javascript";
                             break;
                         case "css":
-                            parameters["mode"] = "css";
+                            mode = "css";
                             break;
                         case "html":
-                            parameters["mode"] = "html";
+                            mode = "html";
                             break;
                         case "xml":
-                            parameters["mode"] = "xml";
+                            mode = "xml";
                             break;
                         case "json":
-                            parameters["mode"] = "json";
+                            mode = "json";
                             break;
                         case "txt":
-                            parameters["mode"] = "text";
+                            mode = "text";
                             break;
                         case "scss":
-                            parameters["mode"] = "scss";
+                            mode = "scss";
                             break;
                         case "ps1":
-                            parameters["mode"] = "powershell";
+                            mode = "powershell";
                             break;
                         case "less":
-                            parameters["mode"] = "less";
+                            mode = "less";
                             break;
                         case "md":
-                            parameters["mode"] = "markdown";
+                            mode = "markdown";
                             break;
-
                     }
 
-                    if (parameters["mode"] != null)
-                    {
-                        urlString.Append("mode", parameters["mode"]);
-                    }
-
+                    urlString.Append("mode", mode);
+                    urlString.Append("theme", settings.Theme);
+                    urlString.Append("fontSize", settings.FontSize.ToString());
+                    urlString.Append("fontFamily", settings.FontFamily);
+                    
                     handle.Add(urlString);
 
-                    var width = Settings.GetSetting("CodeEditor.Dialog.Width").ToNumber(1000);
-                    var height = Settings.GetSetting("CodeEditor.Dialog.Height").ToNumber(500);
-
-                    SheerResponse.ShowModalDialog(urlString.ToString(), width + "px", height + "px", String.Empty, true);
+                    SheerResponse.ShowModalDialog(urlString.ToString(), settings.Width + "px", settings.Height + "px",
+                        String.Empty, true);
                     args.WaitForPostBack();
                 }
             }
