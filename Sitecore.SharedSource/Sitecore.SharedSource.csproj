@@ -276,10 +276,9 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-      copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)\..\Website\bin\$(TargetName).dll"
-      copy /Y "$(ProjectDir)\App_Config\Include\$(TargetName).config" "$(SolutionDir)\..\Website\App_Config\Include\$(TargetName).config"
-    </PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)\..\Website\bin\$(TargetName).dll"
+copy /Y "$(ProjectDir)\App_Config\Include\$(TargetName).config" "$(SolutionDir)\..\Website\App_Config\Include\$(TargetName).config"
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
