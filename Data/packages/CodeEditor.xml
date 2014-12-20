@@ -3,7 +3,7 @@
     <metadata>
       <PackageName>CodeEditor</PackageName>
       <Author>Michael West</Author>
-      <Version>1.5.1.0</Version>
+      <Version>1.6.0.0</Version>
       <Revision />
       <License>
 &lt;p&gt;Copyright 2013-2014 Michael West&lt;/p&gt;
@@ -27,19 +27,19 @@ rich text editor (visible using the Edit Html button).
 
 There is also a code text field type with an Edit Code button.
 
-Additionally, there is a new media template type for 
-attachments that enables editing code files from the 
-media library which then updates the media item.
+Additionally, the Attachment system type is enhanced to support editing of media library items (i.e. css, js, txt).
 
 Installation Steps
 1. Overwrite any existing files 
 2. Merge/Merge any existing Sitecore items
 3. Uncomment the Lucene index configuration settings in Sitecore.SharedSource.CodeEditor.config to enable indexing of the Code Text field.
-4. Delete the Code Attachment field type from under System Types in the Core database.
+4. Delete the Code Attachment field type from under System Types in the Core database (only applies to 1.5 or older).
 
 Shortcuts
 Ctrl-Space : Snippet/code completion window
 Ctrl-Shift-F : Format html code
+Ctrl-Shift-Alt-+ : Increase font size
+Ctrl-Shift-Alt-- : Decrease font size
 
 Code Text Field Type Source Examples:
 mode=javascript
@@ -52,7 +52,7 @@ http://michaellwest.gitbooks.io/sitecore-code-editor/
 Please report any problems in the issue tracker:
 http://goo.gl/MiDWdD
 
-Copyright (c) 2014 Michael West
+Copyright (c) 2013-2014 Michael West
 
 http://michaellwest.blogspot.com/</Readme>
       <Publisher>Michael West</Publisher>
@@ -151,44 +151,6 @@ http://michaellwest.blogspot.com/</Readme>
       <Exclude />
       <Name>lib-ace</Name>
     </files>
-    <files>
-      <Root>/sitecore/shell/Applications/Content Manager/Dialogs/EditHtmlEx</Root>
-      <Converter>
-        <FileToEntryConverter>
-          <Root>/</Root>
-          <Transforms>
-            <InstallerConfigurationTransform>
-              <Options>
-                <BehaviourOptions>
-                  <ItemMode>Undefined</ItemMode>
-                  <ItemMergeMode>Undefined</ItemMergeMode>
-                </BehaviourOptions>
-              </Options>
-            </InstallerConfigurationTransform>
-          </Transforms>
-        </FileToEntryConverter>
-      </Converter>
-      <Include>
-        <FileNameFilter>
-          <Pattern />
-          <AcceptDirectories>False</AcceptDirectories>
-        </FileNameFilter>
-        <FileDateFilter>
-          <FilterType>CreatedFilter</FilterType>
-          <ActionDateTo />
-          <ActionDateFrom />
-          <NotOlderThan />
-        </FileDateFilter>
-        <FileDateFilter>
-          <FilterType>ModifiedFilter</FilterType>
-          <ActionDateTo />
-          <ActionDateFrom />
-          <NotOlderThan />
-        </FileDateFilter>
-      </Include>
-      <Exclude />
-      <Name>dialog-html</Name>
-    </files>
     <xfiles>
       <Entries>
         <x-item>/bin/Sitecore.SharedSource.CodeEditor.dll</x-item>
@@ -252,7 +214,6 @@ http://michaellwest.blogspot.com/</Readme>
     </files>
     <xfiles>
       <Entries>
-        <x-item>/sitecore/shell/Applications/Xaml/Controls/HtmlPageEx.xaml.xml</x-item>
         <x-item>/sitecore/shell/Applications/Xaml/Controls/CodePage.xaml.xml</x-item>
       </Entries>
       <Converter>
@@ -336,11 +297,70 @@ http://michaellwest.blogspot.com/</Readme>
         <x-item>/master/sitecore/templates/System/Media/Versioned/Code/Media/File Path/{217C9AE6-9D32-4760-A67B-EB2C1E06DC51}/invariant/0</x-item>
         <x-item>/master/sitecore/templates/System/Media/Versioned/Code/Properties/{2F4922AB-CFF0-4F32-81C1-3FA7FF0D63AC}/invariant/0</x-item>
         <x-item>/master/sitecore/templates/System/Media/Versioned/Code/Properties/Format/{14BE78C7-8D84-42A5-A17C-4FE979B5BB02}/invariant/0</x-item>
-        <x-item>/master/sitecore/templates/User Defined/CodeEditor/{A01C1DC2-1EE3-4428-B4AD-3D608D683F09}/invariant/0</x-item>
-        <x-item>/master/sitecore/templates/User Defined/CodeEditor/MediaResource/__Standard Values/{E5A17A8E-427A-4FB3-A574-56F41A3681D7}/invariant/0</x-item>
-        <x-item>/master/sitecore/templates/User Defined/CodeEditor/MediaResource/{A3433EFD-6D7F-457E-94E4-9F7559B5BD06}/invariant/0</x-item>
-        <x-item>/master/sitecore/templates/User Defined/CodeEditor/MediaResource/Media Resource/{E07F1C72-B8AB-4D38-9E4F-97DB7813771C}/invariant/0</x-item>
-        <x-item>/master/sitecore/templates/User Defined/CodeEditor/MediaResource/Media Resource/MediaPath/{1BE520EB-CD3F-493A-A9EC-A0DDFF3164C8}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/MediaResource/__Standard Values/{E5A17A8E-427A-4FB3-A574-56F41A3681D7}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/MediaResource/{A3433EFD-6D7F-457E-94E4-9F7559B5BD06}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/MediaResource/Media Resource/{E07F1C72-B8AB-4D38-9E4F-97DB7813771C}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/MediaResource/Media Resource/MediaPath/{1BE520EB-CD3F-493A-A9EC-A0DDFF3164C8}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/{AE149A21-2F18-4F59-9DE8-EA7FE16E923B}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Fonts/{A74EF4C3-936B-4FC5-A49F-AA5812B25EAD}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Fonts/Consolas/{B5C1D64D-9676-4AF0-8E86-D8FD5873D05E}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Fonts/Inconsolata/{44A4D3AE-9DDE-4F94-B12C-9FFFBD3EB3D1}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Fonts/Lucida Console/{BA22C1D6-CAFC-4C3D-A73F-210B3EFD4923}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Fonts/Monaco/{80B4B0D2-165F-4753-BAFF-5F36E17715EA}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Fonts/Source Code Pro/{D47B0792-C9B5-40A8-BA1F-380424E18167}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Settings/{6D397E5C-46F9-4781-9FF8-44046DF85B69}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Settings/All Users/{9DAC8FA4-EE28-4D1F-842E-C107F51E2E6C}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/{4E245F92-0577-409A-9918-6606F15A5FFF}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Ambiance/{4C6F7736-D125-4E75-9205-80146D42BE8C}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Chaos/{C9837101-3F62-421C-9D9F-89EE91E09256}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Chrome/{ABF4C691-40A9-4595-BCAE-7A83D5EF4B01}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Clouds Midnight/{C51CF05D-125A-4539-BF12-F41847CACF6C}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Clouds/{E2B7BA58-1008-4D92-B2FC-E382B439BBFC}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Cobalt/{D394F9C2-E6C1-4E7B-948E-1526846CDD4A}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Crimson Editor/{A8D3624E-6179-4458-A372-DCFE71C90D11}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Dawn/{68423E56-04F8-4A2C-A505-7CA602DF81EA}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Dreamweaver/{34B1C42F-387B-4E78-9842-981B285A9891}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Eclipse/{65D09760-7FEA-48E8-9B87-8348C304F9BD}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Github/{46514AD7-D3E0-4733-A6C3-0099EB4792CD}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Idle Fingers/{DE4F3450-15D0-4112-A20B-59A5ADA1D7A8}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Katzenmilch/{E00407A0-F118-4245-9AAB-C25AFA888D9B}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Kr Theme/{FC59ACDA-5FE7-4DCE-9116-3E7365EF8475}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Kuroir/{E2222108-0151-4BB2-BB20-F8EECAC235A6}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Merbivore Soft/{9062B5A0-97B3-4BF5-9FEA-C769E2203805}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Merbivore/{F789A1CF-B3EF-419F-B26D-34D060A45331}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Mono Industrial/{838BB80B-C044-45A1-AAC5-3704403FAE70}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Monokai/{A0BB8E9B-86AA-47B7-974D-398C0460B6E1}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Pastel On Dark/{6128DB64-7D52-4F60-9F5B-753C638704C2}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Powershellise/{98266613-A5F2-4A65-8397-B69C9AE26DD9}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Solarized Dark/{816EFD68-7C0B-4FAE-83F2-06AC0A9C21E8}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Solarized Light/{974159D5-09B0-48C7-ABD8-6BCE4FC1F1B6}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Terminal/{BAA4E54B-E64C-41F5-954E-D21EA364850B}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/TextMate/{C71A6505-B049-4D2B-85A4-24848A7BDA64}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Tomorrow Night Blue/{B20594B2-26F0-4670-9F9E-F140A64DE715}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Tomorrow Night Bright/{3F9B65D2-C91D-48A2-A1F1-37ACA85B99ED}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Tomorrow Night Eighties/{B8BBD14B-057B-45DA-9F1E-54F8862601CD}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Tomorrow Night/{637DF9E8-04D7-4EB3-BF3B-A2B4A1B646F3}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Tomorrow/{CA2DE416-E8B0-4CF9-B4E6-DE5ECBF45A54}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Twilight/{102D6C9E-BF14-4416-8B29-7230752053C2}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Vibrant Ink/{F7AFE7C2-A9AD-40DD-92E3-07C9392D92AB}/invariant/0</x-item>
+        <x-item>/master/sitecore/system/Modules/Code Editor/Themes/Xcode/{5D1E6A96-C566-4AE6-AAC2-33258A21247E}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/{E1475CB3-4793-41C1-A864-AAD177B610E9}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/{E1475CB3-4793-41C1-A864-AAD177B610E9}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/{48C173D2-0A21-4BEC-B052-95230C6D89BC}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/Font/{B4045E92-EA98-4A4A-B282-A39D1E6D6BDF}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/MediaResource/__Standard Values/{E5A17A8E-427A-4FB3-A574-56F41A3681D7}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/MediaResource/{A3433EFD-6D7F-457E-94E4-9F7559B5BD06}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/MediaResource/Media Resource/{E07F1C72-B8AB-4D38-9E4F-97DB7813771C}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/MediaResource/Media Resource/MediaPath/{1BE520EB-CD3F-493A-A9EC-A0DDFF3164C8}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/Theme/{EB5692A6-71C0-48BB-82CB-7DC0C70134D5}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/User Settings/__Standard Values/{28846ADD-7BB3-432E-9959-01D8B8E858F3}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/User Settings/{4E034734-9440-4AB6-8BCD-1C393D8B781E}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/User Settings/Appearance/{B08B0CBA-2EE5-4CB2-9E64-C801C5DC4A41}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/User Settings/Appearance/FontFamily/{EB8DA5E4-81C3-4FBA-A5FC-DFBA9A0636E3}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/User Settings/Appearance/FontSize/{E6720D2D-19FC-49BA-83D6-B387CD725DC3}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/User Settings/Appearance/Height/{56B06422-984F-4949-8E48-48AF01B51E11}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/User Settings/Appearance/Theme/{7DFDF1D3-C3C0-4575-A371-7273EEF1382E}/invariant/0</x-item>
+        <x-item>/master/sitecore/templates/Modules/Code Editor/User Settings/Appearance/Width/{E6534E6A-E54D-4410-876C-63EFF15A8E4B}/invariant/0</x-item>
       </Entries>
       <SkipVersions>False</SkipVersions>
       <Converter>

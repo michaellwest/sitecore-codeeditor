@@ -32,6 +32,7 @@ The following items are created/updated in the core database:
 
 The following items are created/updated in the master database:
 
+* /sitecore/system/Modules/Code Editor
 * /sitecore/templates/System/Media/Unversioned/Code
 * /sitecore/templates/System/Media/Versioned/Code
 
@@ -41,7 +42,6 @@ The following items are created/updated in the master database:
 * ~/App_Config/Include/Sitecore.SharedSource.CodeEditor.config
 * ~/sitecore/shell/Applications/Content Manager/Dialogs/EditCode/*
 * ~/sitecore/shell/Applications/Xaml/Controls/CodePage.xaml.xml
-* ~/sitecore/shell/Applications/Xaml/Controls/HtmlPageEx.xaml.xml
 * ~/sitecore/shell/Applications/Xaml/Controls/Lib/ace/*
 * ~/sitecore/shell/Applications/Xaml/Controls/Lib/js-beautify/*
  
