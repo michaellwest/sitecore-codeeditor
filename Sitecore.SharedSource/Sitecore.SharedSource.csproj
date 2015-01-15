@@ -33,6 +33,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Sitecore.Client">
+      <HintPath>Lib\Sitecore.Client.dll</HintPath>
+    </Reference>
     <Reference Include="Sitecore.ContentSearch">
       <HintPath>Lib\Sitecore.ContentSearch.dll</HintPath>
       <Private>False</Private>
@@ -41,6 +44,7 @@
       <HintPath>Lib\Sitecore.Kernel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -50,9 +54,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\CacheUtil.cs" />
+    <Compile Include="Data\Fields\CodeTextField.cs" />
     <Compile Include="Data\Fields\CodeTextFieldReader.cs" />
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\SaveResult.cs" />
+    <Compile Include="Extensions\IntegerExtensions.cs" />
+    <Compile Include="Configuration\DialogSettings.cs" />
+    <Compile Include="Configuration\ApplicationSettings.cs" />
+    <Compile Include="ItemIDs.cs" />
+    <Compile Include="Shell\Applications\ContentEditor\EditorFormatter.cs" />
+    <Compile Include="Shell\Applications\ContentEditor\Pipelines\SetEditorFormatter.cs" />
     <Compile Include="Web\HtmlUtil.cs" />
     <Compile Include="Extensions\FieldExtensions.cs" />
     <Compile Include="Extensions\MediaItemExtensions.cs" />
@@ -231,7 +242,6 @@
     <Compile Include="Shell\Applications\ContentEditor\CodeAttachment.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeText.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditCode\EditCodePage.cs" />
-    <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditHtmlEx\EditHtmlExPage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
     <Compile Include="TemplateIDs.cs" />
     <Compile Include="Web\UI\WebControls\ResourceWebControl.cs" />
@@ -266,10 +276,9 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-      copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)\..\Website\bin\$(TargetName).dll"
-      copy /Y "$(ProjectDir)\App_Config\Include\$(TargetName).config" "$(SolutionDir)\..\Website\App_Config\Include\$(TargetName).config"
-    </PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)\..\Website\bin\$(TargetName).dll"
+copy /Y "$(ProjectDir)\App_Config\Include\$(TargetName).config" "$(SolutionDir)\..\Website\App_Config\Include\$(TargetName).config"
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

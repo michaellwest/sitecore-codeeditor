@@ -35,8 +35,7 @@ namespace Sitecore.SharedSource.Pipelines.Save
                     }
 
                     if (field.IsBlobField &&
-                        ((field.TypeKey == "attachment" || field.TypeKey == "code attachment") ||
-                         saveField.Value == Translate.Text("[Blob Value]")))
+                        (field.TypeKey == "attachment" || saveField.Value == Translate.Text("[Blob Value]")))
                     {
                         continue;
                     }
@@ -64,7 +63,7 @@ namespace Sitecore.SharedSource.Pipelines.Save
                     field.Value = saveField.Value;
                 }
                 item.Editing.EndEdit();
-                Log.Audit(this, "Save item: {0}", new[] {AuditFormatter.FormatItem(item)});
+                Log.Audit(this, "Save item: {0}", AuditFormatter.FormatItem(item));
                 args.SavedItems.Add(item);
             }
             if (!Context.IsUnitTesting)

@@ -2,6 +2,7 @@
 using System.Web;
 using System.Web.UI;
 using Sitecore.Diagnostics;
+using Sitecore.SharedSource.Configuration;
 using Sitecore.Text;
 using Sitecore.Web;
 using Sitecore.Web.UI.HtmlControls;
@@ -79,7 +80,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             Assert.ArgumentNotNull(args, "args");
 
             if (Disabled) return;
-
+            
             if (args.IsPostBack)
             {
                 if ((args.Result != null) && (args.Result != "undefined"))
@@ -92,15 +93,18 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 var urlString =
                     new UrlString(
                         "/sitecore/shell/~/xaml/Sitecore.SharedSource.Shell.Applications.ContentEditor.Dialogs.EditCode.aspx");
+
+                var settings = ApplicationSettings.GetDialogSettings();
+
                 var parameters = WebUtil.ParseUrlParameters(Source);
                 if (parameters["mode"] != null)
                 {
                     urlString.Append("mode", parameters["mode"]);
                 }
-                if (parameters["theme"] != null)
-                {
-                    urlString.Append("theme", parameters["theme"]);
-                }
+                urlString.Append("theme", parameters["theme"] ?? settings.Theme);
+                urlString.Append("fontSize", parameters["fontSize"] ?? settings.FontSize.ToString());
+                urlString.Append("fontFamily", parameters["fontFamily"] ?? settings.FontFamily);
+
                 var handle = new UrlHandle();
                 var str2 = Value;
                 if (str2 == "__#!$No value$!#__")
@@ -109,7 +113,9 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 }
                 handle["code"] = str2;
                 handle.Add(urlString);
-                SheerResponse.ShowModalDialog(urlString.ToString(), "1000px", "500px", string.Empty, true);
+
+                SheerResponse.ShowModalDialog(urlString.ToString(), settings.Width + "px", settings.Height + "px",
+                    String.Empty, true);
                 args.WaitForPostBack();
             }
         }
@@ -136,7 +142,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         protected string RenderPreview()
         {
             // Renders the html for the field preview in the content editor.
-            return String.Format("<div style='height: 100%; overflow: hidden;'>{0}</div>",
+            return String.Format("<div style='height: 100%; overflow: auto; overflow-x: hidden;'>{0}</div>",
                 HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(Value)));
         }
 
