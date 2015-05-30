@@ -29,6 +29,7 @@ The following items are created/updated in the core database:
  
 * /sitecore/system/Field types/Custom Types/Code Text
 * /sitecore/system/Field types/Simple Types/Rich Text
+* /sitecore/system/Field types/System Types/Attachment
 
 The following items are created/updated in the master database:
 
@@ -47,7 +48,7 @@ The following items are created/updated in the master database:
  
 ### What versions of Sitecore will this work on?
 
-I have tested this on Sitecore 6.6, 7.0, and 7.1.
+I have tested this on Sitecore 6.6, 7.0-7.2.
 
 ### What version of .NET is required?
 
