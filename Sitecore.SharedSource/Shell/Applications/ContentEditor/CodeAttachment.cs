@@ -41,7 +41,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 
             switch (messageText)
             {
-                case "contentattachment:editcode":
+                case "content:editcode":
                     Sitecore.Context.ClientPage.Start(this, "EditCode");
                     return;
             }
