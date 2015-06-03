@@ -3,23 +3,24 @@ using System.IO;
 using System.Web.UI;
 using Sitecore.Data.Items;
 using Sitecore.Globalization;
+using Sitecore.Shell.Applications.ContentEditor;
 using Sitecore.Shell.Applications.ContentManager;
 
-namespace Sitecore.Sharedsource.Shell.Applications.ContentEditor
+namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
 {
-    public class EditorFormatter : Sitecore.Shell.Applications.ContentEditor.EditorFormatter
+    public class TranslatorFormatterExtended : TranslatorFormatter
     {
         public override void RenderMenuButtons(Control parent, Editor.Field field, Item fieldType, bool readOnly)
         {
-            if (fieldType.ID != SharedSource.TemplateIDs.Attachment)
+            if (fieldType.ID != TemplateIDs.Attachment)
             {
                 base.RenderMenuButtons(parent, field, fieldType, readOnly);
                 return;
             }
 
             var fieldTemplateId = field.TemplateField.Template.ID;
-            if (fieldTemplateId != SharedSource.TemplateIDs.UnversionedCode &&
-                fieldTemplateId != SharedSource.TemplateIDs.VersionedCode)
+            if (fieldTemplateId != TemplateIDs.UnversionedCode &&
+                fieldTemplateId != TemplateIDs.VersionedCode)
             {
                 base.RenderMenuButtons(parent, field, fieldType, readOnly);
                 return;
@@ -36,10 +37,8 @@ namespace Sitecore.Sharedsource.Shell.Applications.ContentEditor
 
         private static string GetLink(string id, string text, string message)
         {
-            return String.Format(
-                "<a href='#' class='scContentButton' onclick='{0}'>{1}</a>",
-                Context.ClientPage.GetClientEvent(String.Format("contentattachment:{0}(id={1}", message, id)),
-                Translate.Text(text));
+            var sheerEvent = Context.ClientPage.GetClientEvent(String.Format("content:{0}(id={1})", message, id));
+            return String.Format("<a href=\"#\" class=\"scContentButton\" onclick=\"{0}\">{1}</a>", sheerEvent, Translate.Text(text));
         }
     }
 }

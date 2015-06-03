@@ -1,4 +1,7 @@
-﻿using Sitecore.Shell.Applications.ContentEditor.Pipelines.RenderContentEditor;
+﻿using Sitecore.SharedSource.Shell.Applications.ContentEditor;
+using Sitecore.Shell.Applications.ContentEditor;
+using Sitecore.Shell.Applications.ContentEditor.Pipelines.RenderContentEditor;
+using Sitecore.Web.UI.HtmlControls;
 
 namespace Sitecore.Sharedsource.Shell.Applications.ContentEditor.Pipelines
 {
@@ -6,10 +9,24 @@ namespace Sitecore.Sharedsource.Shell.Applications.ContentEditor.Pipelines
     {
         public void Process(RenderContentEditorArgs args)
         {
-            args.EditorFormatter = new EditorFormatter
+            if (Registry.GetString("/Current_User/Content Editor/Translate") == "on")
             {
-                Arguments = args
-            };
+                args.EditorFormatter = new TranslatorFormatterExtended()
+                {
+                    Arguments = args
+                };
+            }
+            else
+            {
+                // If another pipeline overrides the editor avoid breaking it.
+                if (args.EditorFormatter == null || args.EditorFormatter.GetType() == typeof (EditorFormatter))
+                {
+                    args.EditorFormatter = new EditorFormatterExtended
+                    {
+                        Arguments = args
+                    };
+                }
+            }
         }
     }
 }

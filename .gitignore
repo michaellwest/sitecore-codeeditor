@@ -4,3 +4,6 @@ Database
 Website
 
 Sitecore.SharedSource/Lib
+Sitecore.SharedSource/obj/
+Databases/
+Sitecore.SharedSource/bin/
