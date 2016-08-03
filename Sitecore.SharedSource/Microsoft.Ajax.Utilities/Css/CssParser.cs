@@ -21,6 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Ajax.Utilities;
 using Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript;
 
 namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css

@@ -16,8 +16,7 @@
 
 using System.Collections.Generic;
 using System.Reflection;
-using Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css;
-using Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript;
+using Microsoft.Ajax.Utilities;
 
 namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {

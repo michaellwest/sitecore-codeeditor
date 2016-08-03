@@ -16,7 +16,7 @@
 
 using System;
 using System.Text;
-using Sitecore.SharedSource.Microsoft.Ajax.Utilities.Css;
+using Microsoft.Ajax.Utilities;
 
 namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities
 {

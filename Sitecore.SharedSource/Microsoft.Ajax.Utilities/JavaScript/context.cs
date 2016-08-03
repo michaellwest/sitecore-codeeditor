@@ -16,6 +16,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.Ajax.Utilities;
 
 namespace Sitecore.SharedSource.Microsoft.Ajax.Utilities.JavaScript
 {
