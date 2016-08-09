@@ -49,7 +49,7 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
             base.HandleMessage(message);
         }
 
-        protected void EditCode(ClientPipelineArgs args)
+        public void EditCode(ClientPipelineArgs args)
         {
             Assert.ArgumentNotNull(args, "args");
             var itemNotNull = Client.GetItemNotNull(Sitecore.Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),

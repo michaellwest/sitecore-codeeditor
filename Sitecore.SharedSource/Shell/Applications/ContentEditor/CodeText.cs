@@ -142,14 +142,13 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
         protected string RenderPreview()
         {
             // Renders the html for the field preview in the content editor.
-            return String.Format("<div style='height: 100%; overflow: auto; overflow-x: hidden;'>{0}</div>",
-                HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(Value)));
+            return $"<div style='height: 100%; overflow: auto; overflow-x: hidden;'>{HtmlUtil.ReplaceNewLines(HttpUtility.HtmlEncode(Value))}</div>";
         }
 
         protected override void DoRender(HtmlTextWriter output)
         {
             SetWidthAndHeightStyle();
-            output.Write("<div {0}>{1}</div>", ControlAttributes, RenderPreview());
+            output.Write($"<div {ControlAttributes}>{RenderPreview()}</div>");
         }
     }
 }
