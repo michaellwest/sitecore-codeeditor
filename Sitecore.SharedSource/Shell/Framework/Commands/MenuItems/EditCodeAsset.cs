@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
+using Sitecore.Data.Items;
 using Sitecore.Diagnostics;
 using Sitecore.SharedSource.Shell.Applications.ContentEditor;
 using Sitecore.Shell.Framework;
@@ -11,6 +12,25 @@ namespace Sitecore.SharedSource.Shell.Framework.Commands.MenuItems
 {
     public class EditCodeAsset : Command
     {
+        public override CommandState QueryState(CommandContext context)
+        {
+            Assert.ArgumentNotNull(context, "context");
+
+            var item = context.Items[0];
+
+            return IsMediaItem(item) ? (IsCodeItem(item) ? CommandState.Enabled : CommandState.Disabled) : CommandState.Hidden;
+        }
+
+        public bool IsCodeItem(Item item)
+        {
+            return item.TemplateID == TemplateIDs.UnversionedCode || item.TemplateID == TemplateIDs.VersionedCode;
+        }
+
+        public bool IsMediaItem(Item item)
+        {
+            return item.Paths.IsMediaItem;
+        }
+
         public override void Execute(CommandContext context)
         {
             Assert.ArgumentNotNull(context, "context");

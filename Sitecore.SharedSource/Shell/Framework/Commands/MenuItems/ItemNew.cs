@@ -11,18 +11,28 @@ namespace Sitecore.SharedSource.Shell.Framework.Commands.MenuItems
 {
     public class ItemNew : Sitecore.Shell.Framework.Commands.ItemNew
     {
+        public bool IsMediaFolder(Item item)
+        {
+            return item.TemplateID == Sitecore.TemplateIDs.MediaFolder;
+        }
+
         public override Control[] GetSubmenuItems(CommandContext context)
         {
             Assert.ArgumentNotNull(context, "context");
 
             var controls = base.GetSubmenuItems(context);
 
-            if (controls == null || context.Items.Length != 1 || context.Items[0] == null)
+            if (controls == null || context.Items.Length != 1 || context.Items[0] == null || !IsMediaFolder(context.Items[0]))
             {
                 return controls;
             }
 
             var item = context.Items[0];
+
+            if (item == null || !IsMediaFolder(item))
+            {
+                return controls;
+            }
 
             var menuItems = new List<Control>();
             menuItems.AddRange(controls);
