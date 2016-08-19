@@ -63,7 +63,7 @@ namespace Sitecore.SharedSource.Shell.Framework.Commands.MenuItems
                 {
                     Header = Translate.Text(mediaType.Value.Name),
                     Icon = "Software/32x32/text_code_colored.png",
-                    Click = $"codetext:newmediaitem(id={contextItem.ID},db={contextItem.Database.Name},ext={mediaType.Value.Extensions})"
+                    Click = $"codetext:newcodeasset(id={contextItem.ID},db={contextItem.Database.Name},ext={mediaType.Value.Extensions})"
                 });
             }
         }
