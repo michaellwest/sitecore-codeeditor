@@ -40,10 +40,12 @@
         </div>
 
         <div Class="scFormDialogFooter">
+          <div>
+            <Placeholder runat="server" Key="Details" />
+          </div>
           <div class="footerOkCancel">
             <Placeholder runat="server" Key="DialogButtons"/>
           </div>
-          <Placeholder runat="server" Key="Buttons"/>
         </div>
 
       </div>

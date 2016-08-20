@@ -39,6 +39,10 @@
           <asp:TextBox ID="Code" runat="server" TextMode="MultiLine" />
         </Border>
 
+        <Border runat="server" x:placeholder="Details" Style="float: left;">
+          <asp:Label ID="Details" runat="server" />
+        </Border>
+
         <Button runat="server" ID="OK" class="scButton scButtonPrimary" KeyCode="13" Click="OK_Click" x:placeholder="DialogButtons">
           <Literal runat="server" Text="Accept"/>
         </Button>
