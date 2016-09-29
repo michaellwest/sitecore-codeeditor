@@ -3,10 +3,10 @@
     <metadata>
       <PackageName>CodeEditor</PackageName>
       <Author>Michael West</Author>
-      <Version>1.6.1.0</Version>
+      <Version>2.0.0.0</Version>
       <Revision />
       <License>
-&lt;p&gt;Copyright 2013-2015 Michael West&lt;/p&gt;
+&lt;p&gt;Copyright 2013-2016 Michael West&lt;/p&gt;
 
 &lt;p&gt;Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ http://michaellwest.gitbooks.io/sitecore-code-editor/
 Please report any problems in the issue tracker:
 http://goo.gl/MiDWdD
 
-Copyright (c) 2013-2014 Michael West
+Copyright (c) 2013-2016 Michael West
 
 http://michaellwest.blogspot.com/</Readme>
       <Publisher>Michael West</Publisher>
@@ -70,6 +70,7 @@ http://michaellwest.blogspot.com/</Readme>
         <x-item>/core/sitecore/system/Field types/Custom Types/Code Text/Menu/{0CD68B98-BF5C-461E-8825-A559748EAC13}/invariant/0</x-item>
         <x-item>/core/sitecore/system/Field types/Custom Types/Code Text/Menu/Edit Code/{72C1FE61-FA41-497E-8ADA-35C556B94A85}/invariant/0</x-item>
         <x-item>/core/sitecore/system/Field types/System Types/Attachment/{696DAB36-F6FA-4836-A4F8-5167DDE397E4}/invariant/0</x-item>
+        <x-item>/core/sitecore/content/Applications/Content Editor/Context Menues/Default/Edit Code/{0137BD25-E69D-44FA-8878-F1DA0E0696AC}/invariant/0</x-item>
       </Entries>
       <SkipVersions>False</SkipVersions>
       <Converter>
