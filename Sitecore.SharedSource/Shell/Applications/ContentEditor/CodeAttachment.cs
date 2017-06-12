@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.UI;
@@ -116,41 +117,10 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                     var settings = ApplicationSettings.GetDialogSettings();
                     var mode = "text";
 
-                    switch (mediaItem.Extension.ToLower())
+                    var mediaTypeSettings = new MediaTypeSettings();
+                    if (mediaTypeSettings.MediaTypes.ContainsKey(mediaItem.Extension))
                     {
-                        case "js":
-                            mode = "javascript";
-                            break;
-                        case "css":
-                            mode = "css";
-                            break;
-                        case "html":
-                            mode = "html";
-                            break;
-                        case "xml":
-                            mode = "xml";
-                            break;
-                        case "json":
-                            mode = "json";
-                            break;
-                        case "txt":
-                            mode = "text";
-                            break;
-                        case "scss":
-                            mode = "scss";
-                            break;
-                        case "ps1":
-                            mode = "powershell";
-                            break;
-                        case "less":
-                            mode = "less";
-                            break;
-                        case "md":
-                            mode = "markdown";
-                            break;
-                        case "cs":
-                            mode = "csharp";
-                            break;
+                        mode = mediaTypeSettings.MediaTypes[mediaItem.Extension].CodeEditorMode;
                     }
 
                     urlString.Append("mode", mode);

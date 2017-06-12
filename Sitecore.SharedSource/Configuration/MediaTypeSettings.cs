@@ -53,7 +53,11 @@ namespace Sitecore.SharedSource.Configuration
                     }
                     else
                     {
-                        var config = new MediaTypeConfig(XmlUtil.GetAttribute("name", configNode, attribute), attribute);
+                        var config =
+                            new MediaTypeConfig(XmlUtil.GetAttribute("name", configNode, attribute), attribute)
+                            {
+                                CodeEditorMode = XmlUtil.GetAttribute("codeEditorMode", configNode)
+                            };
                         FillConfiguration(config, configNode);
                         MediaTypes[extension] = config;
                     }
