@@ -189,8 +189,8 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                 (MediaItem) Client.ContentDatabase.GetItem(Sitecore.Data.ID.Parse(ItemID), Language.Parse(ItemLanguage),
                     Version.Parse(ItemVersion));
 
-            if (mediaItem.InnerItem.TemplateID != TemplateIDs.UnversionedCode &&
-                mediaItem.InnerItem.TemplateID != TemplateIDs.VersionedCode)
+            if (mediaItem.InnerItem.TemplateID != Templates.UnversionedCode.Id &&
+                mediaItem.InnerItem.TemplateID != Templates.VersionedCode.Id)
             {
                 base.DoRender(output);
                 return;

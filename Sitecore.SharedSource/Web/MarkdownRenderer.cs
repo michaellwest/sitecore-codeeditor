@@ -1,8 +1,8 @@
-﻿using MarkdownDeep;
+﻿using System;
+using System.Linq;
+using MarkdownDeep;
 using Sitecore.Collections;
 using Sitecore.SharedSource.Extensions;
-using System;
-using System.Linq;
 
 namespace Sitecore.SharedSource.Web
 {
@@ -10,27 +10,26 @@ namespace Sitecore.SharedSource.Web
     {
         public string Render(string markdown, SafeDictionary<string> parameters)
         {
-            if (String.IsNullOrEmpty(markdown)) return markdown;
+            if (string.IsNullOrEmpty(markdown)) return markdown;
 
             var parser = new Markdown
             {
                 NewWindowForExternalLinks = true,
-                HtmlClassFootnotes = String.Empty,
-                HtmlClassTitledImages = String.Empty
+                HtmlClassFootnotes = string.Empty,
+                HtmlClassTitledImages = string.Empty
             };
 
-            if (parameters.Any())
+            if (!parameters.Any()) return parser.Transform(markdown);
+
+            var properties = parser.GetPropertiesDictionary();
+
+            foreach (var key in parameters.Keys)
             {
-                var properties = parser.GetPropertiesDictionary();
+                if (!properties.ContainsKey(key)) continue;
 
-                foreach (var key in parameters.Keys)
-                {
-                    if (!properties.ContainsKey(key)) continue;
+                var property = properties.SingleOrDefault(p => p.Key.Is(key));
 
-                    var property = properties.SingleOrDefault(p => p.Key.Is(key));
-
-                    parser.SetPropertyValue(property.Key, parameters[key]);
-                }
+                parser.SetPropertyValue(property.Key, parameters[key]);
             }
 
             return parser.Transform(markdown);
@@ -49,9 +48,7 @@ namespace Sitecore.SharedSource.Web
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
-            {
                 return;
-            }
 
             if (disposing)
             {

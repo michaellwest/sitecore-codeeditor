@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Text.RegularExpressions;
-using Sitecore.Configuration;
 using Sitecore.Data;
 using Sitecore.Data.Fields;
 using Sitecore.Data.Items;
@@ -11,7 +9,6 @@ using Sitecore.Links;
 using Sitecore.Resources.Media;
 using Sitecore.Text;
 using Sitecore.Web;
-using Sitecore.Web.UI.WebControls.Ribbons;
 
 namespace Sitecore.SharedSource.Data.Fields
 {
@@ -60,7 +57,7 @@ namespace Sitecore.SharedSource.Data.Fields
 
         public override List<WebEditButton> GetWebEditButtons()
         {
-            List<WebEditButton> list = new List<WebEditButton>();
+            var list = new List<WebEditButton>();
             /*
             Item obj1 =
                 Client.GetDatabaseNotNull("core")
@@ -100,11 +97,11 @@ namespace Sitecore.SharedSource.Data.Fields
             var str = Value;
             MatchLinks(str, itemLink, linkData =>
             {
-                var linkedItemId = this.GetLinkedItemId(linkData.Link);
+                var linkedItemId = GetLinkedItemId(linkData.Link);
                 if (linkedItemId == (ID) null || linkedItemId != itemLink.TargetItemID) return;
 
                 var shellOptions = MediaUrlOptions.GetShellOptions();
-                var mediaUrl = MediaManager.GetMediaUrl((MediaItem)newLink, shellOptions);
+                var mediaUrl = MediaManager.GetMediaUrl(newLink, shellOptions);
                 Value = str.Replace(linkData.Link, ReplaceUrlPath(linkData.Link, mediaUrl));
             });
         }
@@ -123,10 +120,8 @@ namespace Sitecore.SharedSource.Data.Fields
         {
             Assert.ArgumentNotNull(result, "result");
             var str = Value;
-            if (String.IsNullOrEmpty(str))
-            {
+            if (string.IsNullOrEmpty(str))
                 return;
-            }
 
             MatchLinks(str, null, linkData =>
             {
@@ -140,9 +135,7 @@ namespace Sitecore.SharedSource.Data.Fields
                 else
                 {
                     if (!Regex.IsMatch(linkData.Link, @"^http[s]?://"))
-                    {
                         AddLink(result, null, linkData.Link);
-                    }
                 }
 
                 // TODO: Add text links
@@ -155,13 +148,9 @@ namespace Sitecore.SharedSource.Data.Fields
             Assert.ArgumentNotNull(targetPath, "targetPath");
 
             if (targetItem != null)
-            {
                 result.AddValidLink(targetItem, targetPath);
-            }
             else
-            {
                 result.AddBrokenLink(targetPath);
-            }
         }
 
         private ID GetLinkedItemId(string href)
@@ -186,10 +175,8 @@ namespace Sitecore.SharedSource.Data.Fields
             var urlString1 = new UrlString(newHref);
             var urlString2 = new UrlString(oldHref);
             foreach (string index in urlString2.Parameters)
-            {
-                if (index != "_id" && index != "_site" && (index != "_lang" && index != "_z"))
+                if (index != "_id" && index != "_site" && index != "_lang" && index != "_z")
                     urlString1[index] = urlString2[index];
-            }
             return urlString1.ToString();
         }
     }

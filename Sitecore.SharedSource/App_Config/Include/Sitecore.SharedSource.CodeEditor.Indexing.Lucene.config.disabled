@@ -1,0 +1,16 @@
+﻿<configuration xmlns:patch="http://www.sitecore.net/xmlconfig/">
+  <sitecore>
+    <!-- Lucene index configuration settings: Sitecore 7.2+ -->
+    <contentSearch>
+      <indexConfigurations>
+        <defaultLuceneIndexConfiguration>
+          <fieldReaders>
+            <mapFieldByTypeName>
+              <fieldReader fieldTypeName="code text" fieldReaderType="Sitecore.SharedSource.Data.Fields.CodeTextFieldReader, Sitecore.SharedSource.CodeEditor" />
+            </mapFieldByTypeName>
+          </fieldReaders>
+        </defaultLuceneIndexConfiguration>
+      </indexConfigurations>
+    </contentSearch>
+  </sitecore>
+</configuration>

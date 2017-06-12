@@ -12,15 +12,15 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
     {
         public override void RenderMenuButtons(Control parent, Editor.Field field, Item fieldType, bool readOnly)
         {
-            if (fieldType.ID != TemplateIDs.Attachment)
+            if (fieldType.ID != Templates.Attachment.Id)
             {
                 base.RenderMenuButtons(parent, field, fieldType, readOnly);
                 return;
             }
 
             var fieldTemplateId = field.TemplateField.Template.ID;
-            if (fieldTemplateId != TemplateIDs.UnversionedCode &&
-                fieldTemplateId != TemplateIDs.VersionedCode)
+            if (fieldTemplateId != Templates.UnversionedCode.Id &&
+                fieldTemplateId != Templates.VersionedCode.Id)
             {
                 base.RenderMenuButtons(parent, field, fieldType, readOnly);
                 return;

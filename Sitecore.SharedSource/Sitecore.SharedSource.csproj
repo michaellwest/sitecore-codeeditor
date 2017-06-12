@@ -33,6 +33,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MarkdownDeep, Version=1.5.4615.26275, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MarkdownDeep.NET.1.5\lib\.NetFramework 3.5\MarkdownDeep.dll</HintPath>
+    </Reference>
     <Reference Include="Sitecore.Client, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\Sitecore.Client.NoReferences.8.2.170407\lib\NET452\Sitecore.Client.dll</HintPath>
       <Private>False</Private>
@@ -59,8 +62,6 @@
     <Compile Include="Data\Fields\CodeTextField.cs" />
     <Compile Include="Data\Fields\CodeTextFieldReader.cs" />
     <Compile Include="Data\MediaTypeConfig.cs" />
-    <Compile Include="Data\ResourceType.cs" />
-    <Compile Include="Data\SaveResult.cs" />
     <Compile Include="Extensions\IntegerExtensions.cs" />
     <Compile Include="Configuration\DialogSettings.cs" />
     <Compile Include="Configuration\ApplicationSettings.cs" />
@@ -77,19 +78,6 @@
     <Compile Include="Extensions\SafeDictionaryExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TemplateItemExtensions.cs" />
-    <Compile Include="MarkdownDeep\Abbreviation.cs" />
-    <Compile Include="MarkdownDeep\Block.cs" />
-    <Compile Include="MarkdownDeep\BlockProcessor.cs" />
-    <Compile Include="MarkdownDeep\FootnoteReference.cs" />
-    <Compile Include="MarkdownDeep\HtmlTag.cs" />
-    <Compile Include="MarkdownDeep\LinkDefinition.cs" />
-    <Compile Include="MarkdownDeep\LinkInfo.cs" />
-    <Compile Include="MarkdownDeep\MardownDeep.cs" />
-    <Compile Include="MarkdownDeep\SpanFormatter.cs" />
-    <Compile Include="MarkdownDeep\StringScanner.cs" />
-    <Compile Include="MarkdownDeep\TableSpec.cs" />
-    <Compile Include="MarkdownDeep\Token.cs" />
-    <Compile Include="MarkdownDeep\Utils.cs" />
     <Compile Include="Pipelines\GetCodeTextFieldValue.cs" />
     <Compile Include="Pipelines\Save\SaveEx.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -98,9 +86,12 @@
     <Compile Include="Shell\Applications\ContentEditor\CodeText.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditCode\EditCodePage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
-    <Compile Include="TemplateIDs.cs" />
+    <Compile Include="Templates.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App_Config\Include\Sitecore.SharedSource.CodeEditor.Indexing.Lucene.config.disabled">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="App_Config\Include\Sitecore.SharedSource.CodeEditor.config">
       <SubType>Designer</SubType>
     </None>

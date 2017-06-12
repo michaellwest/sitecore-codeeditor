@@ -23,7 +23,7 @@ namespace Sitecore.SharedSource.Shell.Framework.Commands.MenuItems
 
         public bool IsCodeItem(Item item)
         {
-            return item.TemplateID == TemplateIDs.UnversionedCode || item.TemplateID == TemplateIDs.VersionedCode;
+            return item.TemplateID == Templates.UnversionedCode.Id || item.TemplateID == Templates.VersionedCode.Id;
         }
 
         public bool IsMediaItem(Item item)
