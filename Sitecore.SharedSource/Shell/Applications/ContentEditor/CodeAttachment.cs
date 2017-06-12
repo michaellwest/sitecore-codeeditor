@@ -148,6 +148,9 @@ namespace Sitecore.SharedSource.Shell.Applications.ContentEditor
                         case "md":
                             mode = "markdown";
                             break;
+                        case "cs":
+                            mode = "csharp";
+                            break;
                     }
 
                     urlString.Append("mode", mode);
