@@ -15,7 +15,7 @@ namespace Sitecore.SharedSource.Pipelines
             var fieldTypeKey = args.FieldTypeKey;
             if (fieldTypeKey != "code text") return;
 
-            if (Context.PageMode.IsPageEditorEditing)
+            if (Context.PageMode.IsExperienceEditorEditing)
             {
                 // Encode so the page editor will render the html.
                 // Replace with line breaks so the spacing is correct.

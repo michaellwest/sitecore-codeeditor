@@ -33,15 +33,17 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Sitecore.Client">
-      <HintPath>Lib\Sitecore.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Sitecore.ContentSearch">
-      <HintPath>Lib\Sitecore.ContentSearch.dll</HintPath>
+    <Reference Include="Sitecore.Client, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Sitecore.Client.NoReferences.8.2.170407\lib\NET452\Sitecore.Client.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Sitecore.Kernel">
-      <HintPath>Lib\Sitecore.Kernel.dll</HintPath>
+    <Reference Include="Sitecore.ContentSearch, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Sitecore.ContentSearch.NoReferences.8.2.170407\lib\NET452\Sitecore.ContentSearch.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Sitecore.Kernel, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Sitecore.Kernel.NoReferences.8.2.170407\lib\NET452\Sitecore.Kernel.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -53,7 +55,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Caching\CacheUtil.cs" />
     <Compile Include="Configuration\MediaTypeSettings.cs" />
     <Compile Include="Data\Fields\CodeTextField.cs" />
     <Compile Include="Data\Fields\CodeTextFieldReader.cs" />
@@ -72,13 +73,10 @@
     <Compile Include="Shell\Framework\Commands\MenuItems\NewCodeAsset.cs" />
     <Compile Include="Web\HtmlUtil.cs" />
     <Compile Include="Extensions\FieldExtensions.cs" />
-    <Compile Include="Extensions\MediaItemExtensions.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Extensions\SafeDictionaryExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TemplateItemExtensions.cs" />
-    <Compile Include="IO\DirectoryUtil.cs" />
-    <Compile Include="IO\FileUtil.cs" />
     <Compile Include="MarkdownDeep\Abbreviation.cs" />
     <Compile Include="MarkdownDeep\Block.cs" />
     <Compile Include="MarkdownDeep\BlockProcessor.cs" />
@@ -92,188 +90,21 @@
     <Compile Include="MarkdownDeep\TableSpec.cs" />
     <Compile Include="MarkdownDeep\Token.cs" />
     <Compile Include="MarkdownDeep\Utils.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\CommonData.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\CommonSettings.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\CommonStrings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CommonStrings.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Microsoft.Ajax.Utilities\Configuration.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\ContextError.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\CssEncoderFallback.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Css\CssColorName.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Css\CssErrorCode.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Css\CssParser.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Css\CssScanner.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Css\CssSettings.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Css\CssStrings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CssStrings.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Microsoft.Ajax.Utilities\Css\CssToken.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Extensions.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Helpers.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\activationobject.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\AnalyzeNodeVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\arrayliteral.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\aspnetblocknode.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ast.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\astlist.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\binaryop.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\BindingIdentifier.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\BindingsVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\BindingTransform.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\block.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\blockscope.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\break.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\call.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\catchscope.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\cccomment.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ccelif.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ccelse.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ccend.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ccif.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ccon.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ccset.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ccstatement.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ClassNode.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\codesettings.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\CommaOperator.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ComprehensionClause.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ComprehensionForClause.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ComprehensionIfClause.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ComprehensionNode.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\conditional.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\const.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\constantwrapper.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\constantwrapperpp.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\context.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\continue.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\crunchenumerator.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\CustomNode.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\debugger.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\declaration.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\DetachReferences.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\directiveprologue.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\documentcontext.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\dowhile.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\emptystatement.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\EvaluateLiteralVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ExportNode.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\expr.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\FinalPassVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\for.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\forin.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\functionobject.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\functionscope.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\gettersetter.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\globalscope.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\grouping.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\if.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\IModuleReference.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\importantcomment.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ImportExportSpecifier.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ImportExportStatement.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ImportNode.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\INameDeclaration.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\INameReference.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\Initializer.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\IRenameable.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ISourceMap.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\IterationStatement.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\IVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\JScript.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>JScript.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\jserror.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\jskeyword.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\JSON.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\JSONOutputVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\jsparser.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\jsscanner.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\jstoken.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\jsvariablefield.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\labeledstatement.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\LexicalDeclaration.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\LogicalNotVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\lookup.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\MatchPropertiesVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\member.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\missing.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ModuleDeclaration.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ModuleScope.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\NewParensVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\objectliteral.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\objectliteralfield.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ObjectLiteralProperty.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\opprec.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\OutputVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\parameterdeclaration.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\regexpliteral.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ReorderScopeVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\RequiresSeparatorVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ResolutionVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\return.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\ScriptSharpSourceMap.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\SourceMapFactory.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\StatementStartVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\switch.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\switchcase.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\TemplateLiteral.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\TemplateLiteralExpression.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\thisliteral.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\throw.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\TreeVisitor.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\try.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\unaryop.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\V3SourceMap.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\var.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\variabledeclaration.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\while.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\with.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JavaScript\withscope.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\JSEncoderFallback.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\Minifier.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\ResourceStrings.cs" />
-    <Compile Include="Microsoft.Ajax.Utilities\SwitchParser.cs" />
     <Compile Include="Pipelines\GetCodeTextFieldValue.cs" />
     <Compile Include="Pipelines\Save\SaveEx.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Web\MarkdownRenderer.cs" />
-    <Compile Include="Web\ResourceRenderer.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeAttachment.cs" />
     <Compile Include="Shell\Applications\ContentEditor\CodeText.cs" />
     <Compile Include="Shell\Applications\ContentEditor\Dialogs\EditCode\EditCodePage.cs" />
     <Compile Include="Shell\Applications\ContentEditor\RichTextEx.cs" />
     <Compile Include="TemplateIDs.cs" />
-    <Compile Include="Web\UI\WebControls\ResourceWebControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App_Config\Include\Sitecore.SharedSource.CodeEditor.config">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Microsoft.Ajax.Utilities\CommonStrings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CommonStrings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Microsoft.Ajax.Utilities\Css\CssStrings.resx">
-      <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <CustomToolNamespace>Microsoft.Ajax.Utilities</CustomToolNamespace>
-      <LastGenOutput>CssStrings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Microsoft.Ajax.Utilities\JavaScript\JScript.resx">
-      <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <CustomToolNamespace>Microsoft.Ajax.Utilities</CustomToolNamespace>
-      <LastGenOutput>JScript.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -282,9 +113,11 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)\..\Website\bin\$(TargetName).dll"
-copy /Y "$(ProjectDir)\App_Config\Include\$(TargetName).config" "$(SolutionDir)\..\Website\App_Config\Include\$(TargetName).config"
-</PostBuildEvent>
+    <PostBuildEvent>echo "Copy build for Mikey"
+IF EXIST C:\Websites\code.dev.local (
+    xcopy $(TargetDir)Sitecore.SharedSource*.* C:\Websites\code.dev.local\Website\bin\*.* /s /e /c /y
+    xcopy $(ProjectDir)App_Config\Include\*.* C:\Websites\code.dev.local\Website\App_Config\Include\*.* /s /e /c /y
+)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
